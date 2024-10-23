@@ -64,4 +64,9 @@ with webdriver.Firefox() as driver:
     classes.pop(0)
     for c in classes:
         className = c.find_element(By.TAG_NAME, 'h2').text
+        classInfo = c.find_elements(By.XPATH, ".//span[@class='sr-only']")
         print(className)
+        for info in classInfo:
+            print(info.text, end=" ")
+        print()
+        
