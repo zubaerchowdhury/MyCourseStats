@@ -6,6 +6,8 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 
 
+def wait_until_timeout(driver):
+    return False
 
 with webdriver.Firefox() as driver:
 
@@ -56,9 +58,10 @@ with webdriver.Firefox() as driver:
     wait.until(presence_of_element_located((By.XPATH, "//main//div[2]//hr")))
 
     # Get all classes
-    classes = driver.find_elements(By.XPATH, "//main//div[2]/*")
+    form = driver.find_element(By.XPATH, "//form")
+    classesDiv = form.find_element(By.XPATH, "./following-sibling::div")
+    classes = classesDiv.find_elements(By.XPATH, "./div[@class='MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12']")
     classes.pop(0)
     for c in classes:
         className = c.find_element(By.TAG_NAME, 'h2').text
-        classCode = c.find_element(By.TAG_NAME, 'span').text
-        print(className, classCode)
+        print(className)
