@@ -32,48 +32,55 @@ with webdriver.Firefox() as driver:
             print()
             print()
 
-    # Set term to Spring 2025
-    termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
-    termDropdown.click()
-    termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
-    termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
-    for item in termDropdownListItems:
-        driver.execute_script("arguments[0].scrollIntoView();", item)
-        if item.text == "Spring 2025":
-            item.click()
-            break
-    wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
+    def setAcademicCareer(academicCareer):
+        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
+        academicCareerDropdown.click()
+        academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
+        academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
+        for item in academicCareerDropdownListItems:
+            if item.text == academicCareer:
+                item.click()
+                break
 
-    # Set academic career to Undergraduate
-    academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-    academicCareerDropdown.click()
-    academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
-    academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
-    for item in academicCareerDropdownListItems:
-        if item.text == "Undergraduate":
-            item.click()
-            break
+    def setTerm(term):
+        termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
+        termDropdown.click()
+        termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
+        termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
+        for item in termDropdownListItems:
+            if item.text == term:
+                item.click()
+                wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
+                break
+    
+    def uncheckShowOpenClassesOnly():
+        showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
+        showOpenClassesOnlyCheckbox.click()
 
-    # Uncheck Show Open Classes Only Checkbox
-    showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
-    showOpenClassesOnlyCheckbox.click()
-
-
-    # Go through all subjects
-    subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-    subjectDropdown.click()
-    subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
-    subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
-    subjectListLength = len(subjectDropdownListItems)
-    academicCareerDropdown.click() # Close subject dropdown by clicking on academic career dropdown
-    for i in range(subjectListLength):
+    def getAllSubjects():
+        # Go through all subjects
+        subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
         subjectDropdown.click()
         subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
         subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
-        item = subjectDropdownListItems[i]
-        driver.execute_script("arguments[0].scrollIntoView();", item)
-        item.click()
-        clickSearchButton()
-        getAllClasses()
+        subjectListLength = len(subjectDropdownListItems)
+        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
+        academicCareerDropdown.click() # Close subject dropdown by clicking on academic career dropdown
+        for i in range(subjectListLength):
+            subjectDropdown.click()
+            subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
+            subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
+            item = subjectDropdownListItems[i]
+            driver.execute_script("arguments[0].scrollIntoView();", item)
+            item.click()
+            clickSearchButton()
+            getAllClasses()
+
+    setTerm("Spring 2025")
+    uncheckShowOpenClassesOnly()
+    setAcademicCareer("Undergraduate")
+    getAllSubjects()
+    setAcademicCareer("Graduate")
+    getAllSubjects()
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
