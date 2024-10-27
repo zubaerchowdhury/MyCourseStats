@@ -68,6 +68,7 @@ class course:
         self.waitlistAvailable = 300
         self.waitlistCapacity = 300
         self.multipleMeetings = False
+        self.dateTimeRetrieved = datetime.datetime.now()
         self.notes = ""
         # self.decription = ""
         # self.prerequisites = ""
@@ -89,9 +90,9 @@ with webdriver.Firefox() as driver:
     driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
     wait = WebDriverWait(driver, 10)
     driver.switch_to.frame("TargetContent")    
-    currentTerm = ""
-    currentAcademicCareer = ""  
-    currentSubject = ""
+    global currentTerm
+    global currentAcademicCareer
+    global currentSubject
     STRINGS_IN_EACH_SECTION = 9 # number of strings in each section of a class (if it does not have multiple meetings)
     STRINGS_IN_MISSING_IN_MULTIPLE_MEETING_SECTION = 5 # number of strings missing from a section if it has multiple meetings
     STRINGS_IN_EACH_TABLE_ROW = 6 # number of strings in each row of the meeting patterns table (for sections with multiple meetings)
@@ -103,6 +104,83 @@ with webdriver.Firefox() as driver:
         searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
         searchButton.click()
         wait.until(presence_of_element_located((By.XPATH, "//main//div[2]//hr")))
+
+    def fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i):
+        classSectionsTable = classWebElement.find_element(By.XPATH, ".//div[@role='table']")
+        classSectionsTableButtons = classSectionsTable.find_elements(By.XPATH, ".//button[@class='MuiButtonBase-root MuiIconButton-root']")
+        currentClassSectionIndex = i // STRINGS_IN_EACH_SECTION
+        currentButton = classSectionsTableButtons[currentClassSectionIndex]
+        scrollToElement(currentButton)
+        currentButton.click()
+        wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
+        meetingPatternsTable = driver.find_element(By.CSS_SELECTOR, "[aria-label='meeting patterns']")
+        meetingPatternsInfo = meetingPatternsTable.find_elements(By.XPATH, ".//tbody//p")
+        currentCourseList = []
+        for j in range(0, len(meetingPatternsInfo), STRINGS_IN_EACH_TABLE_ROW):
+            partialCourse = currentCourse
+            partialCourse.status = classInfo[i + 3].text.split(", ")[0]
+            if partialCourse.status == "Waitlist":
+                partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
+                partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
+                partialCourse.waitlistAvailable = int(classInfo[i + 3].text.split(", ")[2].split(" ")[0])
+                partialCourse.waitlistCapacity = int(classInfo[i + 3].text.split(", ")[2].split(" ")[2])
+            else:
+                partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
+                partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
+            currentCourse = course()
+
+            # fill in information that was already filled in
+            currentCourse.name = copy.deepcopy(partialCourse.name)
+            currentCourse.subject = copy.deepcopy(partialCourse.subject)
+            currentCourse.catalogNumber = copy.deepcopy(partialCourse.catalogNumber)
+            currentCourse.sectionType = copy.deepcopy(partialCourse.sectionType)
+            currentCourse.sectionCode = copy.deepcopy(partialCourse.sectionCode)
+            currentCourse.classNumber = copy.deepcopy(partialCourse.classNumber)
+            currentCourse.session = copy.deepcopy(partialCourse.session)
+            currentCourse.status = copy.deepcopy(partialCourse.status)
+            currentCourse.seatsAvailable = copy.deepcopy(partialCourse.seatsAvailable)
+            currentCourse.capacity = copy.deepcopy(partialCourse.capacity)
+            currentCourse.waitlistAvailable = copy.deepcopy(partialCourse.waitlistAvailable)
+            currentCourse.waitlistCapacity = copy.deepcopy(partialCourse.waitlistCapacity)
+
+            # fill in information that is different for each meeting
+            """
+            Example of meetingPatternsInfo:
+            0: 01/15/2025 - 03/05/2025
+            1: Mark Friedman
+            2: We
+            3: 6:30PM
+            4: 8:50PM
+            5: Online Instruction ONL
+            6: 03/18/2025 - 04/22/2025
+            7: Mark Friedman
+            8: Tu
+            9: 12:30PM
+            10: 1:45PM
+            11: Stubblefield 204
+            12: 03/21/2025 - 04/25/2025
+            13: Mark Friedman
+            14: Fr
+            15: 1:25PM
+            16: 4:45PM
+            17: Stubblefield 204
+            """
+            currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[0], "%m/%d/%Y").date()
+            currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[1], "%m/%d/%Y").date()
+            currentCourse.instructor = meetingPatternsInfo[j + 1].text.split(", ")
+            currentCourse.days = course.days_mapping[meetingPatternsInfo[j + 2].text]
+            currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3].text, "%I:%M%p").time()
+            currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4].text, "%I:%M%p").time()
+            currentCourse.classroom = meetingPatternsInfo[j + 5].text
+            currentCourse.multipleMeetings = True
+            currentCourseList.append(currentCourse)
+            
+        # insert list of "Multiple" strings into classInfo to keep the same structure
+        for j in range(STRINGS_IN_MISSING_IN_MULTIPLE_MEETING_SECTION):
+            classInfo.insert(i + 3, "Multiple")
+
+        currentButton.click() # Close the table
+        return currentCourseList
 
     def fillCourseObject(classWebElement, classInfo, className, i):
         """
@@ -225,10 +303,13 @@ with webdriver.Firefox() as driver:
         waitlistCapacity = 300
         notes = ''
         """
+        global currentSubject
         currentCourse = course()
         currentCourse.name = className.split(" | ")[0]
         currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
         currentCourse.catalogNumber = int(className.split(" | ")[1].split(" ")[1])
+        currentCourse.semester = currentTerm.split(" ")[0]
+        currentCourse.year = int(currentTerm.split(" ")[1])
         classInfoSection = classInfo[i].text.split(", ")
         currentCourse.sectionType = classInfoSection[0].split(" ")[0]
         currentCourse.sectionCode = classInfoSection[0].split(" ")[2]
@@ -240,95 +321,26 @@ with webdriver.Firefox() as driver:
         try:  # This is where a course with multiple meetings diverges
             currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3].text, "%I:%M %p").time()
             currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4].text, "%I:%M %p").time()
-            currentCourse.classroom = classInfo[i + 5].text
-            currentCourse.instructor = classInfo[i + 6].text.split(", ")
-            currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[0], "%m/%d").date()
-            currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[1], "%m/%d").date()
-            currentCourse.status = classInfo[i + 8].text.split(", ")[0]
-            if currentCourse.status == "Waitlist":
-                currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
-                currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
-                currentCourse.waitlistAvailable = int(classInfo[i + 8].text.split(", ")[2].split(" ")[0])
-                currentCourse.waitlistCapacity = int(classInfo[i + 8].text.split(", ")[2].split(" ")[2])
-            else:
-                currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
-                currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
-            return [currentCourse]
         except(ValueError):
-            classSectionsTable = classWebElement.find_element(By.XPATH, ".//div[@role='table']")
-            classSectionsTableButtons = classSectionsTable.find_elements(By.XPATH, ".//button")
-            currentClassSectionIndex = i // STRINGS_IN_EACH_SECTION
-            currentButton = classSectionsTableButtons[currentClassSectionIndex]
-            scrollToElement(currentButton)
-            currentButton.click()
-            wait.until(presence_of_element_located((By.XPATH, "//table[@aria-label='meeting patterns']")))
-            meetingPatternsTable = classSectionsTable.find_element(By.XPATH, ".//table[@aria-label='meeting patterns']")
-            meetingPatternsInfo = meetingPatternsTable.find_elements(By.XPATH, ".//tbody//p")
-            currentCourseList = []
-            for j in range(0, len(meetingPatternsInfo), STRINGS_IN_EACH_TABLE_ROW):
-                partialCourse = currentCourse
-                partialCourse.status = classInfo[i + 3].text.split(", ")[0]
-                if partialCourse.status == "Waitlist":
-                    partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
-                    partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
-                    partialCourse.waitlistAvailable = int(classInfo[i + 3].text.split(", ")[2].split(" ")[0])
-                    partialCourse.waitlistCapacity = int(classInfo[i + 3].text.split(", ")[2].split(" ")[2])
-                else:
-                    partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
-                    partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
-                currentCourse = course()
-
-                # fill in information that was already filled in
-                currentCourse.name = copy.deepcopy(partialCourse.name)
-                currentCourse.subject = copy.deepcopy(partialCourse.subject)
-                currentCourse.catalogNumber = copy.deepcopy(partialCourse.catalogNumber)
-                currentCourse.sectionType = copy.deepcopy(partialCourse.sectionType)
-                currentCourse.sectionCode = copy.deepcopy(partialCourse.sectionCode)
-                currentCourse.classNumber = copy.deepcopy(partialCourse.classNumber)
-                currentCourse.session = copy.deepcopy(partialCourse.session)
-                currentCourse.status = copy.deepcopy(partialCourse.status)
-                currentCourse.seatsAvailable = copy.deepcopy(partialCourse.seatsAvailable)
-                currentCourse.capacity = copy.deepcopy(partialCourse.capacity)
-                currentCourse.waitlistAvailable = copy.deepcopy(partialCourse.waitlistAvailable)
-                currentCourse.waitlistCapacity = copy.deepcopy(partialCourse.waitlistCapacity)
-
-                # fill in information that is different for each meeting
-                """
-                Example of meetingPatternsInfo:
-                0: 01/15/2025 - 03/05/2025
-                1: Mark Friedman
-                2: We
-                3: 6:30PM
-                4: 8:50PM
-                5: Online Instruction ONL
-                6: 03/18/2025 - 04/22/2025
-                7: Mark Friedman
-                8: Tu
-                9: 12:30PM
-                10: 1:45PM
-                11: Stubblefield 204
-                12: 03/21/2025 - 04/25/2025
-                13: Mark Friedman
-                14: Fr
-                15: 1:25PM
-                16: 4:45PM
-                17: Stubblefield 204
-                """
-                currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[0], "%m/%d/%Y").date()
-                currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[1], "%m/%d/%Y").date()
-                currentCourse.instructor = meetingPatternsInfo[j + 1].text.split(", ")
-                currentCourse.days = course.days_mapping[meetingPatternsInfo[j + 2].text]
-                currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3].text, "%I:%M%p").time()
-                currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4].text, "%I:%M%p").time()
-                currentCourse.classroom = meetingPatternsInfo[j + 5].text
-                currentCourse.multipleMeetings = True
-                currentCourseList.append(currentCourse)
-                
-            # insert list of "Multiple" strings into classInfo to keep the same structure
-            for j in range(STRINGS_IN_MISSING_IN_MULTIPLE_MEETING_SECTION):
-                classInfo.insert(i + 3, "Multiple")
-
-            return currentCourseList
+            if classInfo[i + 3].text != "-":
+                return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+        currentCourse.classroom = classInfo[i + 5].text
+        currentCourse.instructor = classInfo[i + 6].text.split(", ")
+        currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[0], "%m/%d").date()
+        currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
+        currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[1], "%m/%d").date()
+        currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
+        currentCourse.status = classInfo[i + 8].text.split(", ")[0]
+        if currentCourse.status == "Waitlist":
+            currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
+            currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
+            currentCourse.waitlistAvailable = int(classInfo[i + 8].text.split(", ")[2].split(" ")[0])
+            currentCourse.waitlistCapacity = int(classInfo[i + 8].text.split(", ")[2].split(" ")[2])
+        else:
+            currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
+            currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
+        return [currentCourse]
+            
                    
     def getAllClasses(DEBUG=False):
         form = driver.find_element(By.XPATH, "//form")
@@ -410,6 +422,8 @@ with webdriver.Firefox() as driver:
         subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
         for item in subjectDropdownListItems:
             if item.text == subject:
+                global currentSubject
+                currentSubject = item.text
                 scrollToElement(item)
                 item.click()
                 clickSearchButton()
