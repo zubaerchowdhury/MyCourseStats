@@ -330,6 +330,7 @@ with webdriver.Firefox() as driver:
         currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
         currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[1], "%m/%d").date()
         currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
+        # TODO: Error handling for when there are reserved seats
         currentCourse.status = classInfo[i + 8].text.split(", ")[0]
         if currentCourse.status == "Waitlist":
             currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
@@ -350,7 +351,8 @@ with webdriver.Firefox() as driver:
         for c in classes:
             className = c.find_element(By.TAG_NAME, 'h2').text
             classInfo = c.find_elements(By.XPATH, ".//span[@class='sr-only']")
-            classInfo.pop(0) # Remove useless element
+            classInfo.pop(0) # Remove useless element 
+            classInfo = [x for x in classInfo if x.text != ""] # delete all empty strings
             if DEBUG:
                 print(className)
                 for i,info in enumerate(classInfo):
@@ -394,7 +396,7 @@ with webdriver.Firefox() as driver:
         showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
         showOpenClassesOnlyCheckbox.click()
 
-    def getAllSubjects():
+    def getAllSubjects(DEBUG=False):
         # Go through all subjects and get all classes
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
         subjectDropdown.click()
@@ -413,7 +415,7 @@ with webdriver.Firefox() as driver:
             scrollToElement(item)
             item.click()
             clickSearchButton()
-            getAllClasses()
+            getAllClasses(DEBUG)
 
     def setSubject(subject: str, DEBUG=False):
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
@@ -433,9 +435,9 @@ with webdriver.Firefox() as driver:
     setTerm("Spring 2025")
     uncheckShowOpenClassesOnly()
     setAcademicCareer("Undergraduate")
-    setSubject("Accounting Bus Admin", DEBUG=True)
     # getAllSubjects()
     # setAcademicCareer("Graduate")
     # getAllSubjects()
+    setSubject("Anthropology", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
