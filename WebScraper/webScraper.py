@@ -11,7 +11,7 @@ from functools import cache
 class course:
     #semesters = ["Spring", "Summer", "Fall", "Non-credit Term"]
     #sessions = ["Regular Academic", "Summer Session A 5W", "Summer Scholars Program"]
-    #status = ["Open", "Closed", "Waitlist"]
+    status = ["Open", "Closed", "Waitlist"]
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "TBA"]
     days_mapping = {
         "Mo" : "Monday",
@@ -309,10 +309,22 @@ with webdriver.Firefox() as driver:
 
             Need to get rid of [2:8] and [9:14] to match structure of
             other instance of multiple meetings
+
+            Example of classInfo with a section with almost no information:
+            0. Lecture Section 01, Class Number7616
+            1. Regular Academic
+            2. Open, 10 of 10 seats available
+
+            Just need to take what we can get and store it
             """
-            del classInfo[i + 2: i + 8]
-            del classInfo[i + 3: i + 8]
-            return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+            # multiple meetings case
+            # check if the string is actually the status string (remove the last character, which is a comma)
+            if currentCourse.days[0][0:len(currentCourse.days[0])-1] not in course.status:
+                del classInfo[i + 2: i + 8]
+                del classInfo[i + 3: i + 8]
+                return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+            setCourseStatus(currentCourse, classInfo, i, 2)
+            return [currentCourse]
         try:  # This is where a course with multiple meetings diverges
             currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
             currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p").time()
