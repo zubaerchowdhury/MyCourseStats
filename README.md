@@ -1,5 +1,14 @@
 # CourseStats
 
-### UM ECE Senior Design Fall '24-Spring '25 Project
+### UM ECE Senior Design Fall '24 - Spring '25 Project
 
-This project is about adding additional statistical facts about each courses offered by UM every semester and the instructors that teach them. It will provide course popularity and historically offered data. 
+This project is about adding additional statistical facts about each courses offered by UM every semester and the instructors that teach them. It will provide course popularity and historically offered data.
+
+**Advantages:**
+- Informs how consistently courses are offered in Canelink (especially courses that are only offered by announcement)
+- Helps planning out 4-year plan, reducing pressure on advisors
+- Gives an estimate of your chance to get enrolled in a course based on your enrollment date
+- A course’s enrollment rate correlates to course’s/instructor's popularity
+- Dropout rate correlates to how demanding the course is / how good the course is
+- Features most benefited by other departments where students can enroll by themselves
+- Possibility to scale to other universities across US
