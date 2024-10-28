@@ -189,12 +189,15 @@ with webdriver.Firefox() as driver:
             16: 4:45PM
             17: Stubblefield 204
             """
+
             currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y").date()
             currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y").date()
             currentCourse.instructor = meetingPatternsInfo[j + 1].split(", ")
             currentCourse.days = course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2])
-            currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p").time()
-            currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p").time()
+            if meetingPatternsInfo[j + 3] != "-":
+                currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p").time()
+            if meetingPatternsInfo[j + 4] != "-":
+                currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p").time()
             currentCourse.classroom = meetingPatternsInfo[j + 5]
             currentCourse.multipleMeetings = True
             currentCourseList.append(currentCourse)
@@ -444,6 +447,6 @@ with webdriver.Firefox() as driver:
     # getAllSubjects(DEBUG=True)
     # setAcademicCareer("Graduate")
     # getAllSubjects()
-    setSubject("Instrumental Performance", DEBUG=True)
+    setSubject("Music Engineering", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
