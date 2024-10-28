@@ -1,47 +1,26 @@
 from selenium import webdriver
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 import time
 import datetime
 import copy
+from functools import cache
 
 class course:
     #semesters = ["Spring", "Summer", "Fall", "Non-credit Term"]
     #sessions = ["Regular Academic", "Summer Session A 5W", "Summer Scholars Program"]
     #status = ["Open", "Closed", "Waitlist"]
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "TBA"]
     days_mapping = {
-        "Mo" : ["Monday"],
-        "Tu" : ["Tuesday"],
-        "We" : ["Wednesday"],
-        "Th" : ["Thursday"],
-        "Fr" : ["Friday"],
-        "MoTu" : ["Monday", "Tuesday"],
-        "MoWe" : ["Monday", "Wednesday"],
-        "MoTh" : ["Monday", "Thursday"],
-        "MoFr" : ["Monday", "Friday"],
-        "TuWe" : ["Tuesday", "Wednesday"],
-        "TuTh" : ["Tuesday", "Thursday"],
-        "TuFr" : ["Tuesday", "Friday"],
-        "WeTh" : ["Wednesday", "Thursday"],
-        "WeFr" : ["Wednesday", "Friday"],
-        "ThFr" : ["Thursday", "Friday"],
-        "MoTuWe" : ["Monday", "Tuesday", "Wednesday"],
-        "MoTuTh" : ["Monday", "Tuesday", "Thursday"],
-        "MoTuFr" : ["Monday", "Tuesday", "Friday"],
-        "MoWeTh" : ["Monday", "Wednesday", "Thursday"],
-        "MoWeFr" : ["Monday", "Wednesday", "Friday"],
-        "MoThFr" : ["Monday", "Thursday", "Friday"],
-        "TuWeTh" : ["Tuesday", "Wednesday", "Thursday"],
-        "TuWeFr" : ["Tuesday", "Wednesday", "Friday"],
-        "TuThFr" : ["Tuesday", "Thursday", "Friday"],
-        "WeThFr" : ["Wednesday", "Thursday", "Friday"],
-        "MoTuWeTh" : ["Monday", "Tuesday", "Wednesday", "Thursday"],
-        "MoTuWeFr" : ["Monday", "Tuesday", "Wednesday", "Friday"],
-        "MoTuThFr" : ["Monday", "Tuesday", "Thursday", "Friday"],
-        "MoWeThFr" : ["Monday", "Wednesday", "Thursday", "Friday"],
-        "TuWeThFr" : ["Tuesday", "Wednesday", "Thursday", "Friday"],
-        "MoTuWeThFr" : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+        "Mo" : "Monday",
+        "Tu" : "Tuesday",
+        "We" : "Wednesday",
+        "Th" : "Thursday",
+        "Fr" : "Friday",
+        "Sa" : "Saturday",
+        "Su" : "Sunday",
     }
 
     def __init__(self):
@@ -67,6 +46,8 @@ class course:
         self.capacity = 0
         self.waitlistAvailable = 300
         self.waitlistCapacity = 300
+        self.reservedSeatsAvailable = 0
+        self.reservedSeatsCapacity = 0
         self.multipleMeetings = False
         self.dateTimeRetrieved = datetime.datetime.now()
         self.notes = ""
@@ -81,7 +62,22 @@ class course:
             f"Classroom: {self.classroom}, Instructor: {self.instructor}, Start Date: {self.startDate}, "
             f"End Date: {self.endDate}, Status: {self.status}, Seats Available: {self.seatsAvailable}, "
             f"Capacity: {self.capacity}, Waitlist Available: {self.waitlistAvailable}, "
-            f"Waitlist Capacity: {self.waitlistCapacity}, Notes: {self.notes}")
+            f"Waitlist Capacity: {self.waitlistCapacity}, Reserved Seats Available: {self.reservedSeatsAvailable}, "
+            f"Reserved Seats Capacity: {self.reservedSeatsCapacity}, Multiple Meetings: {self.multipleMeetings}, "
+            f"Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
+    
+    # Method to map abbreviated days to full days
+    # Example: "MoWeFr" -> ["Monday", "Wednesday", "Friday"]
+    # Memoization is used to speed up the process
+    @staticmethod
+    @cache
+    def mapDaysAbrvToFull(days: str):
+        if days == "TBA":
+            return ["TBA"]
+        daysList = []
+        for i in range(0, len(days), 2):
+            daysList.append(course.days_mapping[days[i:i+2]])
+
     
 start_time = time.time()
 
@@ -94,10 +90,10 @@ with webdriver.Firefox() as driver:
     global currentAcademicCareer
     global currentSubject
     STRINGS_IN_EACH_SECTION = 9 # number of strings in each section of a class (if it does not have multiple meetings)
-    STRINGS_IN_MISSING_IN_MULTIPLE_MEETING_SECTION = 5 # number of strings missing from a section if it has multiple meetings
+    STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION = 5 # number of strings missing from a section if it has multiple meetings
     STRINGS_IN_EACH_TABLE_ROW = 6 # number of strings in each row of the meeting patterns table (for sections with multiple meetings)
 
-    def scrollToElement(element):
+    def scrollToElement(element: WebElement):
         driver.execute_script("arguments[0].scrollIntoView();", element)
 
     def clickSearchButton():
@@ -105,7 +101,39 @@ with webdriver.Firefox() as driver:
         searchButton.click()
         wait.until(presence_of_element_located((By.XPATH, "//main//div[2]//hr")))
 
-    def fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i):
+    def checkForReservedSeats(classInfo: list[str], i: int, offset: int):
+        hasReservedSeats = False
+        statusStringList = classInfo[i + offset].split(", ")
+        for j, statusString in enumerate(statusStringList):
+            if "reserved" in statusString:
+                hasReservedSeats = True
+                statusStringList.pop(j)
+                break
+        return (hasReservedSeats, statusStringList)
+    
+    def setCourseStatus(courseObject: course, classInfo: list[str], i: int, offset: int):
+        hasReservedSeats, statusStringList = checkForReservedSeats(classInfo, i, offset)
+        courseObject.status = statusStringList[0]
+        if courseObject.status == "Waitlist":
+            courseObject.seatsAvailable = int(statusStringList[1].split(". ")[1].split(" ")[0])
+            courseObject.capacity = int(statusStringList[1].split(". ")[1].split(" ")[2])
+            courseObject.waitlistAvailable = int(statusStringList[2].split(". ")[0].split(" ")[0])
+            courseObject.waitlistCapacity = int(statusStringList[2].split(". ")[0].split(" ")[2])
+        else:
+            courseObject.seatsAvailable = int(statusStringList[1].split(" ")[0])
+            courseObject.capacity = int(statusStringList[1].split(" ")[2])
+
+        if hasReservedSeats:
+            reservedSeatsText = classInfo[i + offset + 1]
+            """
+            Example of reservedSeatsText:
+            '5 of 5'
+            """
+            courseObject.reservedSeatsAvailable = int(reservedSeatsText.split(" ")[0])
+            courseObject.reservedSeatsCapacity = int(reservedSeatsText.split(" ")[2])
+            classInfo.pop(i + offset + 1) # Remove reserved seats text from classInfo to retain structure
+
+    def fillCourseObjectWithMultipleMeetings(currentCourse: course, classWebElement: WebElement, classInfo: list[str], i: int):
         classSectionsTable = classWebElement.find_element(By.XPATH, ".//div[@role='table']")
         classSectionsTableButtons = classSectionsTable.find_elements(By.XPATH, ".//button[@class='MuiButtonBase-root MuiIconButton-root']")
         currentClassSectionIndex = i // STRINGS_IN_EACH_SECTION
@@ -115,18 +143,11 @@ with webdriver.Firefox() as driver:
         wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
         meetingPatternsTable = driver.find_element(By.CSS_SELECTOR, "[aria-label='meeting patterns']")
         meetingPatternsInfo = meetingPatternsTable.find_elements(By.XPATH, ".//tbody//p")
+        meetingPatternsInfo = list(map(lambda x: x.get_attribute("textContent"), meetingPatternsInfo)) # map list of WebElements to list of strings
         currentCourseList = []
+        partialCourse = currentCourse
+        setCourseStatus(partialCourse, classInfo, i, 3)
         for j in range(0, len(meetingPatternsInfo), STRINGS_IN_EACH_TABLE_ROW):
-            partialCourse = currentCourse
-            partialCourse.status = classInfo[i + 3].text.split(", ")[0]
-            if partialCourse.status == "Waitlist":
-                partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
-                partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
-                partialCourse.waitlistAvailable = int(classInfo[i + 3].text.split(", ")[2].split(" ")[0])
-                partialCourse.waitlistCapacity = int(classInfo[i + 3].text.split(", ")[2].split(" ")[2])
-            else:
-                partialCourse.seatsAvailable = int(classInfo[i + 3].text.split(", ")[1].split(" ")[0])
-                partialCourse.capacity = int(classInfo[i + 3].text.split(", ")[1].split(" ")[2])
             currentCourse = course()
 
             # fill in information that was already filled in
@@ -142,6 +163,9 @@ with webdriver.Firefox() as driver:
             currentCourse.capacity = copy.deepcopy(partialCourse.capacity)
             currentCourse.waitlistAvailable = copy.deepcopy(partialCourse.waitlistAvailable)
             currentCourse.waitlistCapacity = copy.deepcopy(partialCourse.waitlistCapacity)
+            currentCourse.reservedSeatsAvailable = copy.deepcopy(partialCourse.reservedSeatsAvailable)
+            currentCourse.reservedSeatsCapacity = copy.deepcopy(partialCourse.reservedSeatsCapacity)
+            currentCourse.dateTimeRetrieved = copy.deepcopy(partialCourse.dateTimeRetrieved)
 
             # fill in information that is different for each meeting
             """
@@ -165,24 +189,24 @@ with webdriver.Firefox() as driver:
             16: 4:45PM
             17: Stubblefield 204
             """
-            currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[0], "%m/%d/%Y").date()
-            currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].text.split(" - ")[1], "%m/%d/%Y").date()
-            currentCourse.instructor = meetingPatternsInfo[j + 1].text.split(", ")
-            currentCourse.days = course.days_mapping[meetingPatternsInfo[j + 2].text]
-            currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3].text, "%I:%M%p").time()
-            currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4].text, "%I:%M%p").time()
-            currentCourse.classroom = meetingPatternsInfo[j + 5].text
+            currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y").date()
+            currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y").date()
+            currentCourse.instructor = meetingPatternsInfo[j + 1].split(", ")
+            currentCourse.days = course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2])
+            currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p").time()
+            currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p").time()
+            currentCourse.classroom = meetingPatternsInfo[j + 5]
             currentCourse.multipleMeetings = True
             currentCourseList.append(currentCourse)
             
         # insert list of "Multiple" strings into classInfo to keep the same structure
-        for j in range(STRINGS_IN_MISSING_IN_MULTIPLE_MEETING_SECTION):
+        for j in range(STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION):
             classInfo.insert(i + 3, "Multiple")
 
         currentButton.click() # Close the table
         return currentCourseList
 
-    def fillCourseObject(classWebElement, classInfo, className, i):
+    def fillCourseObject(classWebElement: WebElement, classInfo: list[str], className: str, i: int):
         """
         Example of className:
         'Small Contemporary Ensemble | MDE 139'
@@ -210,60 +234,6 @@ with webdriver.Firefox() as driver:
         15. Brian Russell
         16. 01/13 - 04/28
         17. Waitlist, 300 of 300 waitlist seats available. 40 of 40 seats available.
-        18. ENS Section CDT, Class Number5387
-        19. Regular Academic
-        20. Tuesday Thursday
-        21. 9:30 am
-        22. 10:45 am
-        23. Rehearsal Center 101
-        24. Stephen Rucker
-        25. 01/13 - 04/28
-        26. Open, 10 of 10 seats available
-        27. ENS Section CHAI, Class Number11249
-        28. Regular Academic
-        29. Wednesday
-        30. 2:00 pm
-        31. 3:00 pm
-        32. Weeks Music Library 130
-        33. Tom Collins
-        34. 01/13 - 04/28
-        35. Open, 5 of 5 seats available
-        36. ENS Section COHO, Class Number5388
-        37. Regular Academic
-        38. Thursday
-        39. 5:05 pm
-        40. 7:55 pm
-        41. Rehearsal Center 102
-        42. Stephen Gleason
-        43. 01/13 - 04/28
-        44. Open, 10 of 10 seats available
-        45. ENS Section CRE, Class Number5389
-        46. Regular Academic
-        47. Monday
-        48. 12:20 pm
-        49. 2:15 pm
-        50. Weeks Music Library 139
-        51. Pauly German Torres
-        52. 01/13 - 04/28
-        53. Open, 10 of 10 seats available
-        54. ENS Section DIYA, Class Number5390
-        55. Regular Academic
-        56. Monday
-        57. 6:35 pm
-        58. 7:50 pm
-        59. Frost North Studio 330
-        60. Cassandra Claude
-        61. 01/13 - 04/28
-        62. Open, 10 of 10 seats available
-        63. ENS Section DIYB, Class Number5391
-        64. Regular Academic
-        65. Monday
-        66. 8:05 pm
-        67. 9:20 pm
-        68. Frost North Studio 330
-        69. Cassandra Claude
-        70. 01/13 - 04/28
-        71. Open, 10 of 10 seats available
 
         First class:
         sectionType = ENS
@@ -310,36 +280,53 @@ with webdriver.Firefox() as driver:
         currentCourse.catalogNumber = int(className.split(" | ")[1].split(" ")[1])
         currentCourse.semester = currentTerm.split(" ")[0]
         currentCourse.year = int(currentTerm.split(" ")[1])
-        classInfoSection = classInfo[i].text.split(", ")
+        classInfoSection = classInfo[i].split(", ")
         currentCourse.sectionType = classInfoSection[0].split(" ")[0]
         currentCourse.sectionCode = classInfoSection[0].split(" ")[2]
         number = classInfoSection[1].split(" ")[1]
         number = number.replace("Number", "")
         currentCourse.classNumber = int(number)
-        currentCourse.session = classInfo[i + 1].text
-        currentCourse.days = classInfo[i + 2].text.split(" ")
+        currentCourse.session = classInfo[i + 1]
+        currentCourse.days = classInfo[i + 2].split(" ")
+        if currentCourse.days[0] not in course.days:
+            """
+            Example of classInfo with a section with multiple meetings:
+            0. Lecture Section C4J, Class Number9426
+            1. Regular Academic
+            2. Meeting 1: Wednesday . Meeting 2: Monday Wednesday Friday 
+            3. Meeting 1: 5:05 pm. Meeting 2: 10:10 am
+            4. Meeting 1: 6:20 pm. Meeting 2: 11:00 am
+            5. Meeting 1: Cox Science 126. Meeting 2: Whitten LC 170
+            6. Meeting 1: Charles Mallery. Meeting 2: Charles Mallery
+            7. Meeting 1: 01/1304/28. Meeting 2: 01/1304/28
+            8. Monday Wednesday Friday 
+            9. 10:10 am
+            10. 11:00 am
+            11. Whitten LC 170
+            12. Charles Mallery
+            13. 01/13 - 04/28
+            14. Open, 170 of 170 seats available
+
+            Need to get rid of [2:8] and [9:14] to match structure of
+            other instance of multiple meetings
+            """
+            del classInfo[i + 2: i + 8]
+            del classInfo[i + 3: i + 8]
+            return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
         try:  # This is where a course with multiple meetings diverges
-            currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3].text, "%I:%M %p").time()
-            currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4].text, "%I:%M %p").time()
+            currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
+            currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p").time()
         except(ValueError):
-            if classInfo[i + 3].text != "-":
+            if classInfo[i + 3] != "-":
                 return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
-        currentCourse.classroom = classInfo[i + 5].text
-        currentCourse.instructor = classInfo[i + 6].text.split(", ")
-        currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[0], "%m/%d").date()
+        currentCourse.classroom = classInfo[i + 5]
+        currentCourse.instructor = classInfo[i + 6].split(", ")
+        currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[0], "%m/%d").date()
         currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
-        currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].text.split(" - ")[1], "%m/%d").date()
+        currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[1], "%m/%d").date()
         currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
-        # TODO: Error handling for when there are reserved seats
-        currentCourse.status = classInfo[i + 8].text.split(", ")[0]
-        if currentCourse.status == "Waitlist":
-            currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
-            currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
-            currentCourse.waitlistAvailable = int(classInfo[i + 8].text.split(", ")[2].split(" ")[0])
-            currentCourse.waitlistCapacity = int(classInfo[i + 8].text.split(", ")[2].split(" ")[2])
-        else:
-            currentCourse.seatsAvailable = int(classInfo[i + 8].text.split(", ")[1].split(" ")[0])
-            currentCourse.capacity = int(classInfo[i + 8].text.split(", ")[1].split(" ")[2])
+        setCourseStatus(currentCourse, classInfo, i, 8)
+
         return [currentCourse]
             
                    
@@ -352,49 +339,22 @@ with webdriver.Firefox() as driver:
             className = c.find_element(By.TAG_NAME, 'h2').text
             classInfo = c.find_elements(By.XPATH, ".//span[@class='sr-only']")
             classInfo.pop(0) # Remove useless element 
-            classInfo = [x for x in classInfo if x.text != ""] # delete all empty strings
+            classInfo = list(map(lambda x: x.get_attribute("textContent"), classInfo)) # map list of WebElements to list of strings
             if DEBUG:
                 print(className)
                 for i,info in enumerate(classInfo):
-                    print(f"{i}.", info.text)
+                    print(f"{i}.", info)
                 print()
-            for i in range(0, len(classInfo), STRINGS_IN_EACH_SECTION):
+            i = 0
+            while i < len(classInfo):
                 classSectionList = fillCourseObject(c, classInfo, className, i)
                 if len(classSectionList) > 1:
                     print("MULTIPLE MEETINGS")
                 for classSection in classSectionList:
                     print(classSection)
                 print()
+                i += STRINGS_IN_EACH_SECTION
             print()
-
-    def setAcademicCareer(academicCareer: str):
-        global currentAcademicCareer
-        currentAcademicCareer = academicCareer
-        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-        academicCareerDropdown.click()
-        academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
-        academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
-        for item in academicCareerDropdownListItems:
-            if item.text == academicCareer:
-                item.click()
-                break
-
-    def setTerm(term: str):
-        termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
-        termDropdown.click()
-        termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
-        termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
-        for item in termDropdownListItems:
-            if item.text == term:
-                global currentTerm
-                currentTerm = item.text
-                item.click()
-                wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
-                break
-    
-    def uncheckShowOpenClassesOnly():
-        showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
-        showOpenClassesOnlyCheckbox.click()
 
     def getAllSubjects(DEBUG=False):
         # Go through all subjects and get all classes
@@ -432,12 +392,43 @@ with webdriver.Firefox() as driver:
                 getAllClasses(DEBUG)
                 break
 
+    def setAcademicCareer(academicCareer: str):
+        global currentAcademicCareer
+        currentAcademicCareer = academicCareer
+        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
+        academicCareerDropdown.click()
+        academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
+        academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
+        for item in academicCareerDropdownListItems:
+            if item.text == academicCareer:
+                item.click()
+                break
+
+    def setTerm(term: str):
+        termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
+        termDropdown.click()
+        termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
+        termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
+        for item in termDropdownListItems:
+            if item.text == term:
+                global currentTerm
+                currentTerm = item.text
+                item.click()
+                wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
+                break
+    
+    def uncheckShowOpenClassesOnly():
+        showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
+        showOpenClassesOnlyCheckbox.click()
+
+    
+
     setTerm("Spring 2025")
     uncheckShowOpenClassesOnly()
     setAcademicCareer("Undergraduate")
-    # getAllSubjects()
+    # getAllSubjects(DEBUG=True)
     # setAcademicCareer("Graduate")
     # getAllSubjects()
-    setSubject("Anthropology", DEBUG=True)
+    setSubject("Biomedical Engineering", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
