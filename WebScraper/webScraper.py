@@ -92,6 +92,7 @@ with webdriver.Firefox() as driver:
     STRINGS_IN_EACH_SECTION = 9 # number of strings in each section of a class (if it does not have multiple meetings)
     STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION = 5 # number of strings missing from a section if it has multiple meetings
     STRINGS_IN_EACH_TABLE_ROW = 6 # number of strings in each row of the meeting patterns table (for sections with multiple meetings)
+    STRINGS_MISSING_IN_MINIMAL_INFO_SECTION = 6 # number of strings missing from a section with almost no information
 
     def scrollToElement(element: WebElement):
         driver.execute_script("arguments[0].scrollIntoView();", element)
@@ -329,7 +330,9 @@ with webdriver.Firefox() as driver:
             # almost no information case
             setCourseStatus(currentCourse, classInfo, i, 2)
             currentCourse.days = [""]
-            del classInfo[i: i + 3] # get rid of the section in the list to retain structure
+            # insert list of "-" strings into classInfo to keep the same structure
+            for j in range(STRINGS_MISSING_IN_MINIMAL_INFO_SECTION):
+                classInfo.insert(i + 2, "-")
             return [currentCourse]
         try:  # This is where a course with multiple meetings diverges
             currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
@@ -447,6 +450,6 @@ with webdriver.Firefox() as driver:
     # getAllSubjects(DEBUG=True)
     # setAcademicCareer("Graduate")
     # getAllSubjects()
-    setSubject("Music Engineering", DEBUG=True)
+    setSubject("Sociology and Criminology", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
