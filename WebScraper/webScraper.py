@@ -99,11 +99,6 @@ with webdriver.Firefox() as driver:
     def scrollToElement(element: WebElement):
         driver.execute_script("arguments[0].scrollIntoView();", element)
 
-    def clickSearchButton():
-        searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
-        searchButton.click()
-        wait.until(presence_of_element_located((By.XPATH, "//main//div[2]//hr")))
-
     def checkForReservedSeats(classInfo: list[str], i: int, offset: int):
         hasReservedSeats = False
         statusStringList = classInfo[i + offset].split(", ")
@@ -447,7 +442,10 @@ with webdriver.Firefox() as driver:
         showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
         showOpenClassesOnlyCheckbox.click()
 
-    
+    def clickSearchButton():
+        searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
+        searchButton.click()
+        wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
 
     setTerm("Spring 2025")
     uncheckShowOpenClassesOnly()
@@ -455,6 +453,6 @@ with webdriver.Firefox() as driver:
     # getAllSubjects(DEBUG=True)
     setAcademicCareer("Graduate")
     # getAllSubjects(DEBUG=True)
-    setSubject("Business", DEBUG=True)
+    setSubject("Ecosystem Science and Policy", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
