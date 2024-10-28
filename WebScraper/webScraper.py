@@ -26,7 +26,7 @@ class course:
     def __init__(self):
         self.name = ""
         self.subject = ("", "")
-        self.catalogNumber = 0
+        self.catalogNumber = ""
         self.semester = ""
         self.year = 0
         self.sectionType = ""
@@ -213,7 +213,7 @@ with webdriver.Firefox() as driver:
 
         courseName = Small Contemporary Ensemble
         subject = (currentSubject, 'MDE')
-        catalogNumber = 139
+        catalogNumber = '139'
 
         Example of classInfo:
         0. ENS Section AMS, Class Number5385
@@ -277,7 +277,7 @@ with webdriver.Firefox() as driver:
         currentCourse = course()
         currentCourse.name = className.split(" | ")[0]
         currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
-        currentCourse.catalogNumber = int(className.split(" | ")[1].split(" ")[1])
+        currentCourse.catalogNumber = className.split(" | ")[1].split(" ")[1]
         currentCourse.semester = currentTerm.split(" ")[0]
         currentCourse.year = int(currentTerm.split(" ")[1])
         classInfoSection = classInfo[i].split(", ")
@@ -444,6 +444,6 @@ with webdriver.Firefox() as driver:
     # getAllSubjects(DEBUG=True)
     # setAcademicCareer("Graduate")
     # getAllSubjects()
-    setSubject("History", DEBUG=True)
+    setSubject("Instrumental Performance", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
