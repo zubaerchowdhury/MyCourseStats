@@ -323,7 +323,10 @@ with webdriver.Firefox() as driver:
                 del classInfo[i + 2: i + 8]
                 del classInfo[i + 3: i + 8]
                 return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+            # almost no information case
             setCourseStatus(currentCourse, classInfo, i, 2)
+            currentCourse.days = [""]
+            del classInfo[i: i + 3] # get rid of the section in the list to retain structure
             return [currentCourse]
         try:  # This is where a course with multiple meetings diverges
             currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
@@ -441,6 +444,6 @@ with webdriver.Firefox() as driver:
     # getAllSubjects(DEBUG=True)
     # setAcademicCareer("Graduate")
     # getAllSubjects()
-    setSubject("Biomedical Engineering", DEBUG=True)
+    setSubject("History", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
