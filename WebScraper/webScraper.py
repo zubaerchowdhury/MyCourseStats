@@ -49,6 +49,7 @@ class course:
         self.reservedSeatsAvailable = 0
         self.reservedSeatsCapacity = 0
         self.multipleMeetings = False
+        self.Topic = ""
         self.dateTimeRetrieved = datetime.datetime.now()
         self.notes = ""
         # self.decription = ""
@@ -64,7 +65,7 @@ class course:
             f"Capacity: {self.capacity}, Waitlist Available: {self.waitlistAvailable}, "
             f"Waitlist Capacity: {self.waitlistCapacity}, Reserved Seats Available: {self.reservedSeatsAvailable}, "
             f"Reserved Seats Capacity: {self.reservedSeatsCapacity}, Multiple Meetings: {self.multipleMeetings}, "
-            f"Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
+            f"Topic: {self.Topic}, Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
     
     # Method to map abbreviated days to full days
     # Example: "MoWeFr" -> ["Monday", "Wednesday", "Friday"]
@@ -92,6 +93,7 @@ with webdriver.Firefox() as driver:
     STRINGS_IN_EACH_SECTION = 9 # number of strings in each section of a class (if it does not have multiple meetings)
     STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION = 5 # number of strings missing from a section if it has multiple meetings
     STRINGS_IN_EACH_TABLE_ROW = 6 # number of strings in each row of the meeting patterns table (for sections with multiple meetings)
+    STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC = 7 # number of strings in each row of the meeting patterns table with the additional 'Topic' column (for sections with multiple meetings)
     STRINGS_MISSING_IN_MINIMAL_INFO_SECTION = 6 # number of strings missing from a section with almost no information
 
     def scrollToElement(element: WebElement):
@@ -148,7 +150,8 @@ with webdriver.Firefox() as driver:
         currentCourseList = []
         partialCourse = currentCourse
         setCourseStatus(partialCourse, classInfo, i, 3)
-        for j in range(0, len(meetingPatternsInfo), STRINGS_IN_EACH_TABLE_ROW):
+        stringsInEachRow = STRINGS_IN_EACH_TABLE_ROW if len(meetingPatternsInfo) % STRINGS_IN_EACH_TABLE_ROW == 0 else STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC
+        for j in range(0, len(meetingPatternsInfo), stringsInEachRow):
             currentCourse = course()
 
             # fill in information that was already filled in
@@ -201,6 +204,8 @@ with webdriver.Firefox() as driver:
                 currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p").time()
             currentCourse.classroom = meetingPatternsInfo[j + 5]
             currentCourse.multipleMeetings = True
+            if stringsInEachRow == STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC:
+                currentCourse.Topic = meetingPatternsInfo[j + 6]
             currentCourseList.append(currentCourse)
             
         # insert list of "Multiple" strings into classInfo to keep the same structure
@@ -446,10 +451,10 @@ with webdriver.Firefox() as driver:
 
     setTerm("Spring 2025")
     uncheckShowOpenClassesOnly()
-    setAcademicCareer("Undergraduate")
+    # setAcademicCareer("Undergraduate")
     # getAllSubjects(DEBUG=True)
-    # setAcademicCareer("Graduate")
-    # getAllSubjects()
-    setSubject("Sociology and Criminology", DEBUG=True)
+    setAcademicCareer("Graduate")
+    # getAllSubjects(DEBUG=True)
+    setSubject("Business", DEBUG=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
