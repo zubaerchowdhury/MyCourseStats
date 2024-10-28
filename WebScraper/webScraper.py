@@ -369,13 +369,23 @@ with webdriver.Firefox() as driver:
             i = 0
             while i < len(classInfo):
                 classSectionList = fillCourseObject(c, classInfo, className, i)
-                if len(classSectionList) > 1:
-                    print("MULTIPLE MEETINGS")
-                for classSection in classSectionList:
-                    print(classSection)
-                print()
+                if DEBUG:
+                    if len(classSectionList) > 1:
+                        print("MULTIPLE MEETINGS")
+                    for classSection in classSectionList:
+                        print(classSection)
+                    print()
                 i += STRINGS_IN_EACH_SECTION
-            print()
+            if DEBUG: print()
+
+    def uncheckShowOpenClassesOnly():
+        showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
+        showOpenClassesOnlyCheckbox.click()
+
+    def clickSearchButton():
+        searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
+        searchButton.click()
+        wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
 
     def getAllSubjects(DEBUG=False):
         # Go through all subjects and get all classes
@@ -384,8 +394,7 @@ with webdriver.Firefox() as driver:
         subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
         subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
         subjectListLength = len(subjectDropdownListItems)
-        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-        academicCareerDropdown.click() # Close subject dropdown by clicking on academic career dropdown
+        clickAcademicCareerDropdown() # Close subject dropdown by clicking on academic career dropdown
         for i in range(subjectListLength):
             subjectDropdown.click()
             subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
@@ -413,11 +422,14 @@ with webdriver.Firefox() as driver:
                 getAllClasses(DEBUG)
                 break
 
+    def clickAcademicCareerDropdown():
+        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
+        academicCareerDropdown.click()
+
     def setAcademicCareer(academicCareer: str):
         global currentAcademicCareer
         currentAcademicCareer = academicCareer
-        academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-        academicCareerDropdown.click()
+        clickAcademicCareerDropdown()
         academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
         academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
         for item in academicCareerDropdownListItems:
@@ -437,22 +449,60 @@ with webdriver.Firefox() as driver:
                 item.click()
                 wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
                 break
+
+    def getNextTerm(item: WebElement):
+        global currentTerm
+        currentTerm = item.text
+        scrollToElement(item)
+        item.click()
+        wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
+
+    def getTermDropdownListOfItems():
+        termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
+        termDropdown.click()
+        termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
+        termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
+        return termDropdownListItems
     
-    def uncheckShowOpenClassesOnly():
-        showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
-        showOpenClassesOnlyCheckbox.click()
+    def getAllSubjectsForUndergradAndGrad(DEBUG=False):
+        uncheckShowOpenClassesOnly()
+        setAcademicCareer("Undergraduate")
+        getAllSubjects(DEBUG)
+        setAcademicCareer("Graduate")
+        getAllSubjects(DEBUG)
 
-    def clickSearchButton():
-        searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
-        searchButton.click()
-        wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
+    def getAllTerms(DEBUG=False):
+        termDropdownListItems = getTermDropdownListOfItems()
+        termDropdownLength = len(termDropdownListItems)
+        clickAcademicCareerDropdown() # Close term dropdown by clicking on academic career dropdown
+        for i in range(termDropdownLength):
+            termDropdownListItems = getTermDropdownListOfItems()
+            item = termDropdownListItems[i]
+            if "Non-credit Term" in item.text:
+                continue
+            getNextTerm(item)
+            getAllSubjectsForUndergradAndGrad(DEBUG)
 
-    setTerm("Spring 2025")
-    uncheckShowOpenClassesOnly()
-    # setAcademicCareer("Undergraduate")
-    # getAllSubjects(DEBUG=True)
-    setAcademicCareer("Graduate")
-    # getAllSubjects(DEBUG=True)
-    setSubject("Ecosystem Science and Policy", DEBUG=True)
+    def getOneTerm(term: str, DEBUG=False):
+        termDropdownListItems = getTermDropdownListOfItems()
+        for item in termDropdownListItems:
+            if item.text == term:
+                getNextTerm(item)
+                break
+        getAllSubjectsForUndergradAndGrad(DEBUG)
+
+    def getOneTermOneAcademicCareerOneSubject(term: str, career: str, subject: str, DEBUG=False):
+        termDropdownListItems = getTermDropdownListOfItems()
+        for item in termDropdownListItems:
+            if item.text == term:
+                getNextTerm(item)
+                break
+        uncheckShowOpenClassesOnly()
+        setAcademicCareer(career)
+        setSubject(subject, DEBUG)
+
+    getAllTerms(DEBUG=False)
+    # getOneTerm("Spring 2025", DEBUG=False)
+    # getOneTermOneAcademicCareerOneSubject("Spring 2025", "Undergraduate", "Ecosystem Science and Policy", DEBUG=False)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
