@@ -60,7 +60,7 @@ class course:
         # self.prerequisites = ""
 
     def __repr__(self):
-        return (f"Name: {self.name}, Subject: {self.subject}, Catalog Number: {self.catalogNumber}, "
+        return (f"Name: {self.name}, Subject: {self.subject}, Catalog Number: {self.catalogNumber}, Academic Career: {self.academicCareer}, "
             f"Semester: {self.semester}, Year: {self.year}, Section Type: {self.sectionType}, "
             f"Section Code: {self.sectionCode}, Class Number: {self.classNumber}, Session: {self.session}, "
             f"Days: {self.days}, Time Start: {self.timeStart}, Time End: {self.timeEnd}, "
@@ -156,6 +156,11 @@ with webdriver.Firefox() as driver:
     def scrollToElement(element: WebElement):
         driver.execute_script("arguments[0].scrollIntoView();", element)
 
+    def printClassInfo(classInfo: list[str]):  
+        for i,info in enumerate(classInfo):
+            print(f"{i}.", info)
+        print()
+
     def checkForReservedSeats(classInfo: list[str], i: int, offset: int):
         hasReservedSeats = False
         statusStringList = classInfo[i + offset].split(", ")
@@ -164,6 +169,12 @@ with webdriver.Firefox() as driver:
                 hasReservedSeats = True
                 statusStringList.pop(j)
                 break
+        reservedSeatsOffset = 1 if statusStringList[0] != "Waitlist" else 2
+        if len(classInfo) <= i + offset + 2:
+            reservedSeatsOffset = 0
+        if not hasReservedSeats and reservedSeatsOffset > 0:
+            if classInfo[i + offset + reservedSeatsOffset].split(" ")[0].isnumeric():
+                hasReservedSeats = True
         return (hasReservedSeats, statusStringList)
     
     def setCourseStatus(courseObject: course, classInfo: list[str], i: int, offset: int):
@@ -174,6 +185,10 @@ with webdriver.Firefox() as driver:
             courseObject.capacity = int(statusStringList[1].split(". ")[1].split(" ")[2])
             courseObject.waitlistAvailable = int(statusStringList[1].split(". ")[0].split(" ")[0])
             courseObject.waitlistCapacity = int(statusStringList[1].split(". ")[0].split(" ")[2])
+            if len(classInfo) > i + offset + 1:
+                nextString = classInfo[i + offset + 1].split(" ")
+                if len(nextString) == 3 and nextString[2].isnumeric() and int(nextString[2]) > 50:
+                    classInfo.pop(i + offset + 1) # Remove waitlist text from classInfo to retain structure
         else:
             courseObject.seatsAvailable = int(statusStringList[1].split(" ")[0])
             courseObject.capacity = int(statusStringList[1].split(" ")[2])
@@ -335,79 +350,88 @@ with webdriver.Firefox() as driver:
         waitlistCapacity = 300
         notes = ''
         """
-        global currentSubject
-        currentCourse = course()
-        currentCourse.name = className.split(" | ")[0]
-        currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
-        currentCourse.catalogNumber = className.split(" | ")[1].split(" ")[1]
-        currentCourse.academicCareer = currentAcademicCareer
-        currentCourse.semester = currentTerm.split(" ")[0]
-        currentCourse.year = int(currentTerm.split(" ")[1])
-        classInfoSection = classInfo[i].split(", ")
-        currentCourse.sectionType = classInfoSection[0].split(" ")[0]
-        currentCourse.sectionCode = classInfoSection[0].split(" ")[2]
-        number = classInfoSection[1].split(" ")[1]
-        number = number.replace("Number", "")
-        currentCourse.classNumber = int(number)
-        currentCourse.session = classInfo[i + 1]
-        currentCourse.days = classInfo[i + 2].split(" ")
-        if currentCourse.days[0] not in course.days:
-            """
-            Example of classInfo with a section with multiple meetings:
-            0. Lecture Section C4J, Class Number9426
-            1. Regular Academic
-            2. Meeting 1: Wednesday . Meeting 2: Monday Wednesday Friday 
-            3. Meeting 1: 5:05 pm. Meeting 2: 10:10 am
-            4. Meeting 1: 6:20 pm. Meeting 2: 11:00 am
-            5. Meeting 1: Cox Science 126. Meeting 2: Whitten LC 170
-            6. Meeting 1: Charles Mallery. Meeting 2: Charles Mallery
-            7. Meeting 1: 01/1304/28. Meeting 2: 01/1304/28
-            8. Monday Wednesday Friday 
-            9. 10:10 am
-            10. 11:00 am
-            11. Whitten LC 170
-            12. Charles Mallery
-            13. 01/13 - 04/28
-            14. Open, 170 of 170 seats available
+        try:
+            global currentSubject
+            currentCourse = course()
+            currentCourse.name = className.split(" | ")[0]
+            currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
+            currentCourse.catalogNumber = className.split(" | ")[1].split(" ")[1]
+            currentCourse.academicCareer = currentAcademicCareer
+            currentCourse.semester = currentTerm.split(" ")[0]
+            currentCourse.year = int(currentTerm.split(" ")[1])
+            classInfoSection = classInfo[i].split(", ")
+            currentCourse.sectionType = classInfoSection[0].split(" ")[0]
+            currentCourse.sectionCode = classInfoSection[0].split(" ")[2]
+            number = classInfoSection[1].split(" ")[1]
+            number = number.replace("Number", "")
+            currentCourse.classNumber = int(number)
+            currentCourse.session = classInfo[i + 1]
+            currentCourse.days = classInfo[i + 2].split(" ")
+            if currentCourse.days[0] not in course.days:
+                """
+                Example of classInfo with a section with multiple meetings:
+                0. Lecture Section C4J, Class Number9426
+                1. Regular Academic
+                2. Meeting 1: Wednesday . Meeting 2: Monday Wednesday Friday 
+                3. Meeting 1: 5:05 pm. Meeting 2: 10:10 am
+                4. Meeting 1: 6:20 pm. Meeting 2: 11:00 am
+                5. Meeting 1: Cox Science 126. Meeting 2: Whitten LC 170
+                6. Meeting 1: Charles Mallery. Meeting 2: Charles Mallery
+                7. Meeting 1: 01/1304/28. Meeting 2: 01/1304/28
+                8. Monday Wednesday Friday 
+                9. 10:10 am
+                10. 11:00 am
+                11. Whitten LC 170
+                12. Charles Mallery
+                13. 01/13 - 04/28
+                14. Open, 170 of 170 seats available
 
-            Need to get rid of [2:8] and [9:14] to match structure of
-            other instance of multiple meetings
+                Need to get rid of [2:8] and [9:14] to match structure of
+                other instance of multiple meetings
 
-            Example of classInfo with a section with almost no information:
-            0. Lecture Section 01, Class Number7616
-            1. Regular Academic
-            2. Open, 10 of 10 seats available
+                Example of classInfo with a section with almost no information:
+                0. Lecture Section 01, Class Number7616
+                1. Regular Academic
+                2. Open, 10 of 10 seats available
 
-            Just need to take what we can get and store it
-            """
-            # multiple meetings case
-            # check if the string is actually the status string (remove the last character, which is a comma)
-            if currentCourse.days[0][0:len(currentCourse.days[0])-1] not in course.status:
-                del classInfo[i + 2: i + 8]
-                del classInfo[i + 3: i + 8]
-                return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
-            # almost no information case
-            setCourseStatus(currentCourse, classInfo, i, 2)
-            currentCourse.days = [""]
-            # insert list of "-" strings into classInfo to keep the same structure
-            for j in range(STRINGS_MISSING_IN_MINIMAL_INFO_SECTION):
-                classInfo.insert(i + 2, "-")
+                Just need to take what we can get and store it
+                """
+                # multiple meetings case
+                # check if the string is actually the status string (remove the last character, which is a comma)
+                if currentCourse.days[0][0:len(currentCourse.days[0])-1] not in course.status:
+                    del classInfo[i + 2: i + 8]
+                    del classInfo[i + 3: i + 8]
+                    return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+                # almost no information case
+                setCourseStatus(currentCourse, classInfo, i, 2)
+                currentCourse.days = [""]
+                # insert list of "-" strings into classInfo to keep the same structure
+                for j in range(STRINGS_MISSING_IN_MINIMAL_INFO_SECTION):
+                    classInfo.insert(i + 2, "-")
+                return [currentCourse]
+            try:  # This is where a course with multiple meetings diverges
+                currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
+                currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p").time()
+            except(ValueError):
+                if classInfo[i + 3] != "-":
+                    return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+            currentCourse.classroom = classInfo[i + 5]
+            currentCourse.instructor = classInfo[i + 6].split(", ")
+            currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[0], "%m/%d").date()
+            currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
+            currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[1], "%m/%d").date()
+            currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
+            setCourseStatus(currentCourse, classInfo, i, 8)
+
             return [currentCourse]
-        try:  # This is where a course with multiple meetings diverges
-            currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
-            currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p").time()
-        except(ValueError):
-            if classInfo[i + 3] != "-":
-                return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
-        currentCourse.classroom = classInfo[i + 5]
-        currentCourse.instructor = classInfo[i + 6].split(", ")
-        currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[0], "%m/%d").date()
-        currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
-        currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[1], "%m/%d").date()
-        currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
-        setCourseStatus(currentCourse, classInfo, i, 8)
-
-        return [currentCourse]
+        except Exception as e:
+            print(type(e).__name__, e)
+            print("Error in fillCourseObject")
+            print("ClassInfo:")
+            printClassInfo(classInfo)
+            print("i:", i)
+            print("className:", className)
+            raise e
             
                    
     def getAllClasses(DEBUG=False):
@@ -422,10 +446,7 @@ with webdriver.Firefox() as driver:
             classInfo.pop(0) # Remove useless element 
             classInfo = list(map(lambda x: x.get_attribute("textContent"), classInfo)) # map list of WebElements to list of strings
             if DEBUG:
-                print(className)
-                for i,info in enumerate(classInfo):
-                    print(f"{i}.", info)
-                print()
+                printClassInfo(classInfo)
             i = 0
             while i < len(classInfo):
                 classSectionList = fillCourseObject(c, classInfo, className, i)
