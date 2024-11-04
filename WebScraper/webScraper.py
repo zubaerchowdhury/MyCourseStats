@@ -7,6 +7,9 @@ import time
 import datetime
 import copy
 from functools import cache
+import csv
+import os
+
 
 class course:
     #semesters = ["Spring", "Summer", "Fall", "Non-credit Term"]
@@ -24,24 +27,25 @@ class course:
     }
 
     def __init__(self):
-        self.name = ""
-        self.subject = ("", "")
-        self.catalogNumber = ""
-        self.semester = ""
+        self.name = "NULL"
+        self.subject = ("NULL", "NULL")
+        self.catalogNumber = "NULL"
+        self.academicCareer = "NULL"
+        self.semester = "NULL"
         self.year = 0
-        self.sectionType = ""
-        self.sectionCode = ""
+        self.sectionType = "NULL"
+        self.sectionCode = "NULL"
         self.classNumber = 0
-        self.session = ""
-        self.days = [""]
+        self.session = "NULL"
+        self.days = ["NULL"]
         self.timeStart = datetime.time()
         self.timeEnd = datetime.time()
-        self.classroom = ""
-        self.instructor = [""]
+        self.classroom = "NULL"
+        self.instructor = ["NULL"]
         self.startDate = datetime.date(2000, 1, 1)
         self.endDate = datetime.date(2000, 1, 1)
         # self.units = ""
-        self.status = ""
+        self.status = "NULL"
         self.seatsAvailable = 0
         self.capacity = 0
         self.waitlistAvailable = 300
@@ -49,9 +53,9 @@ class course:
         self.reservedSeatsAvailable = 0
         self.reservedSeatsCapacity = 0
         self.multipleMeetings = False
-        self.Topic = ""
+        self.topic = "NULL"
         self.dateTimeRetrieved = datetime.datetime.now()
-        self.notes = ""
+        self.notes = "NULL"
         # self.decription = ""
         # self.prerequisites = ""
 
@@ -65,7 +69,7 @@ class course:
             f"Capacity: {self.capacity}, Waitlist Available: {self.waitlistAvailable}, "
             f"Waitlist Capacity: {self.waitlistCapacity}, Reserved Seats Available: {self.reservedSeatsAvailable}, "
             f"Reserved Seats Capacity: {self.reservedSeatsCapacity}, Multiple Meetings: {self.multipleMeetings}, "
-            f"Topic: {self.Topic}, Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
+            f"Topic: {self.topic}, Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
     
     # Method to map abbreviated days to full days
     # Example: "MoWeFr" -> ["Monday", "Wednesday", "Friday"]
@@ -78,6 +82,57 @@ class course:
         daysList = []
         for i in range(0, len(days), 2):
             daysList.append(course.days_mapping[days[i:i+2]])
+        return daysList
+
+    def course_to_dict(self):
+        return {
+            "name": self.name,
+            "subject": self.subject,
+            "catalogNumber": self.catalogNumber,
+            "academicCareer": self.academicCareer,
+            "semester": self.semester,
+            "year": self.year,
+            "sectionType": self.sectionType,
+            "sectionCode": self.sectionCode,
+            "classNumber": self.classNumber,
+            "session": self.session,
+            "days": " ".join(self.days),
+            "timeStart": self.timeStart.strftime("%I:%M %p") if self.timeStart else "NULL",
+            "timeEnd": self.timeEnd.strftime("%I:%M %p") if self.timeEnd else "NULL",
+            "classroom": self.classroom,
+            "instructor": ", ".join(self.instructor),
+            "startDate": self.startDate.strftime("%m/%d/%Y") if self.startDate else "NULL",
+            "endDate": self.endDate.strftime("%m/%d/%Y") if self.endDate else "NULL",
+            "status": self.status,
+            "seatsAvailable": self.seatsAvailable,
+            "capacity": self.capacity,
+            "waitlistAvailable": self.waitlistAvailable,
+            "waitlistCapacity": self.waitlistCapacity,
+            "reservedSeatsAvailable": self.reservedSeatsAvailable,
+            "reservedSeatsCapacity": self.reservedSeatsCapacity,
+            "multipleMeetings": self.multipleMeetings,
+            "topic": self.topic,
+            "dateTimeRetrieved": self.dateTimeRetrieved.strftime("%Y-%m-%d %H:%M:%S"),
+            "notes": self.notes
+        }
+
+    @staticmethod
+    def save_courses_to_csv(courses, filename="courses.csv"):
+        keys = ["name", "subject", "catalogNumber", "academicCareer", "semester", "year", "sectionType", "sectionCode", "classNumber", "session", "days", "timeStart", "timeEnd", "classroom", "instructor", "startDate", "endDate", "status", "seatsAvailable", "capacity", "waitlistAvailable", "waitlistCapacity", "reservedSeatsAvailable", "reservedSeatsCapacity", "multipleMeetings", "topic", "dateTimeRetrieved", "notes"]
+        file_exists = os.path.isfile(filename)
+        
+        with open(filename, 'a', newline='') as output_file:
+            dict_writer = csv.DictWriter(output_file, fieldnames=keys)
+            if not file_exists:
+                dict_writer.writeheader()
+                for courseSection in courses:
+                    try:
+                        dict_writer.writerow(courseSection.course_to_dict())
+                    except Exception as e:
+                        print(e)
+                        print(courseSection)
+                        return
+            
 
     
 start_time = time.time()
@@ -85,11 +140,13 @@ start_time = time.time()
 with webdriver.Firefox() as driver:
 
     driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 20)
     driver.switch_to.frame("TargetContent")    
     global currentTerm
     global currentAcademicCareer
     global currentSubject
+    global courses
+    courses = []
     STRINGS_IN_EACH_SECTION = 9 # number of strings in each section of a class (if it does not have multiple meetings)
     STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION = 5 # number of strings missing from a section if it has multiple meetings
     STRINGS_IN_EACH_TABLE_ROW = 6 # number of strings in each row of the meeting patterns table (for sections with multiple meetings)
@@ -115,8 +172,8 @@ with webdriver.Firefox() as driver:
         if courseObject.status == "Waitlist":
             courseObject.seatsAvailable = int(statusStringList[1].split(". ")[1].split(" ")[0])
             courseObject.capacity = int(statusStringList[1].split(". ")[1].split(" ")[2])
-            courseObject.waitlistAvailable = int(statusStringList[2].split(". ")[0].split(" ")[0])
-            courseObject.waitlistCapacity = int(statusStringList[2].split(". ")[0].split(" ")[2])
+            courseObject.waitlistAvailable = int(statusStringList[1].split(". ")[0].split(" ")[0])
+            courseObject.waitlistCapacity = int(statusStringList[1].split(". ")[0].split(" ")[2])
         else:
             courseObject.seatsAvailable = int(statusStringList[1].split(" ")[0])
             courseObject.capacity = int(statusStringList[1].split(" ")[2])
@@ -153,6 +210,7 @@ with webdriver.Firefox() as driver:
             currentCourse.name = copy.deepcopy(partialCourse.name)
             currentCourse.subject = copy.deepcopy(partialCourse.subject)
             currentCourse.catalogNumber = copy.deepcopy(partialCourse.catalogNumber)
+            currentCourse.academicCareer = copy.deepcopy(partialCourse.academicCareer)
             currentCourse.sectionType = copy.deepcopy(partialCourse.sectionType)
             currentCourse.sectionCode = copy.deepcopy(partialCourse.sectionCode)
             currentCourse.classNumber = copy.deepcopy(partialCourse.classNumber)
@@ -200,7 +258,7 @@ with webdriver.Firefox() as driver:
             currentCourse.classroom = meetingPatternsInfo[j + 5]
             currentCourse.multipleMeetings = True
             if stringsInEachRow == STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC:
-                currentCourse.Topic = meetingPatternsInfo[j + 6]
+                currentCourse.topic = meetingPatternsInfo[j + 6]
             currentCourseList.append(currentCourse)
             
         # insert list of "Multiple" strings into classInfo to keep the same structure
@@ -282,6 +340,7 @@ with webdriver.Firefox() as driver:
         currentCourse.name = className.split(" | ")[0]
         currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
         currentCourse.catalogNumber = className.split(" | ")[1].split(" ")[1]
+        currentCourse.academicCareer = currentAcademicCareer
         currentCourse.semester = currentTerm.split(" ")[0]
         currentCourse.year = int(currentTerm.split(" ")[1])
         classInfoSection = classInfo[i].split(", ")
@@ -352,6 +411,7 @@ with webdriver.Firefox() as driver:
             
                    
     def getAllClasses(DEBUG=False):
+        global courses
         form = driver.find_element(By.XPATH, "//form")
         classesDiv = form.find_element(By.XPATH, "./following-sibling::div")
         classes = classesDiv.find_elements(By.XPATH, "./div[@class='MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12']")
@@ -375,6 +435,8 @@ with webdriver.Firefox() as driver:
                     for classSection in classSectionList:
                         print(classSection)
                     print()
+                for classSection in classSectionList:
+                    courses.append(classSection)
                 i += STRINGS_IN_EACH_SECTION
             if DEBUG: print()
 
@@ -385,7 +447,10 @@ with webdriver.Firefox() as driver:
     def clickSearchButton():
         searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
         searchButton.click()
-        wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
+        try:
+            wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
+        except TimeoutError:
+            print("Timed out at:", currentTerm, currentAcademicCareer, currentSubject)
 
     def getAllSubjects(DEBUG=False):
         # Go through all subjects and get all classes
@@ -491,6 +556,16 @@ with webdriver.Firefox() as driver:
                 break
         getAllSubjectsForUndergradAndGrad(DEBUG)
 
+    def getOneTermOneAcademicCareer(term: str, career: str, DEBUG=False):
+        termDropdownListItems = getTermDropdownListOfItems()
+        for item in termDropdownListItems:
+            if item.text == term:
+                getNextTerm(item)
+                break
+        uncheckShowOpenClassesOnly()
+        setAcademicCareer(career)
+        getAllSubjects(DEBUG)
+
     def getOneTermOneAcademicCareerOneSubject(term: str, career: str, subject: str, DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
         for item in termDropdownListItems:
@@ -501,8 +576,18 @@ with webdriver.Firefox() as driver:
         setAcademicCareer(career)
         setSubject(subject, DEBUG)
 
-    getAllTerms(DEBUG=False)
-    # getOneTerm("Spring 2025", DEBUG=False)
-    # getOneTermOneAcademicCareerOneSubject("Spring 2025", "Undergraduate", "Ecosystem Science and Policy", DEBUG=False)
+    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv"):
+        if Term and Career and Subject:
+            getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
+        elif Term and Career:
+            getOneTermOneAcademicCareer(Term, Career, DEBUG)
+        elif Term:
+            getOneTerm(Term, DEBUG)
+        else:
+            getAllTerms(DEBUG)
+        global courses
+        course.save_courses_to_csv(courses, filename)
+
+    main(DEBUG=False, Term="Spring 2025", Career=None, Subject=None, filename="WebScraper/courses.csv")
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
