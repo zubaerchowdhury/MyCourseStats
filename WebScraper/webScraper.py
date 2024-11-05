@@ -125,13 +125,13 @@ class course:
             dict_writer = csv.DictWriter(output_file, fieldnames=keys)
             if not file_exists:
                 dict_writer.writeheader()
-                for courseSection in courses:
-                    try:
-                        dict_writer.writerow(courseSection.course_to_dict())
-                    except Exception as e:
-                        print(e)
-                        print(courseSection)
-                        return
+            for courseSection in courses:
+                try:
+                    dict_writer.writerow(courseSection.course_to_dict())
+                except Exception as e:
+                    print(type(e).__name__, e)
+                    print(courseSection)
+                    return
             
 
     
@@ -609,6 +609,6 @@ with webdriver.Firefox() as driver:
         global courses
         course.save_courses_to_csv(courses, filename)
 
-    main(DEBUG=True, Term="Spring 2025", Career=None, Subject=None, filename="WebScraper/courses.csv")
+    main(DEBUG=False, Term="Spring 2025", Career=None, Subject=None, filename="WebScraper/courses.csv")
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
