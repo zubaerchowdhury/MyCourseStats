@@ -264,6 +264,7 @@ with webdriver.Firefox() as driver:
 
             currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y").date()
             currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y").date()
+            meetingPatternsInfo[j + 1] = meetingPatternsInfo[j + 1].replace("\n\r", " ")
             currentCourse.instructor = meetingPatternsInfo[j + 1].split(", ")
             currentCourse.days = course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2])
             if meetingPatternsInfo[j + 3] != "-":
@@ -416,7 +417,7 @@ with webdriver.Firefox() as driver:
                 if classInfo[i + 3] != "-":
                     return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
             currentCourse.classroom = classInfo[i + 5]
-            currentCourse.instructor = classInfo[i + 6].split(", ")
+            currentCourse.instructor = classInfo[i + 6].split(",\n\r")
             currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[0], "%m/%d").date()
             currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
             currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[1], "%m/%d").date()
@@ -597,7 +598,7 @@ with webdriver.Firefox() as driver:
         setAcademicCareer(career)
         setSubject(subject, DEBUG)
 
-    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv"):
+    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True):
         if Term and Career and Subject:
             getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
         elif Term and Career:
@@ -606,9 +607,11 @@ with webdriver.Firefox() as driver:
             getOneTerm(Term, DEBUG)
         else:
             getAllTerms(DEBUG)
-        global courses
-        course.save_courses_to_csv(courses, filename)
+        if saveToCSV:
+            global courses
+            course.save_courses_to_csv(courses, filename)
 
-    main(DEBUG=False, Term="Spring 2025", Career=None, Subject=None, filename="WebScraper/courses.csv")
+    main(DEBUG=True, Term="Spring 2025", Career="Undergraduate", Subject="Architecture",
+         filename="WebScraper/courses.csv", saveToCSV=False)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
