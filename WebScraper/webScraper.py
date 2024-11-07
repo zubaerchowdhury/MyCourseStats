@@ -15,6 +15,7 @@ with webdriver.Firefox() as driver:
 
     driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
     wait = WebDriverWait(driver, 20)
+    shortWait = WebDriverWait(driver, 5)
     driver.switch_to.frame("TargetContent")    
     global currentTerm
     global currentAcademicCareer
@@ -319,7 +320,7 @@ with webdriver.Firefox() as driver:
         while True:
             try:
                 scrollToBottomOfElement(parentDiv)
-                wait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
+                shortWait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
                 break
             except TimeoutException:
                 continue  
@@ -500,4 +501,7 @@ with webdriver.Firefox() as driver:
     main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
          filename="WebScraper/courses.csv", saveToCSV=True)
 
-print("--- Executed in %s seconds ---" % (time.time() - start_time))
+executed_time = time.time() - start_time
+minutes = executed_time // 60
+seconds = executed_time % 60
+print("Execution time:", minutes, "minutes and", seconds, "seconds")
