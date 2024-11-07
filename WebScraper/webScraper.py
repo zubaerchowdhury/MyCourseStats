@@ -26,6 +26,10 @@ with webdriver.Firefox() as driver:
     STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC = 7 # number of strings in each row of the meeting patterns table with the additional 'Topic' column (for sections with multiple meetings)
     STRINGS_MISSING_IN_MINIMAL_INFO_SECTION = 6 # number of strings missing from a section with almost no information
 
+    def scrollToBottomOfElement(element: WebElement):
+        driver.execute_script("arguments[0].scrollIntoView(false);", element)
+        driver.execute_script("arguments[0].scrollTop = arguments[0].scrollHeight;", element)
+
     def scrollToElement(element: WebElement):
         driver.execute_script("arguments[0].scrollIntoView();", element)
 
@@ -310,30 +314,38 @@ with webdriver.Firefox() as driver:
                    
     def getAllClasses(DEBUG=False):
         global courses
-        form = driver.find_element(By.XPATH, "//form")
-        classesDiv = form.find_element(By.XPATH, "./following-sibling::div")
-        classes = classesDiv.find_elements(By.XPATH, "./div[@class='MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12']")
-        classes.pop(0) # Remove first element because it is the header
-        for c in classes:
-            className = c.find_element(By.TAG_NAME, 'h2').text
-            classInfo = c.find_elements(By.XPATH, ".//span[@class='sr-only']")
-            classInfo.pop(0) # Remove useless element 
-            classInfo = list(map(lambda x: x.get_attribute("textContent"), classInfo)) # map list of WebElements to list of strings
-            if DEBUG:
-                printClassInfo(classInfo)
-            i = 0
-            while i < len(classInfo):
-                classSectionList = fillCourseObject(c, classInfo, className, i)
+        parentDiv = driver.find_element(By.XPATH, "//form/..")
+        while True:
+            try:
+                scrollToBottomOfElement(parentDiv)
+                wait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
+                break
+            except TimeoutError:
+                continue  
+        classesDivs = parentDiv.find_elements(By.XPATH, "./child::div")
+        for classesDiv in classesDivs:
+            classes = classesDiv.find_elements(By.XPATH, "./div[@class='MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12']")
+            classes.pop(0) # Remove first element because it is the header
+            for c in classes:
+                className = c.find_element(By.TAG_NAME, 'h2').text
+                classInfo = c.find_elements(By.XPATH, ".//span[@class='sr-only']")
+                classInfo.pop(0) # Remove useless element 
+                classInfo = list(map(lambda x: x.get_attribute("textContent"), classInfo)) # map list of WebElements to list of strings
                 if DEBUG:
-                    if len(classSectionList) > 1:
-                        print("MULTIPLE MEETINGS")
+                    printClassInfo(classInfo)
+                i = 0
+                while i < len(classInfo):
+                    classSectionList = fillCourseObject(c, classInfo, className, i)
+                    if DEBUG:
+                        if len(classSectionList) > 1:
+                            print("MULTIPLE MEETINGS")
+                        for classSection in classSectionList:
+                            print(classSection)
+                        print()
                     for classSection in classSectionList:
-                        print(classSection)
-                    print()
-                for classSection in classSectionList:
-                    courses.append(classSection)
-                i += STRINGS_IN_EACH_SECTION
-            if DEBUG: print()
+                        courses.append(classSection)
+                    i += STRINGS_IN_EACH_SECTION
+                if DEBUG: print()
 
     def uncheckShowOpenClassesOnly():
         showOpenClassesOnlyCheckbox = driver.find_element(By.XPATH, "//input[@type='checkbox']")
@@ -472,11 +484,11 @@ with webdriver.Firefox() as driver:
         setSubject(subject, DEBUG)
 
     def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True):
-        if Term and Career and Subject:
+        if Term != "" and Career != "" and Subject != "":
             getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
-        elif Term and Career:
+        elif Term != "" and Career != "":
             getOneTermOneAcademicCareer(Term, Career, DEBUG)
-        elif Term:
+        elif Term != "":
             getOneTerm(Term, DEBUG)
         else:
             getAllTerms(DEBUG)
@@ -484,7 +496,7 @@ with webdriver.Firefox() as driver:
             global courses
             course.save_courses_to_csv(courses, filename)
 
-    main(DEBUG=True, Term="Spring 2025", Career="Undergraduate", Subject="Architecture",
-         filename="WebScraper/courses.csv", saveToCSV=False)
+    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
+         filename="WebScraper/courses.csv", saveToCSV=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
