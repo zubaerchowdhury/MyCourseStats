@@ -497,7 +497,7 @@ with webdriver.Firefox() as driver:
             global courses
             course.save_courses_to_csv(courses, filename)
 
-    main(DEBUG=False, Term="Spring 2025", Career="Undergraduate", Subject="Instrumental Performance",
+    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
          filename="WebScraper/courses.csv", saveToCSV=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
