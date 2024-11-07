@@ -4,6 +4,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
+from selenium.common.exceptions import TimeoutException
 import time
 import datetime
 import copy
@@ -320,7 +321,7 @@ with webdriver.Firefox() as driver:
                 scrollToBottomOfElement(parentDiv)
                 wait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
                 break
-            except TimeoutError:
+            except TimeoutException:
                 continue  
         classesDivs = parentDiv.find_elements(By.XPATH, "./child::div")
         for classesDiv in classesDivs:
@@ -496,7 +497,7 @@ with webdriver.Firefox() as driver:
             global courses
             course.save_courses_to_csv(courses, filename)
 
-    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
+    main(DEBUG=False, Term="Spring 2025", Career="Undergraduate", Subject="Instrumental Performance",
          filename="WebScraper/courses.csv", saveToCSV=True)
 
 print("--- Executed in %s seconds ---" % (time.time() - start_time))
