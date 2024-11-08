@@ -459,13 +459,16 @@ with webdriver.Firefox() as driver:
         termDropdownListItems = getTermDropdownListOfItems()
         termDropdownLength = len(termDropdownListItems)
         clickAcademicCareerDropdown() # Close term dropdown by clicking on academic career dropdown
-        for i in range(termDropdownLength):
+        i = 0
+        while i < termDropdownLength :
             termDropdownListItems = getTermDropdownListOfItems()
             item = termDropdownListItems[i]
             if "Non-credit Term" in item.text:
-                continue
+                i += 1
+                item = termDropdownListItems[i]
             getNextTerm(item)
             getAllSubjectsForUndergradAndGrad(DEBUG)
+            i += 1
 
     def getOneTerm(term: str, DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
@@ -515,8 +518,8 @@ with webdriver.Firefox() as driver:
             print("Current Subject:", currentSubject)
             raise e
 
-    main(DEBUG=False, Term="", Career="", Subject="",
-         filename="WebScraper/courses.csv", saveToCSV=True)
+    main(DEBUG=True, Term="", Career="", Subject="",
+         filename="WebScraper/courses.csv", saveToCSV=False)
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
