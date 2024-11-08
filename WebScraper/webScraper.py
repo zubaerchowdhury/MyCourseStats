@@ -303,10 +303,17 @@ with webdriver.Firefox() as driver:
                     return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
             currentCourse.classroom = classInfo[i + 5]
             currentCourse.instructor = classInfo[i + 6].split(",\n\r")
-            currentCourse.startDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[0], "%m/%d").date()
-            currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
-            currentCourse.endDate = datetime.datetime.strptime(classInfo[i + 7].split(" - ")[1], "%m/%d").date()
-            currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
+            dateString = classInfo[i + 7].split(" - ")
+            if dateString[0] == "02/29":
+                currentCourse.startDate = datetime.datetime(currentCourse.year, 2, 29).date()
+            else:
+                currentCourse.startDate = datetime.datetime.strptime(dateString[0], "%m/%d").date()
+                currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
+            if dateString[1] == "02/29":
+                currentCourse.endDate = datetime.datetime(currentCourse.year, 2, 29).date()
+            else:
+                currentCourse.endDate = datetime.datetime.strptime(dateString[1], "%m/%d").date()
+                currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
             setCourseStatus(currentCourse, classInfo, i, 8)
 
             return [currentCourse]
@@ -518,7 +525,7 @@ with webdriver.Firefox() as driver:
             print("Current Subject:", currentSubject)
             raise e
 
-    main(DEBUG=True, Term="", Career="", Subject="",
+    main(DEBUG=True, Term="Spring 2024", Career="Undergraduate", Subject="Nursing",
          filename="WebScraper/courses.csv", saveToCSV=False)
 
 executed_time = time.time() - start_time
