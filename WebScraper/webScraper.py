@@ -89,7 +89,13 @@ with webdriver.Firefox() as driver:
         currentButton = classSectionsTableButtons[currentClassSectionIndex]
         scrollToElement(currentButton)
         currentButton.click()
-        wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
+        try:
+            wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
+        except TimeoutException:
+            print("Timed out at:", currentTerm, currentAcademicCareer, currentSubject)
+            currentButton.click()
+            currentButton.click()
+            wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
         meetingPatternsTable = driver.find_element(By.CSS_SELECTOR, "[aria-label='meeting patterns']")
         meetingPatternsInfo = meetingPatternsTable.find_elements(By.XPATH, ".//tbody//p")
         meetingPatternsInfo = list(map(lambda x: x.get_attribute("textContent"), meetingPatternsInfo)) # map list of WebElements to list of strings
@@ -384,6 +390,7 @@ with webdriver.Firefox() as driver:
     def setSubject(subject: str, DEBUG=False):
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
         subjectDropdown.click()
+        wait.until(presence_of_element_located((By.XPATH, "//form//div[4]//ul")))
         subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
         subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
         for item in subjectDropdownListItems:
@@ -404,6 +411,7 @@ with webdriver.Firefox() as driver:
         global currentAcademicCareer
         currentAcademicCareer = academicCareer
         clickAcademicCareerDropdown()
+        wait.until(presence_of_element_located((By.XPATH, "//form//div[3]//ul")))
         academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
         academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
         for item in academicCareerDropdownListItems:
@@ -435,6 +443,7 @@ with webdriver.Firefox() as driver:
         termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
         scrollToElement(termDropdown)
         termDropdown.click()
+        wait.until(presence_of_element_located((By.XPATH, "//form//div[2]//ul")))
         termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
         termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
         return termDropdownListItems
@@ -506,7 +515,7 @@ with webdriver.Firefox() as driver:
             print("Current Subject:", currentSubject)
             raise e
 
-    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
+    main(DEBUG=False, Term="", Career="", Subject="",
          filename="WebScraper/courses.csv", saveToCSV=True)
 
 executed_time = time.time() - start_time
