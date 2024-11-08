@@ -433,6 +433,7 @@ with webdriver.Firefox() as driver:
 
     def getTermDropdownListOfItems():
         termDropdown = driver.find_element(By.XPATH, "//form//div[2]//button")
+        scrollToElement(termDropdown)
         termDropdown.click()
         termDropdownList = driver.find_element(By.XPATH, "//form//div[2]//ul")
         termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
@@ -486,17 +487,24 @@ with webdriver.Firefox() as driver:
         setSubject(subject, DEBUG)
 
     def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True):
-        if Term != "" and Career != "" and Subject != "":
-            getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
-        elif Term != "" and Career != "":
-            getOneTermOneAcademicCareer(Term, Career, DEBUG)
-        elif Term != "":
-            getOneTerm(Term, DEBUG)
-        else:
-            getAllTerms(DEBUG)
-        if saveToCSV:
-            global courses
-            course.save_courses_to_csv(courses, filename)
+        try:
+            if Term != "" and Career != "" and Subject != "":
+                getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
+            elif Term != "" and Career != "":
+                getOneTermOneAcademicCareer(Term, Career, DEBUG)
+            elif Term != "":
+                getOneTerm(Term, DEBUG)
+            else:
+                getAllTerms(DEBUG)
+            if saveToCSV:
+                global courses
+                course.save_courses_to_csv(courses, filename)
+        except Exception as e:
+            print(type(e).__name__, e)
+            print("Current Term:", currentTerm)
+            print("Current Academic Career:", currentAcademicCareer)
+            print("Current Subject:", currentSubject)
+            raise e
 
     main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
          filename="WebScraper/courses.csv", saveToCSV=True)
