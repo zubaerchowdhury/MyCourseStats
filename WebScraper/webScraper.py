@@ -370,8 +370,8 @@ with webdriver.Firefox() as driver:
         searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
         searchButton.click()
         try:
-            wait.until(presence_of_element_located((By.XPATH, f"//main/div/div//hr")))
-        except TimeoutError:
+            wait.until(presence_of_element_located((By.XPATH, "//main/div/div//hr")))
+        except TimeoutException:
             print("Timed out at:", currentTerm, currentAcademicCareer, currentSubject)
 
     def getAllSubjects(DEBUG=False):
