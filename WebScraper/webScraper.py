@@ -525,8 +525,8 @@ with webdriver.Firefox() as driver:
             print("Current Subject:", currentSubject)
             raise e
 
-    main(DEBUG=True, Term="Spring 2025", Career="Undergraduate", Subject="Marine Biology and Ecology",
-         filename="WebScraper/courses.csv", saveToCSV=False)
+    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
+         filename="WebScraper/courses.csv", saveToCSV=True)
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
