@@ -52,7 +52,7 @@ with webdriver.Firefox() as driver:
         if len(classInfo) <= i + offset + 2:
             reservedSeatsOffset = 0
         if not hasReservedSeats and reservedSeatsOffset > 0:
-            if classInfo[i + offset + reservedSeatsOffset].split(" ")[0].isnumeric():
+            if classInfo[i + offset + reservedSeatsOffset].split(" ")[1] == "of":
                 hasReservedSeats = True
         return (hasReservedSeats, statusStringList)
     
@@ -525,8 +525,8 @@ with webdriver.Firefox() as driver:
             print("Current Subject:", currentSubject)
             raise e
 
-    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-         filename="WebScraper/courses.csv", saveToCSV=True)
+    main(DEBUG=True, Term="Spring 2025", Career="Undergraduate", Subject="Marine Biology and Ecology",
+         filename="WebScraper/courses.csv", saveToCSV=False)
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
