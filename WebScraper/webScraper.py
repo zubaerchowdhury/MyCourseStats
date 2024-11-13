@@ -8,10 +8,11 @@ from selenium.common.exceptions import TimeoutException
 import time
 import datetime
 import copy
+from wakepy import keep 
     
 start_time = time.time()
 
-with webdriver.Firefox() as driver:
+with keep.presenting(), webdriver.Firefox() as driver:
 
     driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
     wait = WebDriverWait(driver, 20)
