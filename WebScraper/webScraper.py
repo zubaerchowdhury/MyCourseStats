@@ -1,18 +1,22 @@
 from course import course
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.common.exceptions import TimeoutException
+from webdriver_manager.firefox import GeckoDriverManager
 import time
 import datetime
 import copy
 from wakepy import keep 
     
 start_time = time.time()
+options = webdriver.FirefoxOptions()
+options.add_argument("--headless")
 
-with keep.presenting(), webdriver.Firefox() as driver:
+with keep.presenting(), webdriver.Firefox(service=Service(GeckoDriverManager().install()), options=options) as driver:
 
     driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
     wait = WebDriverWait(driver, 20)
