@@ -397,7 +397,9 @@ with keep.presenting(), webdriver.Firefox(service=Service(GeckoDriverManager().i
             scrollToElement(item)
             item.click()
             clickSearchButton()
+            print("Current Subject:", currentSubject)
             getAllClasses(DEBUG)
+            print('\033[1A', '\033[K', end='')
 
     def setSubject(subject: str, DEBUG=False):
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
@@ -461,11 +463,16 @@ with keep.presenting(), webdriver.Firefox(service=Service(GeckoDriverManager().i
         return termDropdownListItems
     
     def getAllSubjectsForUndergradAndGrad(DEBUG=False):
+        global currentAcademicCareer
         uncheckShowOpenClassesOnly()
         setAcademicCareer("Undergraduate")
+        print("Current Academic Career:", currentAcademicCareer)
         getAllSubjects(DEBUG)
+        print('\033[1A', '\033[K', end='')
         setAcademicCareer("Graduate")
+        print("Current Academic Career:", currentAcademicCareer)
         getAllSubjects(DEBUG)
+        print('\033[1A', '\033[K', end='')
 
     def getAllTerms(DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
@@ -483,12 +490,15 @@ with keep.presenting(), webdriver.Firefox(service=Service(GeckoDriverManager().i
             i += 1
 
     def getOneTerm(term: str, DEBUG=False):
+        global currentTerm
         termDropdownListItems = getTermDropdownListOfItems()
         for item in termDropdownListItems:
             if item.text == term:
                 getNextTerm(item)
                 break
+        print("Current Term:", currentTerm)
         getAllSubjectsForUndergradAndGrad(DEBUG)
+        print('\033[1A', '\033[K', end='')
 
     def getOneTermOneAcademicCareer(term: str, career: str, DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
