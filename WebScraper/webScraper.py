@@ -9,10 +9,15 @@ import time
 import datetime
 import copy
 from wakepy import keep 
+import sys
     
 start_time = time.time()
 options = webdriver.FirefoxOptions()
 options.add_argument("--headless")
+
+def eraseTerminalLine(showProgress=True):
+        if showProgress:
+            print('\033[1A', '\033[K', end='', sep='')
 
 with keep.presenting(), webdriver.Firefox(options=options) as driver:
 
@@ -377,7 +382,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
         except TimeoutException:
             print("Timed out at:", currentTerm, currentAcademicCareer, currentSubject)
 
-    def getAllSubjects(DEBUG=False):
+    def getAllSubjects(DEBUG=False, showProgress=True):
         # Go through all subjects and get all classes
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
         subjectDropdown.click()
@@ -395,9 +400,9 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
             scrollToElement(item)
             item.click()
             clickSearchButton()
-            print("Current Subject:", currentSubject)
+            if showProgress: print("Current Subject:", currentSubject)
             getAllClasses(DEBUG)
-            print('\033[1A', '\033[K', end='')
+            eraseTerminalLine(showProgress)
 
     def setSubject(subject: str, DEBUG=False):
         subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
@@ -460,17 +465,17 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
         termDropdownListItems = termDropdownList.find_elements(By.TAG_NAME, 'li')
         return termDropdownListItems
     
-    def getAllSubjectsForUndergradAndGrad(DEBUG=False):
+    def getAllSubjectsForUndergradAndGrad(DEBUG=False, showProgress=True):
         global currentAcademicCareer
         uncheckShowOpenClassesOnly()
         setAcademicCareer("Undergraduate")
-        print("Current Academic Career:", currentAcademicCareer)
-        getAllSubjects(DEBUG)
-        print('\033[1A', '\033[K', end='')
+        if showProgress: print("Current Academic Career:", currentAcademicCareer)
+        getAllSubjects(DEBUG, showProgress)
+        eraseTerminalLine(showProgress)
         setAcademicCareer("Graduate")
-        print("Current Academic Career:", currentAcademicCareer)
-        getAllSubjects(DEBUG)
-        print('\033[1A', '\033[K', end='')
+        if showProgress: print("Current Academic Career:", currentAcademicCareer)
+        getAllSubjects(DEBUG, showProgress)
+        eraseTerminalLine(showProgress)
 
     def getAllTerms(DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
@@ -487,16 +492,16 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
             getAllSubjectsForUndergradAndGrad(DEBUG)
             i += 1
 
-    def getOneTerm(term: str, DEBUG=False):
+    def getOneTerm(term: str, DEBUG=False, showProgress=True):
         global currentTerm
         termDropdownListItems = getTermDropdownListOfItems()
         for item in termDropdownListItems:
             if item.text == term:
                 getNextTerm(item)
                 break
-        print("Current Term:", currentTerm)
-        getAllSubjectsForUndergradAndGrad(DEBUG)
-        print('\033[1A', '\033[K', end='')
+        if showProgress: print("Current Term:", currentTerm)
+        getAllSubjectsForUndergradAndGrad(DEBUG, showProgress)
+        eraseTerminalLine(showProgress)
 
     def getOneTermOneAcademicCareer(term: str, career: str, DEBUG=False):
         termDropdownListItems = getTermDropdownListOfItems()
@@ -518,14 +523,14 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
         setAcademicCareer(career)
         setSubject(subject, DEBUG)
 
-    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True):
+    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True, showProgress=True):
         try:
             if Term != "" and Career != "" and Subject != "":
                 getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
             elif Term != "" and Career != "":
                 getOneTermOneAcademicCareer(Term, Career, DEBUG)
             elif Term != "":
-                getOneTerm(Term, DEBUG)
+                getOneTerm(Term, DEBUG, showProgress)
             else:
                 getAllTerms(DEBUG)
             if saveToCSV:
@@ -539,7 +544,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
             raise e
 
     main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-         filename="WebScraper/courses.csv", saveToCSV=True)
+         filename="WebScraper/courses.csv", saveToCSV=True, showProgress=sys.stdout.isatty())
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
