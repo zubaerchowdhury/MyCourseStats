@@ -1,6 +1,15 @@
 import subprocess
 import datetime
 import paths
+import time
+from urllib.request import urlopen
+
+def is_connected(timeout: int) -> bool:
+	try:
+		urlopen('http://www.google.com', timeout=timeout)
+		return True
+	except: 
+			return False
 
 # Open the log file
 with open("WebScraper/log.txt", "a") as log:
@@ -8,6 +17,16 @@ with open("WebScraper/log.txt", "a") as log:
 		log.write("##################################################\n")
 		EST = datetime.timezone(datetime.timedelta(hours=-5))
 		log.write(f"WebScraper started at {datetime.datetime.now(EST)} EST\n")
+
+		# Wait for internet connection
+		log.write("Waiting for internet connection...\n")
+		log.flush()
+		while True:
+			if is_connected(5):
+				break
+			else:
+				time.sleep(120)
+		log.write("Internet connection established.\n")
 		log.flush()
 		# Run the WebScraper
 		exitCode = subprocess.run([paths.pythonPath, paths.webScraperPath], stdout=log, stderr=log)
