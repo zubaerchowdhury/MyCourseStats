@@ -529,12 +529,20 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 					return
 				try:
 						if Term != "" and Career != "" and Subject != "":
+								sys.stdout.write("Getting data for " + Term + " " + Career + " " + Subject + "\n")
+								sys.stdout.flush()
 								getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
 						elif Term != "" and Career != "":
+								sys.stdout.write("Getting data for " + Term + " " + Career + "\n")
+								sys.stdout.flush()
 								getOneTermOneAcademicCareer(Term, Career, DEBUG)
 						elif Term != "":
+								sys.stdout.write("Getting data for " + Term + "\n")
+								sys.stdout.flush()
 								getOneTerm(Term, DEBUG, showProgress)
 						else:
+								sys.stdout.write("Getting data for all terms\n")
+								sys.stdout.flush()
 								getAllTerms(DEBUG)
 						if saveToCSV:
 							if checkIfRan and course.was_data_collected_today(filename):
@@ -542,7 +550,12 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								return
 							
 							global courses
+							sys.stdout.write("Saving data to " + filename + "\n")
+							sys.stdout.flush()
 							course.save_courses_to_csv(courses, filename)
+							print("Data saved to", filename)
+						else:
+							print("Data not saved")
 							
 				except Exception as e:
 						print(type(e).__name__, e)
