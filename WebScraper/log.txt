@@ -34,3 +34,198 @@ Internet connection established.
 Execution time: 19.0 minutes and 31.493616580963135 seconds
 WebScraper ended at 2024-12-28 20:51:44.227364
 Exit code: 0
+##################################################
+WebScraper started at 2024-12-29 18:48:41.885123-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 15.0 minutes and 11.475929975509644 seconds
+WebScraper ended at 2024-12-29 19:03:58.063928
+Exit code: 0
+##################################################
+WebScraper started at 2024-12-30 18:00:02.103206-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 20.0 minutes and 5.896363019943237 seconds
+WebScraper ended at 2024-12-30 18:20:13.268029
+Exit code: 0
+##################################################
+WebScraper started at 2024-12-31 18:30:59.573185-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 20.0 minutes and 25.755759477615356 seconds
+WebScraper ended at 2024-12-31 18:51:30.732504
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-01 19:53:40.590464-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+##################################################
+WebScraper started at 2025-01-03 00:35:48.263849-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 19.0 minutes and 32.77822828292847 seconds
+WebScraper ended at 2025-01-03 00:55:26.248829
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-03 20:25:19.912339-05:00 EST
+Waiting for internet connection...
+##################################################
+WebScraper started at 2025-01-04 22:13:19.903689-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 17.0 minutes and 44.96680045127869 seconds
+WebScraper ended at 2025-01-04 22:31:09.792995
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-05 18:00:02.271175-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 20.0 minutes and 10.826003074645996 seconds
+WebScraper ended at 2025-01-05 18:20:18.867037
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-06 22:17:24.901593-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 21.0 minutes and 7.579874038696289 seconds
+er started at 2025-01-06 22:22:17.801559-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 21.0 minutes and 8.730623960494995 seconds
+
+WebScraper ended at 2025-01-06 22:43:31.745327
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-07 18:00:02.088320-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 14.0 minutes and 28.100908041000366 seconds
+WebScraper ended at 2025-01-07 18:14:35.228121
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-08 20:27:42.035286-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 21.0 minutes and 23.38424849510193 seconds
+er started at 2025-01-08 20:28:52.811309-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 21.0 minutes and 0.7792539596557617 seconds
+
+WebScraper ended at 2025-01-08 20:49:58.634944
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-09 19:52:17.667092-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 24.0 minutes and 36.241586208343506 seconds
+r started at 2025-01-09 19:57:31.133693-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Timed out at: Spring 2025 Undergraduate Finance Bus Admin
+TimeoutException Message: 
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:511:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+Error in fillCourseObject
+ClassInfo:
+0. Lecture Section 01, Class Number7748
+1. Seven Week - First
+2. Friday 
+3. Closed, 0 of 27 seats available
+4. Lecture Section 02, Class Number11692
+5. Seven Week - First
+6. Meeting 1: Saturday . Meeting 2: Friday 
+7. Meeting 1: 1:00 pm. Meeting 2: 9:00 am
+8. Meeting 1: 4:00 pm. Meeting 2: 12:00 pm
+9. Meeting 1: Aresty 431. Meeting 2: Aresty 431
+10. Meeting 1: Todd Adams. Meeting 2: Todd Adams
+11. Meeting 1: 02/0102/15. Meeting 2: 01/3102/14
+12. Friday 
+13. 9:00 am
+14. 12:00 pm
+15. Aresty 431
+16. Todd Adams
+17. 01/31 - 02/14
+18. Open, 3 of 20 seats available
+
+i: 0
+className: Introduction to ARGUS | FIN 347
+TimeoutException Message: 
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:511:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+Current Term: Spring 2025
+Current Academic Career: Undergraduate
+Current Subject: Finance Bus Admin
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 101, in fillCourseObjectWithMultipleMeetings
+    wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\support\wait.py", line 105, in until
+    raise TimeoutException(message, screen, stacktrace)
+selenium.common.exceptions.TimeoutException: Message: 
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:511:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 546, in <module>
+    main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 544, in main
+    raise e
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 533, in main
+    getOneTerm(Term, DEBUG, showProgress)
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 503, in getOneTerm
+    getAllSubjectsForUndergradAndGrad(DEBUG, showProgress)
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 473, in getAllSubjectsForUndergradAndGrad
+    getAllSubjects(DEBUG, showProgress)
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 404, in getAllSubjects
+    getAllClasses(DEBUG)
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 361, in getAllClasses
+    classSectionList = fillCourseObject(c, classInfo, className, i)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 335, in fillCourseObject
+    raise e
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 298, in fillCourseObject
+    return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 106, in fillCourseObjectWithMultipleMeetings
+    wait.until(presence_of_element_located((By.CSS_SELECTOR, "[aria-label='meeting patterns']")))
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\support\wait.py", line 105, in until
+    raise TimeoutException(message, screen, stacktrace)
+selenium.common.exceptions.TimeoutException: Message: 
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:193:5
+NoSuchElementError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:511:5
+dom.find/</<@chrome://remote/content/shared/DOM.sys.mjs:136:16
+
+WebScraper run failed.
+Attempting to run the WebScraper again...
+Execution time: 21.0 minutes and 23.90353274345398 seconds
+
+WebScraper ended at 2025-01-09 20:27:04.000120
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-10 21:12:36.638899-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 21.0 minutes and 1.3368113040924072 seconds
+r started at 2025-01-10 21:14:16.552346-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Execution time: 20.0 minutes and 47.540151596069336 seconds
+
+WebScraper ended at 2025-01-10 21:35:09.186184
+Exit code: 0
