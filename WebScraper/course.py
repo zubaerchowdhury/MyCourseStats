@@ -124,3 +124,15 @@ class course:
 										print(type(e).__name__, e)
 										print(courseSection)
 										return
+								
+		@staticmethod
+		def was_data_collected_today(filename="courses.csv"):
+				if not os.path.isfile(filename):
+						raise FileNotFoundError(f"File {filename} not found.")
+				with open(filename, 'r') as input_file:
+						reader = csv.DictReader(input_file)
+						for row in reader:
+								dateTimeRetrieved = datetime.datetime.strptime(row["dateTimeRetrieved"], "%Y-%m-%d %H:%M:%S")
+								if dateTimeRetrieved.date() == datetime.date.today():
+										return True
+				return False

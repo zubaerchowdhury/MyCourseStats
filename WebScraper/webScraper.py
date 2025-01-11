@@ -523,7 +523,10 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
         setAcademicCareer(career)
         setSubject(subject, DEBUG)
 
-    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True, showProgress=True):
+    def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True, showProgress=True, checkIfRan=True):
+        if checkIfRan and course.was_data_collected_today(filename):
+          print("Data was already collected today. Returning...")
+          return
         try:
             if Term != "" and Career != "" and Subject != "":
                 getOneTermOneAcademicCareerOneSubject(Term, Career, Subject, DEBUG)
@@ -534,8 +537,13 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
             else:
                 getAllTerms(DEBUG)
             if saveToCSV:
-                global courses
-                course.save_courses_to_csv(courses, filename)
+              if checkIfRan and course.was_data_collected_today(filename):
+                print("Data was already collected today. Returning...")
+                return
+              
+              global courses
+              course.save_courses_to_csv(courses, filename)
+              
         except Exception as e:
             print(type(e).__name__, e)
             print("Current Term:", currentTerm)
@@ -544,7 +552,8 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
             raise e
 
     main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-         filename="WebScraper/courses.csv", saveToCSV=True, showProgress=sys.stdout.isatty())
+         filename="WebScraper/courses.csv", saveToCSV=True, showProgress=sys.stdout.isatty(),
+         checkIfRan=True)
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
