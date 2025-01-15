@@ -229,3 +229,49 @@ Execution time: 20.0 minutes and 47.540151596069336 seconds
 
 WebScraper ended at 2025-01-10 21:35:09.186184
 Exit code: 0
+##################################################
+WebScraper started at 2025-01-11 19:05:44.831197-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 22.0 minutes and 17.565726280212402 seconds
+WebScraper ended at 2025-01-11 19:28:07.675844
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-13 23:50:54.848593-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 20.0 minutes and 41.79521608352661 seconds
+WebScraper ended at 2025-01-14 00:11:41.786293
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-14 20:38:34.092535-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 1.0 minutes and 34.76881408691406 seconds
+WebScraper ended at 2025-01-14 20:40:16.288296
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-14 20:41:40.650113-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 31.504087924957275 seconds
+WebScraper ended at 2025-01-14 20:58:17.202323
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-14 21:46:35.381381-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 0.0 minutes and 20.520811319351196 seconds
+WebScraper ended at 2025-01-14 21:47:01.092579
+Exit code: 0
