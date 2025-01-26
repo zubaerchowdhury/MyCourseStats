@@ -275,3 +275,149 @@ Data was already collected today. Returning...
 Execution time: 0.0 minutes and 20.520811319351196 seconds
 WebScraper ended at 2025-01-14 21:47:01.092579
 Exit code: 0
+##################################################
+WebScraper started at 2025-01-14 23:39:02.478481-05:00 EST
+Waiting for internet connection...
+##################################################
+WebScraper started at 2025-01-15 18:49:45.850319-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 3.3314740657806396 seconds
+WebScraper ended at 2025-01-15 19:06:18.923342
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-16 15:52:51.060334-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 18.0 minutes and 2.457819700241089 seconds
+WebScraper ended at 2025-01-16 16:10:59.448771
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-16 22:18:47.845409-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 1.0 minutes and 15.037636518478394 seconds
+WebScraper ended at 2025-01-16 22:20:10.042481
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-17 17:06:23.105853-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 17.0 minutes and 37.06724166870117 seconds
+WebScraper ended at 2025-01-17 17:24:07.490100
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-17 22:29:38.966271-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 0.0 minutes and 41.684507846832275 seconds
+WebScraper ended at 2025-01-17 22:30:25.963204
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-18 10:00:33.950321-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 53.399497985839844 seconds
+WebScraper ended at 2025-01-18 10:17:33.267977
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-18 15:44:33.928950-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 1.0 minutes and 50.75719618797302 seconds
+WebScraper ended at 2025-01-18 15:46:32.890827
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-19 16:32:34.705932-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 19.0 minutes and 27.814234495162964 seconds
+WebScraper ended at 2025-01-19 16:52:07.354661
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-20 23:39:16.447845-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 18.0 minutes and 38.16535758972168 seconds
+WebScraper ended at 2025-01-20 23:57:59.872983
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-21 23:10:39.928279-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 20.0 minutes and 25.56082057952881 seconds
+WebScraper ended at 2025-01-21 23:31:10.619712
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-22 17:29:25.173369-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 22, in <module>
+    with keep.presenting(), webdriver.Firefox(options=options) as driver:
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\firefox\webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 212, in __init__
+    self.start_session(capabilities)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 299, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 354, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 229, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Process unexpectedly closed with status 0
+
+WebScraper run failed.
+Attempting to run the WebScraper again...
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 18.0 minutes and 20.817851781845093 seconds
+WebScraper ended at 2025-01-22 17:48:01.546737
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-25 22:41:17.414466-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 17.0 minutes and 3.592824935913086 seconds
+WebScraper ended at 2025-01-25 22:58:26.050934
+Exit code: 0
+##################################################
+WebScraper started at 2025-01-26 10:14:40.859400-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 19.0 minutes and 31.88750386238098 seconds
+WebScraper ended at 2025-01-26 10:34:17.870306
+Exit code: 0
