@@ -17,3 +17,9 @@ This project is about adding additional statistical facts about each courses off
 - Include all degree program requirements and 4 year course outline for all departments
 - AI advisor that can help you plan out your daily schedule, semester schedule and 4 year degree plan (1st year free trial with .edu email, paid feature afterwards)
 - TBD
+
+**Tech Stack:**
+- React
+- 
+- .NET Core 8.0
+- 
