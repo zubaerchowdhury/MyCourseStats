@@ -30,3 +30,15 @@ env.bak/
 venv.bak/
 
 paths.py
+
+# ASP.NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core
+project.json
+project.lock.json
+artifacts/
+bin/
+obj/
