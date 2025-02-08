@@ -42,3 +42,10 @@ project.lock.json
 artifacts/
 bin/
 obj/
+
+# ReactJS
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.DS_Store
