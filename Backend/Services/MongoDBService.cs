@@ -1,6 +1,7 @@
 using MongoDB.Driver;
 using MongoDB.Bson;
 using Backend.Models;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Services
 {
@@ -26,6 +27,14 @@ namespace Backend.Services
         {
             await _collection.InsertOneAsync(document);
         }
+        /*
+                {
+                  subject:
+                    "('Electrical & Computer Engineer', 'ECE')"
+                }
+        */
+
+
 
         // Add methods for any specific queries or statistical calculations here.
     }
