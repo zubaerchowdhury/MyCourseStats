@@ -109,28 +109,13 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				meetingPatternsInfo = list(map(lambda x: x.get_attribute("textContent"), meetingPatternsInfo)) # map list of WebElements to list of strings
 				currentCourseList = []
 				partialCourse = currentCourse
-				setCourseStatus(partialCourse, classInfo, i, 3)
+				setCourseStatus(currentCourse, classInfo, i, 3)
 				stringsInEachRow = STRINGS_IN_EACH_TABLE_ROW if len(meetingPatternsInfo) % STRINGS_IN_EACH_TABLE_ROW == 0 else STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC
+				
+				# create a course object for each meeting
 				for j in range(0, len(meetingPatternsInfo), stringsInEachRow):
-						currentCourse = course()
-
 						# fill in information that was already filled in
-						currentCourse.name = copy.deepcopy(partialCourse.name)
-						currentCourse.subject = copy.deepcopy(partialCourse.subject)
-						currentCourse.catalogNumber = copy.deepcopy(partialCourse.catalogNumber)
-						currentCourse.academicCareer = copy.deepcopy(partialCourse.academicCareer)
-						currentCourse.sectionType = copy.deepcopy(partialCourse.sectionType)
-						currentCourse.sectionCode = copy.deepcopy(partialCourse.sectionCode)
-						currentCourse.classNumber = copy.deepcopy(partialCourse.classNumber)
-						currentCourse.session = copy.deepcopy(partialCourse.session)
-						currentCourse.status = copy.deepcopy(partialCourse.status)
-						currentCourse.seatsAvailable = copy.deepcopy(partialCourse.seatsAvailable)
-						currentCourse.capacity = copy.deepcopy(partialCourse.capacity)
-						currentCourse.waitlistAvailable = copy.deepcopy(partialCourse.waitlistAvailable)
-						currentCourse.waitlistCapacity = copy.deepcopy(partialCourse.waitlistCapacity)
-						currentCourse.reservedSeatsAvailable = copy.deepcopy(partialCourse.reservedSeatsAvailable)
-						currentCourse.reservedSeatsCapacity = copy.deepcopy(partialCourse.reservedSeatsCapacity)
-						currentCourse.dateTimeRetrieved = copy.deepcopy(partialCourse.dateTimeRetrieved)
+						currentCourse = copy.deepcopy(partialCourse)
 
 						# fill in information that is different for each meeting
 						"""
