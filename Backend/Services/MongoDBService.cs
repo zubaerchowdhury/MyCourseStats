@@ -27,15 +27,9 @@ namespace Backend.Services
         {
             await _collection.InsertOneAsync(document);
         }
-        /*
-                {
-                  subject:
-                    "('Electrical & Computer Engineer', 'ECE')"
-                }
-        */
-
 
 
         // Add methods for any specific queries or statistical calculations here.
+
     }
 }
