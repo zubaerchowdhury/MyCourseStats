@@ -2,7 +2,7 @@
 
 ### UM ECE Senior Design Fall '24 - Spring '25 Project
 
-This project is about adding additional statistical facts about each courses offered by UM every semester and the instructors that teach them. It will provide course popularity and historically offered data.
+This project is about supporting additional statistical data and metrics on each courses offered by UM every semester and their instructors. It will provide course popularity and historically offered data.
 
 **Advantages:**
 - Informs how consistently courses are offered in CaneLink (University of Miami's Student Information System), especially courses that are only offered by announcement
@@ -22,4 +22,6 @@ This project is about adding additional statistical facts about each courses off
 - React
 - 
 - .NET Core 8.0
-- 
+- MongoDB
+- Python 3.
+- Selenium
