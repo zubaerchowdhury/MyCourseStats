@@ -1,8 +1,9 @@
 import subprocess
 import datetime
-import paths
 import time
+import os
 from urllib.request import urlopen
+from dotenv import load_dotenv
 
 def is_connected(timeout: int) -> bool:
 	try:
@@ -10,6 +11,11 @@ def is_connected(timeout: int) -> bool:
 		return True
 	except: 
 		return False
+	
+# Load the environment variables
+load_dotenv()
+PYTHON_PATH = os.environ['PYTHON_PATH']
+WEB_SCRAPER_PATH = os.environ['WEB_SCRAPER_PATH']
 
 # Open the log file
 with open("WebScraper/log.txt", "a") as log:
@@ -29,12 +35,12 @@ with open("WebScraper/log.txt", "a") as log:
 	log.write("Internet connection established.\n")
 	log.flush()
 	# Run the WebScraper
-	exitCode = subprocess.run([paths.pythonPath, paths.webScraperPath], stdout=log, stderr=log)
+	exitCode = subprocess.run([PYTHON_PATH, WEB_SCRAPER_PATH], stdout=log, stderr=log)
 	if exitCode.returncode != 0:
 		log.write("WebScraper run failed.\n")
 		log.write("Attempting to run the WebScraper again...\n")
 		log.flush()
-		exitCode = subprocess.run([paths.pythonPath, paths.webScraperPath], stdout=log, stderr=log)
+		exitCode = subprocess.run([PYTHON_PATH, WEB_SCRAPER_PATH], stdout=log, stderr=log)
 		if exitCode.returncode != 0:
 			log.write("WebScraper run failed again.\n")
 		

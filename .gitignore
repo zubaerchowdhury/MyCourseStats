@@ -29,8 +29,6 @@ ENV/
 env.bak/
 venv.bak/
 
-paths.py
-
 # ASP.NET
 project.lock.json
 project.fragment.lock.json

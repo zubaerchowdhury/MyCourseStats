@@ -2,3 +2,5 @@
 selenium==4.25.0
 wakepy==0.10.1
 webdriver-manager==4.0.2
+python-dotenv==1.0.1
+pymongo==4.11.1
