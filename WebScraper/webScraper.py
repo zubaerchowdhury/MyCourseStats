@@ -233,7 +233,8 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						global currentSubject
 						currentCourse = course()
 						currentCourse.name = className.split(" | ")[0]
-						currentCourse.subject = (currentSubject, className.split(" | ")[1].split(" ")[0])
+						currentCourse.subjectName = currentSubject
+						currentCourse.subjectCode = className.split(" | ")[1].split(" ")[0]
 						currentCourse.catalogNumber = className.split(" | ")[1].split(" ")[1]
 						currentCourse.academicCareer = currentAcademicCareer
 						currentCourse.semester = currentTerm.split(" ")[0]

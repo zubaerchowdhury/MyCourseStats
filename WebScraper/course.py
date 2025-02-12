@@ -20,7 +20,8 @@ class course:
 
 		def __init__(self):
 				self.name = "NULL"
-				self.subject = ("NULL", "NULL")
+				self.subjectName = "NULL"
+				self.subjectCode = "NULL"
 				self.catalogNumber = "NULL"
 				self.academicCareer = "NULL"
 				self.semester = "NULL"
@@ -52,7 +53,7 @@ class course:
 				# self.prerequisites = ""
 
 		def __repr__(self):
-				return (f"Name: {self.name}, Subject: {self.subject}, Catalog Number: {self.catalogNumber}, Academic Career: {self.academicCareer}, "
+				return (f"Name: {self.name}, Subject: ({self.subjectName}, {self.subjectCode}), Catalog Number: {self.catalogNumber}, Academic Career: {self.academicCareer}, "
 						f"Semester: {self.semester}, Year: {self.year}, Section Type: {self.sectionType}, "
 						f"Section Code: {self.sectionCode}, Class Number: {self.classNumber}, Session: {self.session}, "
 						f"Days: {self.days}, Time Start: {self.timeStart}, Time End: {self.timeEnd}, "
@@ -76,41 +77,9 @@ class course:
 						daysList.append(course.days_mapping[days[i:i+2]])
 				return daysList
 
-		def course_to_dict(self):
-				return {
-						"name": self.name,
-						"subject": self.subject,
-						"catalogNumber": self.catalogNumber,
-						"academicCareer": self.academicCareer,
-						"semester": self.semester,
-						"year": self.year,
-						"sectionType": self.sectionType,
-						"sectionCode": self.sectionCode,
-						"classNumber": self.classNumber,
-						"session": self.session,
-						"days": " ".join(self.days),
-						"timeStart": self.timeStart.strftime("%I:%M %p") if self.timeStart else "NULL",
-						"timeEnd": self.timeEnd.strftime("%I:%M %p") if self.timeEnd else "NULL",
-						"classroom": self.classroom,
-						"instructor": ", ".join(self.instructor),
-						"startDate": self.startDate.strftime("%m/%d/%Y") if self.startDate else "NULL",
-						"endDate": self.endDate.strftime("%m/%d/%Y") if self.endDate else "NULL",
-						"status": self.status,
-						"seatsAvailable": self.seatsAvailable,
-						"capacity": self.capacity,
-						"waitlistAvailable": self.waitlistAvailable,
-						"waitlistCapacity": self.waitlistCapacity,
-						"reservedSeatsAvailable": self.reservedSeatsAvailable,
-						"reservedSeatsCapacity": self.reservedSeatsCapacity,
-						"multipleMeetings": self.multipleMeetings,
-						"topic": self.topic,
-						"dateTimeRetrieved": self.dateTimeRetrieved.strftime("%Y-%m-%d %H:%M:%S"),
-						"notes": self.notes
-				}
-
 		@staticmethod
 		def save_courses_to_csv(courses, filename="courses.csv"):
-				keys = ["name", "subject", "catalogNumber", "academicCareer", "semester", "year", "sectionType", "sectionCode", "classNumber", "session", "days", "timeStart", "timeEnd", "classroom", "instructor", "startDate", "endDate", "status", "seatsAvailable", "capacity", "waitlistAvailable", "waitlistCapacity", "reservedSeatsAvailable", "reservedSeatsCapacity", "multipleMeetings", "topic", "dateTimeRetrieved", "notes"]
+				keys = list(course().__dict__.keys())
 				file_exists = os.path.isfile(filename)
 				
 				with open(filename, 'a', newline='') as output_file:
