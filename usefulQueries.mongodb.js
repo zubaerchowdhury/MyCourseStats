@@ -11,8 +11,8 @@
 // 'use('courses');' is in every query so that they can be run individually.
 
 
-// Find all instructors for a specific course.
-use('courses'); // Select the database to use.
+// Find all instructors for a specific course
+use('courses'); // Select the database to use
 subjectName = 'Architecture';
 subjectCode = 'ARC';
 catalogNumber = '586';
@@ -38,6 +38,73 @@ db.getCollection('sections').aggregate(
       $project: {
         _id: 0,
         instructors: '$instructors'
+      }
+    }
+  ],
+  { maxTimeMS: 60000, allowDiskUse: true }
+);
+
+// Match courses with time series data
+use('courses');
+db.getCollection('sections').aggregate(
+  [
+    {
+      $lookup: {
+        from: 'sectionsTS',
+        let: {
+          sem: '$semester',
+          year: '$year',
+          classNum: '$classNumber',
+          dtr: '$dateTimeRetrieved'
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: [
+                      '$courseInfo.semester',
+                      '$$sem'
+                    ]
+                  },
+                  {
+                    $eq: [
+                      '$courseInfo.year',
+                      '$$year'
+                    ]
+                  },
+                  {
+                    $eq: [
+                      '$courseInfo.classNumber',
+                      '$$classNum'
+                    ]
+                  },
+                  {
+                    $eq: [
+                      '$dateTimeRetrieved',
+                      '$$dtr'
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              dateTimeRetrieved: 0,
+              courseInfo: 0
+            }
+          }
+        ],
+        as: 'courseStats'
+      }
+    },
+    {
+      $unwind: {
+        path: '$courseStats',
+        preserveNullAndEmptyArrays: true
       }
     }
   ],
