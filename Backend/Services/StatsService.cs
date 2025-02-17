@@ -1,45 +1,70 @@
-using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
 using MongoDB.Driver;
+using System.Globalization;
 using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Backend.Services
 {
     public class StatsService
     {
-        private readonly IMongoCollection<BsonDocument> _collection;
-
-        public StatsService(IMongoClient mongoClient)
+        // Method to calculate the daily changes in seatsOpen (seatsAvailable - capacity)
+        public List<double> CalculateDailyChanges(List<BsonDocument> data)
         {
-            var database = mongoClient.GetDatabase("MyCourseStatsDev");
-            _collection = database.GetCollection<BsonDocument>("YourCollectionName");
-        }
+            // Sort the data by dateTimeRetrieved
+            var sortedData = data.OrderBy(doc => doc["dateTimeRetrieved"].ToUniversalTime()).ToList();
 
-        // Method to get time series data from MongoDB
-        public async Task<List<BsonDocument>> GetTimeSeriesDataAsync()
-        {
-            var filter = new BsonDocument(); // Adjust your filter if needed
-            return await _collection.Find(filter).ToListAsync();
-        }
+            // Calculate seatsOpen and daily changes
+            var dailySeatsOpen = sortedData
+                .Select(doc => new
+                {
+                    DateTime = doc["dateTimeRetrieved"].ToUniversalTime(),
+                    SeatsOpen = doc["seatsAvailable"].AsInt32 - doc["capacity"].AsInt32
+                })
+                .ToList();
 
-        // Method to calculate the rate of change for seatsAvailable
-        public double[] CalculateRateOfChange(List<BsonDocument> timeSeriesData)
-        {
-            // Extract the 'seatsAvailable' values from the time series data
-            List<double> seatsAvailable = timeSeriesData.Select(doc =>
-                doc["seatsAvailable"].AsDouble).ToList();
+            var dailyChanges = new List<double>();
 
-            // TEMPLATE Calculate the rate of change using MathNet.Numerics
-            double[] rateOfChange = new double[seatsAvailable.Count - 1];
-            for (int i = 1; i < seatsAvailable.Count; i++)
+            // Calculate the daily change in seatsOpen
+            for (int i = 1; i < dailySeatsOpen.Count; i++)
             {
-                rateOfChange[i - 1] = (seatsAvailable[i] - seatsAvailable[i - 1]) / seatsAvailable[i - 1];
+                var dailyChange = dailySeatsOpen[i].SeatsOpen - dailySeatsOpen[i - 1].SeatsOpen;
+                dailyChanges.Add(dailyChange);
             }
+            return dailyChanges;
+        }
 
-            return rateOfChange;
+        // Method to calculate weekly statistics (mean and variance) for seatsOpen
+        public List<object> CalculateWeeklyStatistics(List<BsonDocument> data)
+        {
+            // Sort the data by dateTimeRetrieved
+            var sortedData = data.OrderBy(doc => doc["dateTimeRetrieved"].ToUniversalTime()).ToList();
+
+            // Calculate seatsOpen for each record
+            var dailySeatsOpen = sortedData
+                .Select(doc => new
+                {
+                    DateTime = doc["dateTimeRetrieved"].ToUniversalTime(),
+                    SeatsOpen = doc["seatsAvailable"].AsInt32 - doc["capacity"].AsInt32
+                }).ToList();
+
+            // Group data by week
+            var weeklyGroups = dailySeatsOpen
+                .GroupBy(doc => ISOWeek.GetWeekOfYear(doc.DateTime))
+                .Select(group => new
+                {
+                    WeekNumber = ISOWeek.GetWeekOfYear(group.First().DateTime),
+                    WeeklySeatsOpen = group.Select(g => g.SeatsOpen).ToList()
+                }).ToList();
+
+            // Calculate statistics for each week
+            var weeklyStatistics = weeklyGroups.Select(week => new
+            {
+                WeekNumber = week.WeekNumber,
+                MeanSeatsOpen = week.WeeklySeatsOpen.Select(seat => (double)seat).Mean(),
+                VarianceSeatsOpen = week.WeeklySeatsOpen.Select(seat => (double)seat).Variance()
+            }).ToList<object>();
+            Console.WriteLine(weeklyStatistics); // Debugging
+            return weeklyStatistics;
         }
     }
 }

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
-using MongoDB.Bson;
 
 namespace Backend.Controllers
 {
@@ -9,34 +8,34 @@ namespace Backend.Controllers
     public class StatsController : ControllerBase
     {
         private readonly MongoDBService _mongoDBService;
+        private readonly StatsService _statsService;
 
-        public StatsController(MongoDBService mongoDBService)
+        public StatsController(MongoDBService mongoDBService, StatsService statsService)
         {
             _mongoDBService = mongoDBService;
+            _statsService = statsService;
         }
 
-        [HttpGet("data")]
-        public async Task<IActionResult> GetData()
+        [HttpGet("course-statistics")]
+        public async Task<IActionResult> CalculateCourseStatistics([FromQuery] string subjectName, [FromQuery] string subjectCode, [FromQuery] int weeks = 1)
         {
-            var data = await _mongoDBService.GetDataAsync();
-            return Ok(data);
-        }
+            // Query MongoDB for course data based on subject name, subject code, and time frame (weeks)
+            var data = await _mongoDBService.GetCourseDataAsync(subjectName, subjectCode, weeks);
 
-        [HttpPost("data")]
-        public async Task<IActionResult> InsertData([FromBody] BsonDocument document)
-        {
-            await _mongoDBService.InsertDataAsync(document);
-            return Ok();
-        }
+            if (data == null || data.Count == 0)
+            {
+                return NotFound("No data found for the given subject and subjectCode.");
+            }
 
-        // Add a route for performing statistical calculations.
-        [HttpGet("statistics")]
-        public IActionResult CalculateStatistics()
-        {
-            // Example calculation (e.g., mean, median, etc.)
-            // Retrieve data from MongoDB, then perform the necessary operations.
-            // Return the result.
-            return Ok(new { Mean = 0, Median = 0 });
+            // Perform calculations using StatsService
+            var dailyChanges = _statsService.CalculateDailyChanges(data);
+            var weeklyStatistics = _statsService.CalculateWeeklyStatistics(data);
+
+            return Ok(new
+            {
+                DailyChanges = dailyChanges,
+                WeeklyStatistics = weeklyStatistics
+            });
         }
     }
 }

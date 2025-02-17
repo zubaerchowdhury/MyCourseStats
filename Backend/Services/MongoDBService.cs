@@ -14,8 +14,7 @@ namespace Backend.Services
             var client = new MongoClient(mongoDBSettings.Value.ConnectionString);
             var database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
 
-            // Replace "YourCollection" with the name of the MongoDB collection you want to use.
-            _collection = database.GetCollection<BsonDocument>("YourCollection");
+            _collection = database.GetCollection<BsonDocument>("MyCourseStatsDev");
         }
 
         public async Task<List<BsonDocument>> GetDataAsync()
@@ -28,6 +27,17 @@ namespace Backend.Services
             await _collection.InsertOneAsync(document);
         }
 
+        public async Task<List<BsonDocument>> GetCourseDataAsync(string subjectName, string subjectCode, int weeks)
+        {
+            // Create a filter to retrieve courses by subject name and subject code
+            var filter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Eq("subject.0", subjectName),
+                Builders<BsonDocument>.Filter.Eq("subject.1", subjectCode),
+                Builders<BsonDocument>.Filter.Gte("dateTimeRetrieved", DateTime.UtcNow.AddDays(-7 * weeks))
+            );
+
+            return await _collection.Find(filter).ToListAsync();
+        }
 
         // Add methods for any specific queries or statistical calculations here.
 
