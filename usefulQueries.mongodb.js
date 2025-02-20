@@ -10,52 +10,69 @@
 
 // 'use('courses');' is in every query so that they can be run individually.
 
-
 // Find all instructors for a specific course
-use('courses'); // Select the database to use
-subjectName = 'Architecture';
-subjectCode = 'ARC';
-catalogNumber = '586';
-db.getCollection('sections').aggregate(
+use("courses"); // Select the database to use
+subjectName = "Architecture";
+subjectCode = "ARC";
+catalogNumber = "586";
+db.getCollection("sections").aggregate(
   [
     {
       $match: {
-        subject: `('${subjectName}', '${subjectCode}')`,
-        catalogNumber: catalogNumber,
-        instructor: { $nin: ['X TBA', null] }
-      }
+        subjectName: "Architecture",
+        subjectCode: "ARC",
+        catalogNumber: "586",
+        instructor: {
+          $nin: ["X TBA", null],
+        },
+      },
+    },
+    {
+      $unwind: {
+        path: "$instructor",
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+    {
+      $unwind: {
+        path: "$instructor",
+        preserveNullAndEmptyArrays: false,
+      },
     },
     {
       $group: {
         _id: {
-          subject: '$subject',
-          catalogNumber: '$catalogNumber'
+          subjectName: "$subjectName",
+          subjectCode: "$subjectCode",
+          catalogNumber: "$catalogNumber",
         },
-        instructors: { $addToSet: '$instructor' }
-      }
+        instructors: {
+          $addToSet: "$instructor",
+        },
+      },
     },
     {
       $project: {
         _id: 0,
-        instructors: '$instructors'
-      }
-    }
+        instructors: "$instructors",
+      },
+    },
   ],
   { maxTimeMS: 60000, allowDiskUse: true }
 );
 
 // Match courses with time series data
-use('courses');
-db.getCollection('sections').aggregate(
+use("courses");
+db.getCollection("sections").aggregate(
   [
     {
       $lookup: {
-        from: 'sectionsTS',
+        from: "sectionsTS",
         let: {
-          sem: '$semester',
-          year: '$year',
-          classNum: '$classNumber',
-          dtr: '$dateTimeRetrieved'
+          sem: "$semester",
+          year: "$year",
+          classNum: "$classNumber",
+          dtr: "$dateTimeRetrieved",
         },
         pipeline: [
           {
@@ -63,50 +80,38 @@ db.getCollection('sections').aggregate(
               $expr: {
                 $and: [
                   {
-                    $eq: [
-                      '$courseInfo.semester',
-                      '$$sem'
-                    ]
+                    $eq: ["$courseInfo.semester", "$$sem"],
                   },
                   {
-                    $eq: [
-                      '$courseInfo.year',
-                      '$$year'
-                    ]
+                    $eq: ["$courseInfo.year", "$$year"],
                   },
                   {
-                    $eq: [
-                      '$courseInfo.classNumber',
-                      '$$classNum'
-                    ]
+                    $eq: ["$courseInfo.classNumber", "$$classNum"],
                   },
                   {
-                    $eq: [
-                      '$dateTimeRetrieved',
-                      '$$dtr'
-                    ]
-                  }
-                ]
-              }
-            }
+                    $eq: ["$dateTimeRetrieved", "$$dtr"],
+                  },
+                ],
+              },
+            },
           },
           {
             $project: {
               _id: 0,
               dateTimeRetrieved: 0,
-              courseInfo: 0
-            }
-          }
+              courseInfo: 0,
+            },
+          },
         ],
-        as: 'courseStats'
-      }
+        as: "courseStats",
+      },
     },
     {
       $unwind: {
-        path: '$courseStats',
-        preserveNullAndEmptyArrays: true
-      }
-    }
+        path: "$courseStats",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
   ],
   { maxTimeMS: 60000, allowDiskUse: true }
 );
