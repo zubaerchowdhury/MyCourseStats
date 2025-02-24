@@ -7,43 +7,25 @@ namespace Backend.Services
 {
     public class MongoDBService
     {
-        private readonly IMongoCollection<BsonDocument> _collection;
+        private readonly MongoDBConfig _configuration;
+        private readonly IMongoCollection<BsonDocument> _sectionsCollection;
+        private readonly IMongoCollection<BsonDocument> _timeSeriesCollection;
 
-        public MongoDBService(IOptions<MongoDBConfigs> mongoDBSettings)
+        public MongoDBService(MongoDBConfig configuration)
         {
+            _configuration = configuration;
+            EnvReader.Load(".env"); // Load environment variables from .env file
             var connectionString = Environment.GetEnvironmentVariable("MONGODB_URI"); // Retrieve MongoDB URI from environment variable
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("MongoDB URI environmetal variable is not set.");
+                throw new InvalidOperationException("MongoDB URI environment variable is not set.");
             }
 
             var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
+            var database = client.GetDatabase(configuration.DatabaseName);
 
-            _collection = database.GetCollection<BsonDocument>("MyCourseStatsDev");
-        }
-
-        public async Task<List<BsonDocument>> GetDataAsync()
-        {
-            return await _collection.Find(new BsonDocument()).ToListAsync();
-        }
-
-        public async Task InsertDataAsync(BsonDocument document)
-        {
-            await _collection.InsertOneAsync(document);
-        }
-
-        // Method to retrieve course data by subject name and subject code
-        public async Task<List<BsonDocument>> GetCourseDataAsync(string subjectName, string subjectCode, int weeks)
-        {
-            // Create a filter to retrieve courses by subject name and subject code
-            var filter = Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("subject.0", subjectName),
-                Builders<BsonDocument>.Filter.Eq("subject.1", subjectCode),
-                Builders<BsonDocument>.Filter.Gte("dateTimeRetrieved", DateTime.UtcNow.AddDays(-7 * weeks))
-            );
-
-            return await _collection.Find(filter).ToListAsync();
+            _sectionsCollection = database.GetCollection<BsonDocument>(configuration.SectionsCollectionName);
+            _timeSeriesCollection = database.GetCollection<BsonDocument>(configuration.TimeSeriesCollectionName);
         }
     }
 }

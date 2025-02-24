@@ -1,25 +1,24 @@
 using Backend.Models;
-using Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// MongoDB configuration
+builder.Services.Configure<MongoDBConfig>(builder.Configuration.GetSection("MongoDB"));
+
+builder.Services.AddSingleton(builder.Configuration.GetSection("MongoDB").Get<MongoDBConfig>());
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
-// MongoDB configuration
-builder.Services.Configure<MongoDBConfigs>(
-    builder.Configuration.GetSection("MongoDB"));
-
-builder.Services.AddSingleton<MongoDBConfigs>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
