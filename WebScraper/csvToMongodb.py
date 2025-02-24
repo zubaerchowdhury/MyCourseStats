@@ -3,7 +3,6 @@ import os
 import csv
 from dotenv import load_dotenv
 from pymongo import MongoClient
-import pytz
 
 # Load the environment variables
 load_dotenv()
@@ -60,7 +59,6 @@ Example of a course:
 # Convert the csv courses to the format that will be inserted into the database
 courses = []
 coursesTS = []
-ny_tz = pytz.timezone('America/New_York')
 prevClassNum = 0
 idx = 0
 while idx < len(csvCourses):
@@ -90,21 +88,21 @@ while idx < len(csvCourses):
 	if course['topic'] == 'NULL':
 		course.pop('topic')
 
-	course['timeStart'] = datetime.datetime.strptime(course['timeStart'], "%I:%M %p").replace(tzinfo=ny_tz)
-	course['timeEnd'] = datetime.datetime.strptime(course['timeEnd'], "%I:%M %p").replace(tzinfo=ny_tz)
-	course['startDate'] = datetime.datetime.strptime(course['startDate'], "%m/%d/%Y").replace(tzinfo=ny_tz)
-	course['endDate'] = datetime.datetime.strptime(course['endDate'], "%m/%d/%Y").replace(tzinfo=ny_tz)
-	course['dateTimeRetrieved'] = datetime.datetime.strptime(course['dateTimeRetrieved'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=ny_tz)
+	course['timeStart'] = datetime.datetime.strptime(course['timeStart'], "%I:%M %p")
+	course['timeEnd'] = datetime.datetime.strptime(course['timeEnd'], "%I:%M %p")
+	course['startDate'] = datetime.datetime.strptime(course['startDate'], "%m/%d/%Y")
+	course['endDate'] = datetime.datetime.strptime(course['endDate'], "%m/%d/%Y")
+	course['dateTimeRetrieved'] = datetime.datetime.strptime(course['dateTimeRetrieved'], "%Y-%m-%d %H:%M:%S")
 
 	if course['semester'] == 'NULL':
 		# Semesters in csv are Spring 2024, Summer 2024, Fall 2024, Spring 2025
-		if course['startDate'] < datetime.datetime(2024, 5, 13, tzinfo=ny_tz):
+		if course['startDate'] < datetime.datetime(2024, 5, 13):
 			course['semester'] = 'Spring'
 			course['year'] = 2024
-		elif course['startDate'] < datetime.datetime(2024, 8, 19, tzinfo=ny_tz):
+		elif course['startDate'] < datetime.datetime(2024, 8, 19):
 			course['semester'] = 'Summer'
 			course['year'] = 2024
-		elif course['startDate'] < datetime.datetime(2025, 1, 13, tzinfo=ny_tz):
+		elif course['startDate'] < datetime.datetime(2025, 1, 13):
 			course['semester'] = 'Fall'
 			course['year'] = 2024
 		else:
@@ -146,10 +144,10 @@ while idx < len(csvCourses):
 		while idx < len(csvCourses) and int(csvCourses[idx]['classNumber']) == prevClassNum:
 			meeting = csvCourses[idx]
 			course['days'].append(meeting['days'].split())
-			course['timeStart'].append(datetime.datetime.strptime(meeting['timeStart'], "%I:%M %p").replace(tzinfo=ny_tz))
-			course['timeEnd'].append(datetime.datetime.strptime(meeting['timeEnd'], "%I:%M %p").replace(tzinfo=ny_tz))
-			course['startDate'].append(datetime.datetime.strptime(meeting['startDate'], "%m/%d/%Y").replace(tzinfo=ny_tz))
-			course['endDate'].append(datetime.datetime.strptime(meeting['endDate'], "%m/%d/%Y").replace(tzinfo=ny_tz))
+			course['timeStart'].append(datetime.datetime.strptime(meeting['timeStart'], "%I:%M %p"))
+			course['timeEnd'].append(datetime.datetime.strptime(meeting['timeEnd'], "%I:%M %p"))
+			course['startDate'].append(datetime.datetime.strptime(meeting['startDate'], "%m/%d/%Y"))
+			course['endDate'].append(datetime.datetime.strptime(meeting['endDate'], "%m/%d/%Y"))
 			course['classroom'].append(meeting['classroom'])
 			if meeting['classroom'] == 'NULL':
 				course['classroom'][-1] = None
