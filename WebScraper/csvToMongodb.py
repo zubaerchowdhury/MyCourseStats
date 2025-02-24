@@ -155,12 +155,13 @@ while idx < len(csvCourses):
 			if meeting['instructor'][0] == 'NULL':
 				meeting['instructor'] = []
 			course['instructor'].append(meeting['instructor'])
-			if 'topic' in meeting:
-				if 'topic' not in course:
-					course['topic'] = [None]
-				course['topic'].append(meeting['topic'] if meeting['topic'] != 'NULL' else None)
+			if 'topic' not in course:
+				course['topic'] = [None]
+			course['topic'].append(meeting['topic'] if meeting['topic'] != 'NULL' else None)
 			idx += 1
 
+		if all(topic is None for topic in course['topic']):
+			course.pop('topic')
 		idx -= 1
 
 	courses.append(course)
