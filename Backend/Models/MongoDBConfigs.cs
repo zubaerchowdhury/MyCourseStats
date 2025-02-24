@@ -1,5 +1,6 @@
 namespace Backend.Models
 {
+    // Model to store MongoDB configurations
     public class MongoDBConfigs
     {
         public string? ConnectionString { get; set; }

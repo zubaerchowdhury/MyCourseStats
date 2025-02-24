@@ -52,7 +52,7 @@ namespace Backend.Services
                 .GroupBy(doc => ISOWeek.GetWeekOfYear(doc.DateTime))
                 .Select(group => new
                 {
-                    WeekNumber = ISOWeek.GetWeekOfYear(group.First().DateTime),
+                    WeekNumber = group.Key,
                     WeeklySeatsOpen = group.Select(g => g.SeatsOpen).ToList()
                 }).ToList();
 
