@@ -3,6 +3,7 @@ using Backend.Services;
 
 namespace Backend.Controllers
 {
+    // Controller for handling requests related to StatsService
     [ApiController]
     [Route("api/[controller]")]
     public class StatsController : ControllerBase
@@ -24,7 +25,7 @@ namespace Backend.Controllers
 
             if (data == null || data.Count == 0)
             {
-                return NotFound("No data found for the given subject and subjectCode.");
+                return NotFound("No data found for the subject and subjectCode inputs.");
             }
 
             // Perform calculations using StatsService

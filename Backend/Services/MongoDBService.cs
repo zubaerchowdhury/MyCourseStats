@@ -11,7 +11,13 @@ namespace Backend.Services
 
         public MongoDBService(IOptions<MongoDBConfigs> mongoDBSettings)
         {
-            var client = new MongoClient(mongoDBSettings.Value.ConnectionString);
+            var connectionString = Environment.GetEnvironmentVariable("MONGODB_URI"); // Retrieve MongoDB URI from environment variable
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("MongoDB URI environmetal variable is not set.");
+            }
+
+            var client = new MongoClient(connectionString);
             var database = client.GetDatabase(mongoDBSettings.Value.DatabaseName);
 
             _collection = database.GetCollection<BsonDocument>("MyCourseStatsDev");
@@ -27,6 +33,7 @@ namespace Backend.Services
             await _collection.InsertOneAsync(document);
         }
 
+        // Method to retrieve course data by subject name and subject code
         public async Task<List<BsonDocument>> GetCourseDataAsync(string subjectName, string subjectCode, int weeks)
         {
             // Create a filter to retrieve courses by subject name and subject code
@@ -38,8 +45,5 @@ namespace Backend.Services
 
             return await _collection.Find(filter).ToListAsync();
         }
-
-        // Add methods for any specific queries or statistical calculations here.
-
     }
 }
