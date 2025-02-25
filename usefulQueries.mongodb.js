@@ -19,9 +19,9 @@ db.getCollection("sections").aggregate(
   [
     {
       $match: {
-        subjectName: "Architecture",
-        subjectCode: "ARC",
-        catalogNumber: "586",
+        subjectName: `${subjectName}`,
+				subjectCode: `${subjectCode}`,
+        catalogNumber: `${catalogNumber}`,
         instructor: {
           $nin: ["X TBA", null],
         },
