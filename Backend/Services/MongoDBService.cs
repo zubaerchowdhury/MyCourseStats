@@ -14,13 +14,13 @@ public class MongoDBService
     //private readonly MongoDBConfig _configuration; // Configuration for MongoDB connection
     private readonly IMongoCollection<BsonDocument> _sectionsCollection; // Collection for storing course sections data
     private readonly IMongoCollection<BsonDocument> _timeSeriesCollection; // Collection for storing time series data
-    private readonly string? _connectionString;
+
 
     public MongoDBService(MongoDBConfig configuration)
     {
         //_configuration = configuration;
         EnvReader.Load(".env"); // Load environment variables from .env file to current environment context
-        _connectionString = Environment.GetEnvironmentVariable("MONGODB_URI"); // Retrieve MongoDB URI from environment variable
+        string? _connectionString = Environment.GetEnvironmentVariable("MONGODB_URI"); // Retrieve MongoDB URI from environment variable
 
         if (string.IsNullOrEmpty(_connectionString))
         {
