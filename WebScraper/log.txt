@@ -557,3 +557,247 @@ Data saved to WebScraper/courses.csv
 Execution time: 16.0 minutes and 36.92489838600159 seconds
 WebScraper ended at 2025-02-08 12:54:00.721415
 Exit code: 0
+##################################################
+WebScraper started at 2025-02-09 12:54:37.696339-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 14.0 minutes and 23.77942419052124 seconds
+WebScraper ended at 2025-02-09 13:09:06.273794
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-09 21:00:56.645315-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 0.0 minutes and 22.36230778694153 seconds
+WebScraper ended at 2025-02-09 21:01:23.838181
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-10 22:42:01.403020-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 15.0 minutes and 39.55635952949524 seconds
+WebScraper ended at 2025-02-10 22:57:45.844177
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-11 10:50:02.679725-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 14.0 minutes and 49.961491107940674 seconds
+WebScraper ended at 2025-02-11 11:04:57.632946
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-11 22:49:05.171444-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 0.0 minutes and 20.23370909690857 seconds
+WebScraper ended at 2025-02-11 22:49:30.115998
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-12 22:24:09.199916-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 22, in <module>
+    with keep.presenting(), webdriver.Firefox(options=options) as driver:
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\firefox\webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 212, in __init__
+    self.start_session(capabilities)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 299, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 354, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 229, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Process unexpectedly closed with status 0
+
+WebScraper run failed.
+Attempting to run the WebScraper again...
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 14.0 minutes and 59.080353021621704 seconds
+WebScraper ended at 2025-02-12 22:39:23.337803
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-13 22:09:37.781332-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 19.0 minutes and 26.58054804801941 seconds
+WebScraper ended at 2025-02-13 22:29:11.357835
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-14 19:52:39.009765-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 15.0 minutes and 37.65636897087097 seconds
+WebScraper ended at 2025-02-14 20:08:21.590401
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-15 23:30:04.198889-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 35.835556745529175 seconds
+WebScraper ended at 2025-02-15 23:46:44.986873
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-16 21:19:19.313138-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 11.263484239578247 seconds
+WebScraper ended at 2025-02-16 21:35:36.035495
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-17 22:34:38.353431-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 24, in <module>
+    driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 363, in get
+    self.execute(Command.GET, {"url": url})
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 354, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 229, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Reached error page: about:neterror?e=dnsNotFound&u=https%3A//canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main&c=UTF-8&d=We%20can%E2%80%99t%20connect%20to%20the%20server%20at%20canelink.miami.edu.
+Stacktrace:
+RemoteError@chrome://remote/content/shared/RemoteError.sys.mjs:8:8
+WebDriverError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:197:5
+UnknownError@chrome://remote/content/shared/webdriver/Errors.sys.mjs:869:5
+checkReadyState@chrome://remote/content/marionette/navigate.sys.mjs:58:24
+onNavigation@chrome://remote/content/marionette/navigate.sys.mjs:345:39
+emit@resource://gre/modules/EventEmitter.sys.mjs:148:20
+receiveMessage@chrome://remote/content/marionette/actors/MarionetteEventsParent.sys.mjs:33:25
+
+WebScraper run failed.
+Attempting to run the WebScraper again...
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 15.0 minutes and 15.17997694015503 seconds
+WebScraper ended at 2025-02-17 22:50:13.117576
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-18 22:03:16.281374-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 16.0 minutes and 39.99379777908325 seconds
+WebScraper ended at 2025-02-18 22:20:01.206109
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-19 22:26:44.926695-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 14.0 minutes and 15.192566394805908 seconds
+WebScraper ended at 2025-02-19 22:41:04.645097
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-20 16:06:41.715627-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 18.0 minutes and 26.038390398025513 seconds
+WebScraper ended at 2025-02-20 16:25:12.756910
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-20 17:05:01.460419-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Data was already collected today. Returning...
+Execution time: 0.0 minutes and 21.811163902282715 seconds
+WebScraper ended at 2025-02-20 17:05:27.973739
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-21 10:36:10.308445-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+##################################################
+WebScraper started at 2025-02-23 22:21:55.521668-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Traceback (most recent call last):
+  File "C:\Users\moral\GithubRepos\CourseStats\WebScraper\webScraper.py", line 22, in <module>
+    with keep.presenting(), webdriver.Firefox(options=options) as driver:
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\firefox\webdriver.py", line 71, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 212, in __init__
+    self.start_session(capabilities)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 299, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 354, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\moral\anaconda3\envs\CourseStats\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 229, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.WebDriverException: Message: Process unexpectedly closed with status 0
+
+WebScraper run failed.
+Attempting to run the WebScraper again...
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 20.0 minutes and 15.75832986831665 seconds
+WebScraper ended at 2025-02-23 22:42:27.263588
+Exit code: 0
+##################################################
+WebScraper started at 2025-02-24 20:40:42.184545-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 19.0 minutes and 40.0149610042572 seconds
+##################################################
+WebScraper started at 2025-02-25 18:35:47.315083-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 17.0 minutes and 36.1744270324707 seconds
+##################################################
+WebScraper started at 2025-02-26 17:57:19.453518-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to WebScraper/courses.csv
+Data saved to WebScraper/courses.csv
+Execution time: 20.0 minutes and 23.508413076400757 seconds
+WebScraper ended at 2025-02-26 18:17:48.704485
+Exit code: 0
