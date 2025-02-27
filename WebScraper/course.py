@@ -2,6 +2,7 @@ import datetime
 from functools import cache
 import csv
 import os
+from pymongo import MongoClient
 
 class course:
 		#semesters = ["Spring", "Summer", "Fall", "Non-credit Term"]
@@ -30,39 +31,37 @@ class course:
 				self.sectionCode = "NULL"
 				self.classNumber = 0
 				self.session = "NULL"
-				self.days = ["NULL"]
-				self.timeStart = datetime.time()
-				self.timeEnd = datetime.time()
+				self.days = []
+				self.timeStart = datetime.datetime(1900, 1, 1)
+				self.timeEnd = datetime.datetime(1900, 1, 1)
 				self.classroom = "NULL"
-				self.instructor = ["NULL"]
-				self.startDate = datetime.date(2000, 1, 1)
-				self.endDate = datetime.date(2000, 1, 1)
+				self.instructor = []
+				self.startDate = datetime.datetime(1900, 1, 1)
+				self.endDate = datetime.datetime(1900, 1, 1)
 				# self.units = ""
 				self.status = "NULL"
 				self.seatsAvailable = 0
 				self.capacity = 0
 				self.waitlistAvailable = 300
 				self.waitlistCapacity = 300
-				self.reservedSeatsAvailable = 0
-				self.reservedSeatsCapacity = 0
+				# self.reservedSeatsAvailable = 0
+				# self.reservedSeatsCapacity = 0
 				self.multipleMeetings = False
-				self.topic = "NULL"
+				# self.topic = "NULL"
 				self.dateTimeRetrieved = datetime.datetime.now()
-				self.notes = "NULL"
+				# self.notes = "NULL"
 				# self.decription = ""
 				# self.prerequisites = ""
 
 		def __repr__(self):
-				return (f"Name: {self.name}, Subject: ({self.subjectName}, {self.subjectCode}), Catalog Number: {self.catalogNumber}, Academic Career: {self.academicCareer}, "
-						f"Semester: {self.semester}, Year: {self.year}, Section Type: {self.sectionType}, "
-						f"Section Code: {self.sectionCode}, Class Number: {self.classNumber}, Session: {self.session}, "
-						f"Days: {self.days}, Time Start: {self.timeStart}, Time End: {self.timeEnd}, "
-						f"Classroom: {self.classroom}, Instructor: {self.instructor}, Start Date: {self.startDate}, "
-						f"End Date: {self.endDate}, Status: {self.status}, Seats Available: {self.seatsAvailable}, "
-						f"Capacity: {self.capacity}, Waitlist Available: {self.waitlistAvailable}, "
-						f"Waitlist Capacity: {self.waitlistCapacity}, Reserved Seats Available: {self.reservedSeatsAvailable}, "
-						f"Reserved Seats Capacity: {self.reservedSeatsCapacity}, Multiple Meetings: {self.multipleMeetings}, "
-						f"Topic: {self.topic}, Date Time Retrieved: {self.dateTimeRetrieved}, Notes: {self.notes}")
+				return str(self.__dict__)
+		
+		def addTopic(self, topic: str):
+				self.topic = topic
+
+		def addReservedSeats(self, reservedSeatsAvailable: int, reservedSeatsCapacity: int):
+				self.reservedSeatsAvailable = reservedSeatsAvailable
+				self.reservedSeatsCapacity = reservedSeatsCapacity
 		
 		# Method to map abbreviated days to full days
 		# Example: "MoWeFr" -> ["Monday", "Wednesday", "Friday"]
@@ -94,15 +93,55 @@ class course:
 										print(courseSection)
 										return
 								
+		def createTimeSeriesEntry(self):
+				tsEntry = {
+					"dateTimeRetrieved": self.dateTimeRetrieved,
+					"courseInfo": {
+						"semester": self.semester,
+						"year": self.year,
+						"classNumber": self.classNumber
+					},
+					"status": self.status,
+					"seatsAvailable": self.seatsAvailable,
+					"wailistAvailable": self.waitlistAvailable
+				}
+				del self.status
+				del self.seatsAvailable
+				del self.waitlistAvailable
+				return tsEntry
+		
 		@staticmethod
-		def was_data_collected_today(filename="courses.csv"):
-				if not os.path.isfile(filename):
-						raise FileNotFoundError(f"File {filename} not found.")
-				with open(filename, 'r') as input_file:
-						reader = csv.DictReader(input_file)
-						last_row = list(reader)[-1] if reader else None
-						if last_row:
-								dateTimeRetrieved = datetime.datetime.strptime(last_row["dateTimeRetrieved"], "%Y-%m-%d %H:%M:%S")
-								if dateTimeRetrieved.date() == datetime.date.today():
-										return True
-				return False
+		def save_courses_to_mongodb(client: MongoClient, courses: list):
+				db = client["courses"]
+				sections = db['sections']
+				sectionsTS = db['sectionsTS']
+				sectionsTS.insert_many([courseSection.createTimeSeriesEntry() for courseSection in courses])
+				sections.insert_many([courseSection.__dict__ for courseSection in courses])
+												
+		@staticmethod
+		def was_data_collected_today(filename = None, client: MongoClient = None):
+				if client is not None:
+						db = client["courses"]
+						sectionsTS = db['sectionsTS']
+						today_entry = sectionsTS.find_one(
+							{},
+							{'dateTimeRetrieved': 1, '_id': 0},
+							sort=[('dateTimeRetrieved', -1)]
+						)
+						if today_entry:
+							dateTimeRetrieved = today_entry["dateTimeRetrieved"]
+							if dateTimeRetrieved.date() == datetime.date.today():
+								return True
+						return False
+				if filename is not None:
+					if not os.path.isfile(filename):
+							raise FileNotFoundError(f"File {filename} not found.")
+					with open(filename, 'r') as input_file:
+							reader = csv.DictReader(input_file)
+							last_row = list(reader)[-1] if reader else None
+							if last_row:
+									dateTimeRetrieved = datetime.datetime.strptime(last_row["dateTimeRetrieved"], "%Y-%m-%d %H:%M:%S")
+									if dateTimeRetrieved.date() == datetime.date.today():
+											return True
+					return False
+				raise ValueError("Either filename or client must be provided.")

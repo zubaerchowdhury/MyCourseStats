@@ -10,6 +10,9 @@ import datetime
 import copy
 from wakepy import keep 
 import sys
+import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
 		
 start_time = time.time()
 options = webdriver.FirefoxOptions()
@@ -86,8 +89,8 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						Example of reservedSeatsText:
 						'5 of 5'
 						"""
-						courseObject.reservedSeatsAvailable = int(reservedSeatsText.split(" ")[0])
-						courseObject.reservedSeatsCapacity = int(reservedSeatsText.split(" ")[2])
+						courseObject.addReservedSeats(reservedSeatsAvailable=int(reservedSeatsText.split(" ")[0]), 
+																		reservedSeatsCapacity=int(reservedSeatsText.split(" ")[2]))
 						classInfo.pop(i + offset + 1) # Remove reserved seats text from classInfo to retain structure
 
 		def fillCourseObjectWithMultipleMeetings(currentCourse: course, classWebElement: WebElement, classInfo: list[str], i: int):
@@ -140,19 +143,19 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						17: Stubblefield 204
 						"""
 
-						currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y").date()
-						currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y").date()
+						currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y")
+						currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y")
 						meetingPatternsInfo[j + 1] = meetingPatternsInfo[j + 1].replace("\n\r", " ")
 						currentCourse.instructor = meetingPatternsInfo[j + 1].split(", ")
 						currentCourse.days = course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2])
 						if meetingPatternsInfo[j + 3] != "-":
-								currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p").time()
+								currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p")
 						if meetingPatternsInfo[j + 4] != "-":
-								currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p").time()
+								currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p")
 						currentCourse.classroom = meetingPatternsInfo[j + 5]
 						currentCourse.multipleMeetings = True
 						if stringsInEachRow == STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC:
-								currentCourse.topic = meetingPatternsInfo[j + 6]
+								currentCourse.addTopic(meetingPatternsInfo[j + 6])
 						currentCourseList.append(currentCourse)
 						
 				# insert list of "Multiple" strings into classInfo to keep the same structure
@@ -168,7 +171,8 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				'Small Contemporary Ensemble | MDE 139'
 
 				courseName = Small Contemporary Ensemble
-				subject = (currentSubject, 'MDE')
+				subjectName = currentSubject
+				subjectCode = 'MDE'
 				catalogNumber = '139'
 
 				Example of classInfo:
@@ -192,42 +196,40 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				17. Waitlist, 300 of 300 waitlist seats available. 40 of 40 seats available.
 
 				First class:
-				sectionType = ENS
-				sectionCode = AMS
+				sectionType = 'ENS'
+				sectionCode = 'AMS'
 				classNumber = 5385
-				session = Regular Academic
-				days = Friday
+				session = 'Regular Academic'
+				days = [Friday]
 				timeStart = 10:10 am
 				timeEnd = 1:10 pm
-				classroom = Frost North Studio 330
+				classroom = 'Frost North Studio 330'
 				instructor = ['Roxana Amed', 'Reynaldo Sanchez']
 				startDate = 01/13
 				endDate = 04/28
-				status = Open
+				status = 'Open'
 				seatsAvailable = 10
 				capacity = 10
 				waitlistAvailable = 300
 				waitlistCapacity = 300
-				notes = ''
 
 				Second class:
-				sectionType = ENS
-				sectionCode = CCE
+				sectionType = 'ENS'
+				sectionCode = 'CCE'
 				classNumber = 5386
-				session = Regular Academic
-				days = Tuesday Thursday
+				session = 'Regular Academic'
+				days = ['Tuesday', 'Thursday']
 				timeStart = 6:35 pm
 				timeEnd = 7:50 pm
-				classroom = Frost North Studio 330
+				classroom = 'Frost North Studio 330'
 				instructor = ['Brian Russell']
 				startDate = 01/13
 				endDate = 04/28
-				status = Waitlist
+				status = 'Waitlist'
 				seatsAvailable = 40
 				capacity = 40
 				waitlistAvailable = 300
 				waitlistCapacity = 300
-				notes = ''
 				"""
 				try:
 						global currentSubject
@@ -246,7 +248,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						number = number.replace("Number", "")
 						currentCourse.classNumber = int(number)
 						currentCourse.session = classInfo[i + 1]
-						currentCourse.days = classInfo[i + 2].split(" ")
+						currentCourse.days = classInfo[i + 2].split()
 						if currentCourse.days[0] not in course.days:
 								"""
 								Example of classInfo with a section with multiple meetings:
@@ -284,14 +286,14 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 										return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
 								# almost no information case
 								setCourseStatus(currentCourse, classInfo, i, 2)
-								currentCourse.days = [""]
+								currentCourse.days = []
 								# insert list of "-" strings into classInfo to keep the same structure
 								for j in range(STRINGS_MISSING_IN_MINIMAL_INFO_SECTION):
 										classInfo.insert(i + 2, "-")
 								return [currentCourse]
 						try:  # This is where a course with multiple meetings diverges
-								currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p").time()
-								currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p").time()
+								currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p")
+								currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p")
 						except(ValueError):
 								if classInfo[i + 3] != "-":
 										return fillCourseObjectWithMultipleMeetings(currentCourse, classWebElement, classInfo, i)
@@ -299,14 +301,14 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						currentCourse.instructor = classInfo[i + 6].split(",\n\r")
 						dateString = classInfo[i + 7].split(" - ")
 						if dateString[0] == "02/29":
-								currentCourse.startDate = datetime.datetime(currentCourse.year, 2, 29).date()
+								currentCourse.startDate = datetime.datetime(currentCourse.year, 2, 29)
 						else:
-								currentCourse.startDate = datetime.datetime.strptime(dateString[0], "%m/%d").date()
+								currentCourse.startDate = datetime.datetime.strptime(dateString[0], "%m/%d")
 								currentCourse.startDate = currentCourse.startDate.replace(year=currentCourse.year)
 						if dateString[1] == "02/29":
-								currentCourse.endDate = datetime.datetime(currentCourse.year, 2, 29).date()
+								currentCourse.endDate = datetime.datetime(currentCourse.year, 2, 29)
 						else:
-								currentCourse.endDate = datetime.datetime.strptime(dateString[1], "%m/%d").date()
+								currentCourse.endDate = datetime.datetime.strptime(dateString[1], "%m/%d")
 								currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
 						setCourseStatus(currentCourse, classInfo, i, 8)
 
@@ -509,8 +511,10 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				setAcademicCareer(career)
 				setSubject(subject, DEBUG)
 
-		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToCSV=True, showProgress=True, checkIfRan=True):
-				if checkIfRan and course.was_data_collected_today(filename):
+		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToDB=True, showProgress=True, checkIfRan=True):
+				load_dotenv()
+				client = MongoClient(os.getenv("MONGO_URI"))
+				if checkIfRan and course.was_data_collected_today(client=client):
 					print("Data was already collected today. Returning...")
 					return
 				try:
@@ -530,28 +534,34 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								sys.stdout.write("Getting data for all terms\n")
 								sys.stdout.flush()
 								getAllTerms(DEBUG)
-						if saveToCSV:
+						if saveToDB:
 							if checkIfRan and course.was_data_collected_today(filename):
 								print("Data was already collected today. Returning...")
 								return
 							
 							global courses
-							sys.stdout.write("Saving data to " + filename + "\n")
+							# sys.stdout.write("Saving data to " + filename + "\n")
+							sys.stdout.write("Saving data to MongoDB\n")
 							sys.stdout.flush()
-							course.save_courses_to_csv(courses, filename)
-							print("Data saved to", filename)
+							# course.save_courses_to_csv(courses, filename)
+							course.save_courses_to_mongodb(client, courses)
+							# print("Data saved to", filename)
+							print("Data saved to MongoDB")
 						else:
 							print("Data not saved")
+						
+						client.close()
 							
 				except Exception as e:
 						print(type(e).__name__, e)
 						print("Current Term:", currentTerm)
 						print("Current Academic Career:", currentAcademicCareer)
 						print("Current Subject:", currentSubject)
+						client.close()
 						raise e
 
 		main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-				 filename="WebScraper/courses.csv", saveToCSV=True, showProgress=sys.stdout.isatty(),
+				 filename="WebScraper/courses.csv", saveToDB=True, showProgress=sys.stdout.isatty(),
 				 checkIfRan=True)
 
 executed_time = time.time() - start_time
