@@ -49,6 +49,14 @@ with keep.presenting():
 		'notes': 'NULL'
 	}
 	"""
+	# This range captures data for Spring, Summer, and Fall 2024
+	STARTING_IDX_FALL_2024 = 54788
+	ENDING_IDX_SPRING_2024 = 70719
+
+	# This range captures the latest data for Spring 2025
+	LATEST_IDX_SPRING_2025 = 802899
+	ENDING_IDX_SPRING_2025 = len(csvCourses)
+
 	# Convert the csv courses to the format that will be inserted into the database
 	courses = []
 	coursesTS = []
