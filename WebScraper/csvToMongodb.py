@@ -2,7 +2,7 @@ import datetime
 import os
 import csv
 from dotenv import load_dotenv
-from pymongo import MongoClient
+from pymongo import MongoClient, ReplaceOne
 from wakepy import keep
 
 # Load the environment variables
@@ -169,12 +169,31 @@ with keep.presenting():
 	sectionsTS = db['sectionsTS']
 	sections = db['sections']
 
-	# Insert the courses into the database in batches
+	# Insert the coursesTS into the database in batches
 	batch_size = 30000
-	for i in range(0, len(courses), batch_size):
-		sections.insert_many(courses[i:i + batch_size])
+	for i in range(0, len(coursesTS), batch_size):
 		sectionsTS.insert_many(coursesTS[i:i + batch_size])
-	print("Courses inserted into the database")
+
+	# Create bulk operations for sections - replacing existing documents with the latest data
+	bulk_operations = []
+	for course in courses:
+		# Create a filter to identify unique sections
+		filter_doc = {
+			'classNumber': course['classNumber'],
+			'semester': course['semester'],
+			'year': course['year']
+		}
+		
+		# Replace the document if it exists, or insert if it doesn't
+		bulk_operations.append(
+			ReplaceOne(filter_doc, course, upsert=True)
+		)
+
+	# Execute the bulk operations in batches
+	for i in range(0, len(bulk_operations), batch_size):
+		sections.bulk_write(bulk_operations[i:i + batch_size])
+
+	print("Courses inserted/updated in the database")
 
 	# Close the connection to the database
 	client.close()

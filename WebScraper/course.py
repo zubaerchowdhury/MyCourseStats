@@ -2,7 +2,7 @@ import datetime
 from functools import cache
 import csv
 import os
-from pymongo import MongoClient
+from pymongo import MongoClient, ReplaceOne
 
 class course:
 		#semesters = ["Spring", "Summer", "Fall", "Non-credit Term"]
@@ -77,7 +77,7 @@ class course:
 				return daysList
 
 		@staticmethod
-		def save_courses_to_csv(courses, filename="courses.csv"):
+		def saveCoursesToCsv(courses, filename="courses.csv"):
 				keys = list(course().__dict__.keys())
 				file_exists = os.path.isfile(filename)
 				
@@ -110,16 +110,27 @@ class course:
 				del self.waitlistAvailable
 				return tsEntry
 		
+		def createCourseReplacement(self):
+				return ReplaceOne(
+					{
+						"semester": self.semester,
+						"year": self.year,
+						"classNumber": self.classNumber
+					},
+					self.__dict__,
+					upsert=True
+				)
+
 		@staticmethod
-		def save_courses_to_mongodb(client: MongoClient, courses: list):
+		def saveCoursesToMongodb(client: MongoClient, courses: list):
 				db = client["courses"]
 				sections = db['sections']
 				sectionsTS = db['sectionsTS']
 				sectionsTS.insert_many([courseSection.createTimeSeriesEntry() for courseSection in courses])
-				sections.insert_many([courseSection.__dict__ for courseSection in courses])
+				sections.bulk_write([courseSection.createCourseReplacement() for courseSection in courses])
 												
 		@staticmethod
-		def was_data_collected_today(filename = None, client: MongoClient = None):
+		def wasDataCollectedToday(filename = None, client: MongoClient = None):
 				if client is not None:
 						db = client["courses"]
 						sectionsTS = db['sectionsTS']

@@ -514,7 +514,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToDB=True, showProgress=True, checkIfRan=True):
 				load_dotenv()
 				client = MongoClient(os.getenv("MONGO_URI"))
-				if checkIfRan and course.was_data_collected_today(client=client):
+				if checkIfRan and course.wasDataCollectedToday(client=client):
 					print("Data was already collected today. Returning...")
 					return
 				try:
@@ -535,7 +535,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								sys.stdout.flush()
 								getAllTerms(DEBUG)
 						if saveToDB:
-							if checkIfRan and course.was_data_collected_today(filename):
+							if checkIfRan and course.wasDataCollectedToday(filename):
 								print("Data was already collected today. Returning...")
 								return
 							
@@ -544,7 +544,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 							sys.stdout.write("Saving data to MongoDB\n")
 							sys.stdout.flush()
 							# course.save_courses_to_csv(courses, filename)
-							course.save_courses_to_mongodb(client, courses)
+							course.saveCoursesToMongodb(client, courses)
 							# print("Data saved to", filename)
 							print("Data saved to MongoDB")
 						else:
