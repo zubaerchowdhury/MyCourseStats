@@ -110,16 +110,22 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				meetingPatternsTable = driver.find_element(By.CSS_SELECTOR, "[aria-label='meeting patterns']")
 				meetingPatternsInfo = meetingPatternsTable.find_elements(By.XPATH, ".//tbody//p")
 				meetingPatternsInfo = list(map(lambda x: x.get_attribute("textContent"), meetingPatternsInfo)) # map list of WebElements to list of strings
-				currentCourseList = []
-				partialCourse = currentCourse
 				setCourseStatus(currentCourse, classInfo, i, 3)
 				stringsInEachRow = STRINGS_IN_EACH_TABLE_ROW if len(meetingPatternsInfo) % STRINGS_IN_EACH_TABLE_ROW == 0 else STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC
-				
-				# create a course object for each meeting
-				for j in range(0, len(meetingPatternsInfo), stringsInEachRow):
-						# fill in information that was already filled in
-						currentCourse = copy.deepcopy(partialCourse)
+				# create multiple meetings structure
+				currentCourse.multipleMeetings = True
+				if stringsInEachRow == STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC:
+						currentCourse.addTopic([])
+				currentCourse.startDate = []
+				currentCourse.endDate = []
+				currentCourse.instructor = []
+				currentCourse.days = []
+				currentCourse.timeStart = []
+				currentCourse.timeEnd = []
+				currentCourse.classroom = []
 
+				# create one course object that consists of information for every meeting
+				for j in range(0, len(meetingPatternsInfo), stringsInEachRow):
 						# fill in information that is different for each meeting
 						"""
 						Example of meetingPatternsInfo:
@@ -143,27 +149,25 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						17: Stubblefield 204
 						"""
 
-						currentCourse.startDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y")
-						currentCourse.endDate = datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y")
+						currentCourse.startDate.append(datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[0], "%m/%d/%Y"))
+						currentCourse.endDate.append(datetime.datetime.strptime(meetingPatternsInfo[j].split(" - ")[1], "%m/%d/%Y"))
 						meetingPatternsInfo[j + 1] = meetingPatternsInfo[j + 1].replace("\n\r", " ")
-						currentCourse.instructor = meetingPatternsInfo[j + 1].split(", ")
-						currentCourse.days = course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2])
+						currentCourse.instructor.append(meetingPatternsInfo[j + 1].split(", "))
+						currentCourse.days.append(course.mapDaysAbrvToFull(meetingPatternsInfo[j + 2]))
 						if meetingPatternsInfo[j + 3] != "-":
-								currentCourse.timeStart = datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p")
+								currentCourse.timeStart.append(datetime.datetime.strptime(meetingPatternsInfo[j + 3], "%I:%M%p"))
 						if meetingPatternsInfo[j + 4] != "-":
-								currentCourse.timeEnd = datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p")
-						currentCourse.classroom = meetingPatternsInfo[j + 5]
-						currentCourse.multipleMeetings = True
+								currentCourse.timeEnd.append(datetime.datetime.strptime(meetingPatternsInfo[j + 4], "%I:%M%p"))
+						currentCourse.classroom.append(meetingPatternsInfo[j + 5])
 						if stringsInEachRow == STRINGS_IN_EACH_TABLE_ROW_WITH_TOPIC:
-								currentCourse.addTopic(meetingPatternsInfo[j + 6])
-						currentCourseList.append(currentCourse)
+								currentCourse.topic.append(meetingPatternsInfo[j + 6])
 						
 				# insert list of "Multiple" strings into classInfo to keep the same structure
 				for j in range(STRINGS_MISSING_IN_MULTIPLE_MEETINGS_SECTION):
 						classInfo.insert(i + 3, "Multiple")
 
 				currentButton.click() # Close the table
-				return currentCourseList
+				return currentCourse
 
 		def fillCourseObject(classWebElement: WebElement, classInfo: list[str], className: str, i: int):
 				"""
@@ -290,7 +294,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								# insert list of "-" strings into classInfo to keep the same structure
 								for j in range(STRINGS_MISSING_IN_MINIMAL_INFO_SECTION):
 										classInfo.insert(i + 2, "-")
-								return [currentCourse]
+								return currentCourse
 						try:  # This is where a course with multiple meetings diverges
 								currentCourse.timeStart = datetime.datetime.strptime(classInfo[i + 3], "%I:%M %p")
 								currentCourse.timeEnd = datetime.datetime.strptime(classInfo[i + 4], "%I:%M %p")
@@ -312,7 +316,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								currentCourse.endDate = currentCourse.endDate.replace(year=currentCourse.year)
 						setCourseStatus(currentCourse, classInfo, i, 8)
 
-						return [currentCourse]
+						return currentCourse
 				except Exception as e:
 						print(type(e).__name__, e)
 						print("Error in fillCourseObject")
@@ -346,15 +350,13 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 										printClassInfo(classInfo)
 								i = 0
 								while i < len(classInfo):
-										classSectionList = fillCourseObject(c, classInfo, className, i)
+										classSection = fillCourseObject(c, classInfo, className, i)
 										if DEBUG:
-												if len(classSectionList) > 1:
+												if classSection.multipleMeetings:
 														print("MULTIPLE MEETINGS")
-												for classSection in classSectionList:
-														print(classSection)
+												print(classSection)
 												print()
-										for classSection in classSectionList:
-												courses.append(classSection)
+										courses.append(classSection)
 										i += STRINGS_IN_EACH_SECTION
 								if DEBUG: print()
 

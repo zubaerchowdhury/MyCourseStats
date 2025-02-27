@@ -56,7 +56,7 @@ class course:
 		def __repr__(self):
 				return str(self.__dict__)
 		
-		def addTopic(self, topic: str):
+		def addTopic(self, topic):
 				self.topic = topic
 
 		def addReservedSeats(self, reservedSeatsAvailable: int, reservedSeatsCapacity: int):
