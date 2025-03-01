@@ -48,17 +48,17 @@ namespace Backend.Controllers
         /// <param name="subjectCode"></param>
         /// <param name="catalogNumber"></param>
         /// <returns> List of historical instructors </returns>
-        // TESTING: curl -X GET "https://localhost:5184/api/stats/historical-instructors?subjectName=Electrical%20%26%20Computer%20Engineer&subjectCode=ECE&catalogNumber=421" -H  "accept: text/plain"
+        // TESTING: curl -X GET "http://localhost:5184/api/stats/historical-instructors?subjectCode=ECE&catalogNumber=421" -H  "accept: text/plain"
         [HttpGet("historical-instructors")]
-        public async Task<IActionResult> GetHistoricalInstructors([FromQuery] string subjectName, [FromQuery] string subjectCode, [FromQuery] string catalogNumber)
+        public async Task<IActionResult> GetHistoricalInstructors([FromQuery] string subjectCode, [FromQuery] string catalogNumber)
         {
-            if (string.IsNullOrEmpty(subjectName) || string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber))
+            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber))
             {
                 return BadRequest("Please provide subject name, subject code, and catalog number.");
             }
             try
             {
-                List<string> instructors = await _mongoDbService.GetHistoricalInstructors(subjectName, subjectCode, catalogNumber);
+                List<string> instructors = await _mongoDbService.GetHistoricalInstructors(subjectCode, catalogNumber);
                 if (instructors == null || instructors.Count == 0)
                 {
                     return NotFound("No instructors found for the given course.");

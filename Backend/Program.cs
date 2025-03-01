@@ -5,9 +5,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // MongoDB configuration
 builder.Services.Configure<MongoDBConfig>(builder.Configuration.GetSection("MongoDB"));
-builder.Services.AddSingleton<MongoDBService>(); // Register MongoDBService
-
 builder.Services.AddSingleton(builder.Configuration.GetSection("MongoDB").Get<MongoDBConfig>());
+
+// Register services
+builder.Services.AddSingleton<MongoDBService>();
+builder.Services.AddSingleton<StatsService>();
+
+// http://localhost:5184/api/stats/historical-instructors?subjectName=Electrical%20%26%20Computer%20Engineer&subjectCode=ECE&catalogNumber=421
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();

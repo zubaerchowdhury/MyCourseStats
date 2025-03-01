@@ -12,14 +12,13 @@
 
 // Find all instructors for a specific course
 use("courses"); // Select the database to use
-subjectName = "Architecture";
-subjectCode = "ARC";
-catalogNumber = "586";
+subjectCode = "ECE";
+catalogNumber = "421";
 db.getCollection("sections").aggregate(
   [
     {
       $match: {
-        subjectName: `${subjectName}`,
+        // subjectName: `${subjectName}`,
 				subjectCode: `${subjectCode}`,
         catalogNumber: `${catalogNumber}`,
         instructor: {
@@ -42,7 +41,7 @@ db.getCollection("sections").aggregate(
     {
       $group: {
         _id: {
-          subjectName: "$subjectName",
+          // subjectName: "$subjectName",
           subjectCode: "$subjectCode",
           catalogNumber: "$catalogNumber",
         },
@@ -50,13 +49,7 @@ db.getCollection("sections").aggregate(
           $addToSet: "$instructor",
         },
       },
-    },
-    {
-      $project: {
-        _id: 0,
-        instructors: "$instructors",
-      },
-    },
+    }
   ],
   { maxTimeMS: 60000, allowDiskUse: true }
 );

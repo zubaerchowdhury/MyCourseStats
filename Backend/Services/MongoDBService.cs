@@ -36,41 +36,22 @@ public class MongoDBService
     /// Get list of all instructors that have taught a course 
     /// based on subject name, subject code, and catalog number
     /// </summary>
-    /// <param name="subjectName"></param>
     /// <param name="subjectCode"></param>
     /// <param name="catalogNumber"></param>
     /// <returns> A list of historical instructors </returns>
-    public async Task<List<string>> GetHistoricalInstructors(string subjectName, string subjectCode, string catalogNumber)
+    public async Task<List<string>> GetHistoricalInstructors(string subjectCode, string catalogNumber)
     {
         var filter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("subjectName", subjectName),
             Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
             Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
             Builders<BsonDocument>.Filter.Nin("instructor", new BsonArray { "X TBA", BsonNull.Value })
         );
 
-        var pipeline = new[]
-        {
-            new BsonDocument("$match", filter.ToBsonDocument()),
-            new BsonDocument("$unwind", new BsonDocument("path", "$instructor").Add("preserveNullAndEmptyArrays", false)),
-            new BsonDocument("$unwind", new BsonDocument("path", "$instructor").Add("preserveNullAndEmptyArrays", false)),
-            new BsonDocument("$group", new BsonDocument
-            {
-                { "_id", new BsonDocument
-                    {
-                        { "subjectName", "$subjectName" },
-                        { "subjectCode", "$subjectCode" },
-                        { "catalogNumber", "$catalogNumber" }
-                    }
-                },
-                { "instructors", new BsonDocument("$addToSet", "$instructor") }
-            }),
-            new BsonDocument("$project", new BsonDocument
-            {
-                { "_id", 0 },
-                { "instructors", "$instructors" }
-            })
-        };
+        var pipeline = new EmptyPipelineDefinition<BsonDocument>()
+            .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $match: { subjectCode: '" + subjectCode + "', catalogNumber: '" + catalogNumber + "', instructor: { $nin: [ 'X TBA', null ] } } }")
+            .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $unwind: { path: '$instructor', preserveNullAndEmptyArrays: false } }")
+            .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $unwind: { path: '$instructor', preserveNullAndEmptyArrays: false } }")
+            .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $group: { _id: { subjectCode: '$subjectCode', catalogNumber: '$catalogNumber' }, instructors: { $addToSet: '$instructor' } } }");
 
         var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
         var result = await _sectionsCollection.AggregateAsync<BsonDocument>(pipeline, options);
