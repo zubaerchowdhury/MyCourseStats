@@ -115,3 +115,11 @@ db.getCollection("sections").aggregate(
   ],
   { maxTimeMS: 60000, allowDiskUse: true }
 );
+
+// Find latest dateTimeRetrieved
+use("courses");
+db.getCollection("sectionsTS").findOne(
+	{},
+	{ dateTimeRetrieved: 1, _id: 0 },
+	{ sort: { dateTimeRetrieved: -1 } }
+);
