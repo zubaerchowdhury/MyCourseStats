@@ -18,7 +18,6 @@ db.getCollection("sections").aggregate(
   [
     {
       $match: {
-        // subjectName: `${subjectName}`,
 				subjectCode: `${subjectCode}`,
         catalogNumber: `${catalogNumber}`,
         instructor: {
@@ -41,7 +40,6 @@ db.getCollection("sections").aggregate(
     {
       $group: {
         _id: {
-          // subjectName: "$subjectName",
           subjectCode: "$subjectCode",
           catalogNumber: "$catalogNumber",
         },
