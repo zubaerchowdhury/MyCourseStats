@@ -38,20 +38,22 @@ class course:
 				self.instructor = []
 				self.startDate = datetime.datetime(1900, 1, 1)
 				self.endDate = datetime.datetime(1900, 1, 1)
-				# self.units = ""
 				self.status = "NULL"
 				self.seatsAvailable = 0
 				self.capacity = 0
 				self.waitlistAvailable = 300
 				self.waitlistCapacity = 300
+				self.multipleMeetings = False
+				# Make sure that the datetime is in EST but is timezone naive
+				EST = datetime.timezone(datetime.timedelta(hours=-5))
+				self.dateTimeRetrieved = datetime.datetime.now(EST).replace(tzinfo=None)
 				# self.reservedSeatsAvailable = 0
 				# self.reservedSeatsCapacity = 0
-				self.multipleMeetings = False
 				# self.topic = "NULL"
-				self.dateTimeRetrieved = datetime.datetime.now()
 				# self.notes = "NULL"
 				# self.decription = ""
 				# self.prerequisites = ""
+				# self.units = ""
 
 		def __repr__(self):
 				return str(self.__dict__)
@@ -141,7 +143,9 @@ class course:
 						)
 						if today_entry:
 							dateTimeRetrieved = today_entry["dateTimeRetrieved"]
-							if dateTimeRetrieved.date() == datetime.date.today():
+							EST = datetime.timezone(datetime.timedelta(hours=-5))
+							today = datetime.datetime.now(EST).date()
+							if dateTimeRetrieved.date() == today:
 								return True
 						return False
 				if filename is not None:
