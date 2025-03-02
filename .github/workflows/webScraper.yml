@@ -66,14 +66,19 @@ jobs:
           echo "WebScraper ended at $(date)" >> WebScraper/logs/action_log.txt
           echo "Exit code: $?" >> WebScraper/logs/action_log.txt
 
+      - name: Set timestamp for artifact name
+        id: timestamp
+        run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_OUTPUT
+
       - name: Upload execution log as artifact
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: webscraper-logs
+          name: webscraper-logs-${{ steps.timestamp.outputs.timestamp }}
           path: WebScraper/logs/
+          retention-days: 30
 
-      - name: Remove GH runner IP from MongDB access list
+      - name: Remove GH runner IP from MongoDB access list
         if: always()
         shell: bash
         run: |
