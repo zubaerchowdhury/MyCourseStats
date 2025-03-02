@@ -801,3 +801,16 @@ Data saved to WebScraper/courses.csv
 Execution time: 20.0 minutes and 23.508413076400757 seconds
 WebScraper ended at 2025-02-26 18:17:48.704485
 Exit code: 0
+##################################################
+WebScraper run manually on 2025-02-27
+Spring 2025 data saved into MongoDB
+##################################################
+WebScraper started at 2025-02-28 17:51:46.693512-05:00 EST
+Waiting for internet connection...
+Internet connection established.
+Getting data for Spring 2025
+Saving data to MongoDB
+Data saved to MongoDB
+Execution time: 15.0 minutes and 21.2254900932312 seconds
+WebScraper ended at 2025-02-28 18:07:08.426154
+Exit code: 0
