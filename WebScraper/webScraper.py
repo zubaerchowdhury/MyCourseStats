@@ -513,10 +513,10 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				setAcademicCareer(career)
 				setSubject(subject, DEBUG)
 
-		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="courses.csv", saveToDB=True, showProgress=True, checkIfRan=True):
+		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="WebScraper/courses.csv", saveData=True, showProgress=True, checkIfRan=True):
 				load_dotenv()
 				client = MongoClient(os.getenv("MONGO_URI"))
-				if checkIfRan and course.wasDataCollectedToday(client=client):
+				if checkIfRan and course.wasDataCollectedToday(filename, client):
 					print("Data was already collected today. Returning...")
 					return
 				try:
@@ -536,19 +536,21 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								sys.stdout.write("Getting data for all terms\n")
 								sys.stdout.flush()
 								getAllTerms(DEBUG)
-						if saveToDB:
-							if checkIfRan and course.wasDataCollectedToday(filename):
+						if saveData:
+							if checkIfRan and course.wasDataCollectedToday(filename, client):
 								print("Data was already collected today. Returning...")
 								return
-							
 							global courses
-							# sys.stdout.write("Saving data to " + filename + "\n")
-							sys.stdout.write("Saving data to MongoDB\n")
-							sys.stdout.flush()
-							# course.save_courses_to_csv(courses, filename)
-							course.saveCoursesToMongodb(client, courses)
-							# print("Data saved to", filename)
-							print("Data saved to MongoDB")
+							if filename is not None:
+								sys.stdout.write("Saving data to " + filename + "\n")
+								sys.stdout.flush()
+								course.save_courses_to_csv(courses, filename)
+								print("Data saved to", filename)
+							else:
+								sys.stdout.write("Saving data to MongoDB\n")
+								sys.stdout.flush()
+								course.saveCoursesToMongodb(client, courses)
+								print("Data saved to MongoDB")
 						else:
 							print("Data not saved")
 						
@@ -563,7 +565,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						raise e
 
 		main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-				 filename="WebScraper/courses.csv", saveToDB=True, showProgress=sys.stdout.isatty(),
+				 filename=None, saveData=True, showProgress=sys.stdout.isatty(),
 				 checkIfRan=True)
 
 executed_time = time.time() - start_time
