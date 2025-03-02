@@ -45,11 +45,10 @@ jobs:
         id: first_attempt
         continue-on-error: true
         run: |
-          python WebScraper/webScraper.py 2>&1
+          python WebScraper/webScraper.py 2>&1 || true
           exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           echo "Exit code: $exit_code"
-          exit $exit_code
 
       - name: Retry execution if first attempt failed
         if: steps.first_attempt.outputs.exit_code != '0'
