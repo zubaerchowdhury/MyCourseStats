@@ -41,10 +41,40 @@ jobs:
         run: |
           atlas accessLists create ${{ steps.get_gh_runner_ip.outputs.ip_address }} --type ipAddress --projectId ${{ env.MONGODB_ATLAS_PROJECT_ID }} --comment  "Temporary access for GH Action"
 
-      - name: Execute the python script
-        run: python -m WebScraper/webScraper.py
+      - name: Create log directory
+        run: mkdir -p WebScraper/logs
+
+      - name: First attempt to execute the python script
+        id: first_attempt
+        continue-on-error: true
+        run: |
+          echo "##################################################" > WebScraper/logs/action_log.txt
+          echo "WebScraper started at $(date)" >> WebScraper/logs/action_log.txt
+          python -m WebScraper/webScraper.py 2>&1 | tee -a WebScraper/logs/action_log.txt
+          exit_code=$?
+          echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
+          echo "WebScraper ended at $(date)" >> WebScraper/logs/action_log.txt
+          echo "Exit code: $exit_code" >> WebScraper/logs/action_log.txt
+          exit $exit_code
+
+      - name: Retry execution if first attempt failed
+        if: steps.first_attempt.outputs.exit_code != '0'
+        run: |
+          echo "WebScraper run failed." >> WebScraper/logs/action_log.txt
+          echo "Attempting to run the WebScraper again..." >> WebScraper/logs/action_log.txt
+          python -m WebScraper/webScraper.py 2>&1 | tee -a WebScraper/logs/action_log.txt
+          echo "WebScraper ended at $(date)" >> WebScraper/logs/action_log.txt
+          echo "Exit code: $?" >> WebScraper/logs/action_log.txt
+
+      - name: Upload execution log as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: webscraper-logs
+          path: WebScraper/logs/
 
       - name: Remove GH runner IP from MongDB access list
+        if: always()
         shell: bash
         run: |
           atlas accessLists delete ${{ steps.get_gh_runner_ip.outputs.ip_address }} --projectId ${{ env.MONGODB_ATLAS_PROJECT_ID }} --force
