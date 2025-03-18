@@ -17,17 +17,24 @@ namespace Backend.Controllers
             _statsService = statsService;
         }
 
-        // TODO: determine date formula
+        /// <summary>
+        /// API endpoint to get probability of enrolling in to a course based on subject code, catalog number, and date-time
+        /// </summary>
+        /// <endpoint>GET /api/stats/probability-of-enrollment</endpoint>
+        /// <param name="subjectCode"></param>
+        /// <param name="catalogNumber"></param>
+        /// <param name="dateTime"></param>
+        /// <returns> A string containing the likelihood of successfully enrolling into a course  </returns>
         [HttpGet("probability-of-enrollment")]
-        public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] int date)
+        public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
         {
-            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || date == 0)
+            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || dateTime == )
             {
                 return BadRequest("Please provide subject code, catalog number, date.");
             }
             try
             {
-                List<string>
+
             }
 
 
