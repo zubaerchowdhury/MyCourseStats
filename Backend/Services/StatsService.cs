@@ -25,7 +25,7 @@ namespace Backend.Services
             var dailyChanges = new List<double>();
 
             // Calculate the daily change in seatsOpen
-            for (int i = 1; i < dailySeatsOpen.Count; i++)
+            for (int i = 1; i < dailySeatsOpen.Count; ++i)
             {
                 var dailyChange = dailySeatsOpen[i].SeatsOpen - dailySeatsOpen[i - 1].SeatsOpen;
                 dailyChanges.Add(dailyChange);

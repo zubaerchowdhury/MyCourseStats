@@ -17,34 +17,36 @@ namespace Backend.Controllers
             _statsService = statsService;
         }
 
+        // TODO: determine date formula
+        [HttpGet("probability-of-enrollment")]
+        public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] int date)
+        {
+            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || date == 0)
+            {
+                return BadRequest("Please provide subject code, catalog number, date.");
+            }
+            try
+            {
+                List<string>
+            }
 
-        // [HttpGet("course-statistics")]
-        // public async Task<IActionResult> CalculateCourseStatistics([FromQuery] string subjectName, [FromQuery] string subjectCode, [FromQuery] int weeks = 1)
-        // {
-        //     // Query MongoDB for course data based on subject name, subject code, and time frame (weeks)
-        //     var data = await _mongoDbService.GetCourseDataAsync(subjectName, subjectCode, weeks);
 
-        //     if (data == null || data.Count == 0)
-        //     {
-        //         return NotFound("No data found for the subject and subjectCode inputs.");
-        //     }
+        }
 
-        //     // Perform calculations using StatsService
-        //     var dailyChanges = statsService.CalculateDailyChanges(data);
-        //     var weeklyStatistics = statsService.CalculateWeeklyStatistics(data);
+        [HttpGet("enrollment-rate")]
+        public async Task<IActionResult> CalculateEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] int weeks = 1)
+        {
+            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || weeks == 0)
+            {
+                return BadRequest("Please provide semester, year, and weeks.");
+            }
 
-        //     return Ok(new
-        //     {
-        //         DailyChanges = dailyChanges,
-        //         WeeklyStatistics = weeklyStatistics
-        //     });
-        // }
+        }
 
         /// <summary>
         /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
         /// </summary>
         /// <endpoint>GET /api/stats/historical-instructors</endpoint>
-        /// <param name="subjectName"></param>
         /// <param name="subjectCode"></param>
         /// <param name="catalogNumber"></param>
         /// <returns> List of historical instructors </returns>
@@ -71,6 +73,5 @@ namespace Backend.Controllers
             }
         }
     }
-
 
 }
