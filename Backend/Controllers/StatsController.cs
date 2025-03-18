@@ -40,6 +40,13 @@ namespace Backend.Controllers
 
         }
 
+        /// <summary>
+        /// API endpoint to get the daily changes in seatsOpen for a course based on semester, year, and 
+        /// </summary>
+        /// <param name="semester"></param>
+        /// <param name="year"></param>
+        /// <param name="weeks"></param>
+        /// <returns></returns>
         [HttpGet("enrollment-rate")]
         public async Task<IActionResult> CalculateEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] int weeks = 1)
         {
