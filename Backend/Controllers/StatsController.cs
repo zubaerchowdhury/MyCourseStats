@@ -25,20 +25,20 @@ namespace Backend.Controllers
         /// <param name="catalogNumber"></param>
         /// <param name="dateTime"></param>
         /// <returns> A string containing the likelihood of successfully enrolling into a course  </returns>
-        [HttpGet("probability-of-enrollment")]
-        public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
-        {
-            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || dateTime == )
-            {
-                return BadRequest("Please provide subject code, catalog number, date.");
-            }
-            try
-            {
+        // [HttpGet("probability-of-enrollment")]
+        // public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
+        // {
+        //     if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || dateTime == )
+        //     {
+        //         return BadRequest("Please provide subject code, catalog number, date.");
+        //     }
+        //     try
+        //     {
 
-            }
+        //     }
 
 
-        }
+        // }
 
         /// <summary>
         /// API endpoint to get the daily changes in seatsOpen for a course based on semester, year, and 
@@ -47,15 +47,15 @@ namespace Backend.Controllers
         /// <param name="year"></param>
         /// <param name="weeks"></param>
         /// <returns></returns>
-        [HttpGet("enrollment-rate")]
-        public async Task<IActionResult> CalculateEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] int weeks = 1)
-        {
-            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || weeks == 0)
-            {
-                return BadRequest("Please provide semester, year, and weeks.");
-            }
+        // [HttpGet("enrollment-rate")]
+        // public async Task<IActionResult> CalculateEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] int weeks = 1)
+        // {
+        //     if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || weeks == 0)
+        //     {
+        //         return BadRequest("Please provide semester, year, and weeks.");
+        //     }
 
-        }
+        // }
 
         /// <summary>
         /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
