@@ -514,8 +514,6 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				setSubject(subject, DEBUG)
 
 		def main(DEBUG=False, Term=None, Career=None, Subject=None, filename="WebScraper/courses.csv", saveData=True, showProgress=True, checkIfRan=True):
-				print("Testing stdout")
-				raise Exception("Testing stderr")
 				load_dotenv()
 				client = MongoClient(os.getenv("MONGO_URI"))
 				if checkIfRan and course.wasDataCollectedToday(filename, client):
