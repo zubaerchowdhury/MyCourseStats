@@ -43,9 +43,10 @@ jobs:
 
       - name: First attempt to execute the python script
         id: first_attempt
+        shell: bash
         continue-on-error: true
         run: |
-          python WebScraper/webScraper.py || true
+          python WebScraper/webScraper.py
           exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           echo "Exit code: $exit_code"
