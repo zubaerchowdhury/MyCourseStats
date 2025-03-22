@@ -45,7 +45,7 @@ jobs:
         id: first_attempt
         continue-on-error: true
         run: |
-          python WebScraper/webScraper.py
+          python WebScraper/webScraper.py || true
           exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           echo "Exit code: $exit_code"
