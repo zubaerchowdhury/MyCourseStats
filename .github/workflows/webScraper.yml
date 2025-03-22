@@ -45,7 +45,7 @@ jobs:
         id: first_attempt
         continue-on-error: true
         run: |
-          python WebScraper/webScraper.py 2>&1 || true
+          python WebScraper/webScraper.py
           exit_code=$?
           echo "exit_code=$exit_code" >> $GITHUB_OUTPUT
           echo "Exit code: $exit_code"
@@ -53,7 +53,7 @@ jobs:
       - name: Retry execution if first attempt failed
         if: steps.first_attempt.outputs.exit_code != '0'
         run: |
-          python WebScraper/webScraper.py 2>&1
+          python WebScraper/webScraper.py
 
       - name: Remove GH runner IP from MongoDB access list
         if: always()
