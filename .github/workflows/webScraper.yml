@@ -45,8 +45,6 @@ jobs:
         id: first_attempt
         continue-on-error: true
         run: |
-          # Force the step to fail if any command within it fails
-          set -e
           python WebScraper/webScraper.py
 
       - name: Retry execution if first attempt failed
