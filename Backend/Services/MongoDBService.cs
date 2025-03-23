@@ -58,4 +58,33 @@ public class MongoDBService
         var resultList = await result.ToListAsync();
         return resultList.Count == 0 ? [] : resultList.First()["instructors"].AsBsonArray.Select(x => x.AsString).ToList();
     }
+
+    /// <summary>
+    /// Get capacity of course from "sections" collection and seatsAvailable from "sectionsTS" collection of Spring 2025 for a course
+    /// based on semester, year, dateTimeRetrieved=2024-11-04T00:14:53.000+00:00, subjectCode, catalogNumber, and classNumber
+    /// </summary>
+    /// <param name="semester"></param>
+    /// <param name="year"></param>
+    /// <param name="subjectCode"></param>
+    /// <param name="catalogNumber"></param>
+    /// <param name="classNumber"></param>
+    /// <param name="dateTimeRetrieved"></param>
+    /// <returns> A list of capacity and seatsAvailable</returns>
+    public async Task<List<BsonDocument>> GetEnrollmentData(string semester, string year, string subjectCode, string catalogNumber, string classNumber, string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("semester", semester),
+            Builders<BsonDocument>.Filter.Eq("year", year),
+            Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
+            Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
+            Builders<BsonDocument>.Filter.Eq("classNumber", classNumber),
+            Builders<BsonDocument>.Filter.Eq("dateTimeRetrieved", dateTimeRetrieved)
+        );
+
+        var projection = Builders<BsonDocument>.Projection.Include("capacity").Include("seatsAvailable").Exclude("_id");
+
+        var result = await _timeSeriesCollection.Find(filter).Project(projection).ToListAsync();
+        return result;
+    }
+
 }

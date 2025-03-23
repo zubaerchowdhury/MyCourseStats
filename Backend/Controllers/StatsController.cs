@@ -18,6 +18,40 @@ namespace Backend.Controllers
         }
 
         /// <summary>
+        /// API endpoint to get the enrollment rate for the dateTimeRetrieved date for a course based on semester, year, subject code, and catalog number
+        /// </summary>
+        /// <param name="semester"></param>
+        /// <param name="year"></param>
+        /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
+        /// <param name="subjectCode"></param>
+        /// <param name="catalogNumber"></param>
+        /// <param name="classNumber"></param>
+        /// <returns>2-D List of [Date][filled-percentage, changed-percentage][</returns>
+        [HttpGet("enrollment-rate")]
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+        {
+            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || string.IsNullOrEmpty(classNumber))
+            {
+                return BadRequest("Please provide semester, year, subject code, catalog number, and class number.");
+            }
+            try
+            {
+                List<BsonDocument> data = await _mongoDbService.GetEnrollmentData(semester, year, dateTimeRetrieved, subjectCode, catalogNumber, classNumber);
+                if (data == null || data.Count == 0)
+                {
+                    return NotFound("No data found for the given course.");
+                }
+                List<double> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
+                return Ok(enrollmentRates);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// API endpoint to get probability of enrolling in to a course based on subject code, catalog number, and date-time
         /// </summary>
         /// <endpoint>GET /api/stats/probability-of-enrollment</endpoint>
@@ -26,7 +60,7 @@ namespace Backend.Controllers
         /// <param name="dateTime"></param>
         /// <returns> A string containing the likelihood of successfully enrolling into a course  </returns>
         // [HttpGet("probability-of-enrollment")]
-        // public async Task<IActionResult> CalculateProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
+        // public async Task<IActionResult> GetProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
         // {
         //     if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || dateTime == )
         //     {
@@ -37,23 +71,6 @@ namespace Backend.Controllers
 
         //     }
 
-
-        // }
-
-        /// <summary>
-        /// API endpoint to get the daily changes in seatsOpen for a course based on semester, year, and 
-        /// </summary>
-        /// <param name="semester"></param>
-        /// <param name="year"></param>
-        /// <param name="weeks"></param>
-        /// <returns></returns>
-        // [HttpGet("enrollment-rate")]
-        // public async Task<IActionResult> CalculateEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] int weeks = 1)
-        // {
-        //     if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || weeks == 0)
-        //     {
-        //         return BadRequest("Please provide semester, year, and weeks.");
-        //     }
 
         // }
 
