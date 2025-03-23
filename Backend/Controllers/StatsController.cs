@@ -18,14 +18,44 @@ namespace Backend.Controllers
         }
 
         /// <summary>
+        /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
+        /// </summary>
+        /// <endpoint>GET /api/stats/historical-instructors</endpoint>
+        /// <param name="subjectCode"></param>
+        /// <param name="catalogNumber"></param>
+        /// <returns> List of historical instructors </returns>
+        // TESTING: curl -X GET "http://localhost:5184/api/stats/historical-instructors?subjectCode=ECE&catalogNumber=421" -H  "accept: text/plain"
+        [HttpGet("historical-instructors")]
+        public async Task<IActionResult> GetHistoricalInstructors([FromQuery] string subjectCode, [FromQuery] string catalogNumber)
+        {
+            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber))
+            {
+                return BadRequest("Please provide subject name, subject code, and catalog number.");
+            }
+            try
+            {
+                List<string> instructors = await _mongoDbService.QueryHistoricalInstructors(subjectCode, catalogNumber);
+                if (instructors == null || instructors.Count == 0)
+                {
+                    return NotFound("No instructors found for the given course.");
+                }
+                return Ok(instructors);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// API endpoint to get the enrollment rate for the dateTimeRetrieved date for a course based on semester, year, subject code, and catalog number
         /// </summary>
         /// <param name="semester"></param>
         /// <param name="year"></param>
-        /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
         /// <param name="subjectCode"></param>
         /// <param name="catalogNumber"></param>
         /// <param name="classNumber"></param>
+        /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
         /// <returns>2-D List of [Date][filled-percentage, changed-percentage][</returns>
         [HttpGet("enrollment-rate")]
         public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
@@ -36,7 +66,7 @@ namespace Backend.Controllers
             }
             try
             {
-                List<BsonDocument> data = await _mongoDbService.GetEnrollmentData(semester, year, dateTimeRetrieved, subjectCode, catalogNumber, classNumber);
+                List<string> data = await _mongoDbService.QueryEnrollmentData(semester, year, subjectCode, catalogNumber, classNumber, dateTimeRetrieved);
                 if (data == null || data.Count == 0)
                 {
                     return NotFound("No data found for the given course.");
@@ -44,7 +74,6 @@ namespace Backend.Controllers
                 List<double> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
                 return Ok(enrollmentRates);
             }
-
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
@@ -74,35 +103,7 @@ namespace Backend.Controllers
 
         // }
 
-        /// <summary>
-        /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
-        /// </summary>
-        /// <endpoint>GET /api/stats/historical-instructors</endpoint>
-        /// <param name="subjectCode"></param>
-        /// <param name="catalogNumber"></param>
-        /// <returns> List of historical instructors </returns>
-        // TESTING: curl -X GET "http://localhost:5184/api/stats/historical-instructors?subjectCode=ECE&catalogNumber=421" -H  "accept: text/plain"
-        [HttpGet("historical-instructors")]
-        public async Task<IActionResult> GetHistoricalInstructors([FromQuery] string subjectCode, [FromQuery] string catalogNumber)
-        {
-            if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber))
-            {
-                return BadRequest("Please provide subject name, subject code, and catalog number.");
-            }
-            try
-            {
-                List<string> instructors = await _mongoDbService.GetHistoricalInstructors(subjectCode, catalogNumber);
-                if (instructors == null || instructors.Count == 0)
-                {
-                    return NotFound("No instructors found for the given course.");
-                }
-                return Ok(instructors);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+
     }
 
 }
