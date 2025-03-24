@@ -92,3 +92,46 @@ public class MongoDBService
     }
 
 }
+
+/* --sections collections query--
+
+- Ideal Query- 
+{
+  semester: "Spring",
+  year: 2025,
+  subjectCode: "ECE",
+  catalogNumber: "118",
+  classNumber: 6273,
+  dateTimeRetrieved: {
+    $gte: ISODate("2025-11-04T00:00:00.000Z"),
+    $lt: ISODate("2025-11-11T00:00:00.000Z")
+  }
+}
+
+- Adjusted Query -
+{
+  semester: "Spring",
+  year: 2025,
+  subjectCode: "ECE",
+  catalogNumber: "118",
+  classNumber: 6273,
+  dateTimeRetrieved: {
+    $gte: ISODate("2025-03-23T00:00:00.000Z"),
+    $lt: ISODate("2025-03-30T00:00:00.000Z")
+  }
+}
+
+
+--sectionsTS collections query--
+{
+  "courseInfo.semester": "Spring",
+  "courseInfo.classNumber": 6273,
+  "courseInfo.year": 2025,
+  "status": "Open"
+}
+{
+  seatsAvailable: 1,
+  _id: 0
+}
+
+*/
