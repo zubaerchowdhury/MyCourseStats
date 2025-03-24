@@ -17,34 +17,10 @@ namespace Backend.Controllers
             _statsService = statsService;
         }
 
-
-        // [HttpGet("course-statistics")]
-        // public async Task<IActionResult> CalculateCourseStatistics([FromQuery] string subjectName, [FromQuery] string subjectCode, [FromQuery] int weeks = 1)
-        // {
-        //     // Query MongoDB for course data based on subject name, subject code, and time frame (weeks)
-        //     var data = await _mongoDbService.GetCourseDataAsync(subjectName, subjectCode, weeks);
-
-        //     if (data == null || data.Count == 0)
-        //     {
-        //         return NotFound("No data found for the subject and subjectCode inputs.");
-        //     }
-
-        //     // Perform calculations using StatsService
-        //     var dailyChanges = statsService.CalculateDailyChanges(data);
-        //     var weeklyStatistics = statsService.CalculateWeeklyStatistics(data);
-
-        //     return Ok(new
-        //     {
-        //         DailyChanges = dailyChanges,
-        //         WeeklyStatistics = weeklyStatistics
-        //     });
-        // }
-
         /// <summary>
         /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
         /// </summary>
         /// <endpoint>GET /api/stats/historical-instructors</endpoint>
-        /// <param name="subjectName"></param>
         /// <param name="subjectCode"></param>
         /// <param name="catalogNumber"></param>
         /// <returns> List of historical instructors </returns>
@@ -58,7 +34,7 @@ namespace Backend.Controllers
             }
             try
             {
-                List<string> instructors = await _mongoDbService.GetHistoricalInstructors(subjectCode, catalogNumber);
+                List<string> instructors = await _mongoDbService.QueryHistoricalInstructors(subjectCode, catalogNumber);
                 if (instructors == null || instructors.Count == 0)
                 {
                     return NotFound("No instructors found for the given course.");
@@ -70,7 +46,64 @@ namespace Backend.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-    }
 
+        /// <summary>
+        /// API endpoint to get the enrollment rate for the dateTimeRetrieved date for a course based on semester, year, subject code, and catalog number
+        /// </summary>
+        /// <param name="semester"></param>
+        /// <param name="year"></param>
+        /// <param name="subjectCode"></param>
+        /// <param name="catalogNumber"></param>
+        /// <param name="classNumber"></param>
+        /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
+        /// <returns>2-D List of [Date][filled-percentage, changed-percentage][</returns>
+        [HttpGet("enrollment-rate")]
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+        {
+            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || string.IsNullOrEmpty(classNumber))
+            {
+                return BadRequest("Please provide semester, year, subject code, catalog number, and class number.");
+            }
+            try
+            {
+                List<string> data = await _mongoDbService.QueryEnrollmentData(semester, year, subjectCode, catalogNumber, classNumber, dateTimeRetrieved);
+                if (data == null || data.Count == 0)
+                {
+                    return NotFound("No data found for the given course.");
+                }
+                List<double> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
+                return Ok(enrollmentRates);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// API endpoint to get probability of enrolling in to a course based on subject code, catalog number, and date-time
+        /// </summary>
+        /// <endpoint>GET /api/stats/probability-of-enrollment</endpoint>
+        /// <param name="subjectCode"></param>
+        /// <param name="catalogNumber"></param>
+        /// <param name="dateTime"></param>
+        /// <returns> A string containing the likelihood of successfully enrolling into a course  </returns>
+        // [HttpGet("probability-of-enrollment")]
+        // public async Task<IActionResult> GetProbabilityOfEnrollment([FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string dateTime)
+        // {
+        //     if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || dateTime == )
+        //     {
+        //         return BadRequest("Please provide subject code, catalog number, date.");
+        //     }
+        //     try
+        //     {
+
+        //     }
+
+
+        // }
+
+
+    }
 
 }
