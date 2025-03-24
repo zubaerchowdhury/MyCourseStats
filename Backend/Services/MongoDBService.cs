@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Globalization;
 using Backend.Models;
 
 namespace Backend.Services;
@@ -72,23 +73,79 @@ public class MongoDBService
     /// <returns> A list of capacity and seatsAvailable string</returns>
     public async Task<List<string>> QueryEnrollmentData(string semester, string year, string subjectCode, string catalogNumber, string classNumber, string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
     {
+        try
+        {
+            // Convert string parameters to appropriate types
+            int yearInt = int.Parse(year);
+            int classNumberInt = int.Parse(classNumber);
+            DateTime retrievedDate = DateTime.Parse(dateTimeRetrieved, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-        var filter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("semester", semester),
-            Builders<BsonDocument>.Filter.Eq("year", year),
-            Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
-            Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
-            Builders<BsonDocument>.Filter.Eq("classNumber", classNumber),
-            Builders<BsonDocument>.Filter.Eq("dateTimeRetrieved", dateTimeRetrieved)
-        );
-        // TODO: Check if we need to pipeline and aggregate
+            // Query for the sections collection to get capacity
+            var sectionsFilter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Eq("semester", semester),
+                Builders<BsonDocument>.Filter.Eq("year", yearInt),
+                Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
+                Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
+                Builders<BsonDocument>.Filter.Eq("classNumber", classNumberInt),
+                Builders<BsonDocument>.Filter.Gte("dateTimeRetrieved", retrievedDate.Date),
+                Builders<BsonDocument>.Filter.Lt("dateTimeRetrieved", retrievedDate.Date.AddDays(1))
+            );
 
+            var sectionsProjection = Builders<BsonDocument>.Projection
+                .Include("capacity")
+                .Include("dateTimeRetrieved");
 
-        // TODO: Add projection to only return capacity from "sections" and seatsAvailable from "sectionsTS"
+            var sectionData = await _sectionsCollection
+                .Find(sectionsFilter)
+                .Project(sectionsProjection)
+                .FirstOrDefaultAsync();
 
+            if (sectionData == null)
+            {
+                return new List<string>();
+            }
 
-        var result = await _timeSeriesCollection.Find(filter).Project(projection).ToListAsync();
-        return result;
+            // Query for the time series collection to get seatsAvailable
+            var timeSeriesFilter = Builders<BsonDocument>.Filter.And(
+                Builders<BsonDocument>.Filter.Eq("courseInfo.semester", semester),
+                Builders<BsonDocument>.Filter.Eq("courseInfo.year", yearInt),
+                Builders<BsonDocument>.Filter.Eq("courseInfo.classNumber", classNumberInt),
+                Builders<BsonDocument>.Filter.Eq("status", "Open")
+            );
+
+            var timeSeriesProjection = Builders<BsonDocument>.Projection
+                .Include("seatsAvailable")
+                .Exclude("_id");
+
+            var timeSeriesData = await _timeSeriesCollection
+                .Find(timeSeriesFilter)
+                .Project(timeSeriesProjection)
+                .FirstOrDefaultAsync();
+
+            if (timeSeriesData == null)
+            {
+                return new List<string>();
+            }
+
+            // Combine the results
+            var result = new List<string>
+            {
+                new BsonDocument
+                {
+                    { "capacity", sectionData.GetValue("capacity", 0) },
+                    { "seatsAvailable", timeSeriesData.GetValue("seatsAvailable", 0) },
+                    { "dateTimeRetrieved", sectionData.GetValue("dateTimeRetrieved", DateTime.MinValue) }
+                }.ToJson()
+            };
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            // Log the error if needed
+            Console.WriteLine($"Error in QueryEnrollmentData: {ex.Message}");
+            return new List<string>();
+        }
     }
 
 }
