@@ -56,54 +56,57 @@ db.getCollection("sections").aggregate(
 use("courses");
 db.getCollection("sections").aggregate(
   [
-    {
-      $lookup: {
-        from: "sectionsTS",
-        let: {
-          sem: "$semester",
-          year: "$year",
-          classNum: "$classNumber",
-          dtr: "$dateTimeRetrieved",
-        },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  {
-                    $eq: ["$courseInfo.semester", "$$sem"],
-                  },
-                  {
-                    $eq: ["$courseInfo.year", "$$year"],
-                  },
-                  {
-                    $eq: ["$courseInfo.classNumber", "$$classNum"],
-                  },
-                  {
-                    $eq: ["$dateTimeRetrieved", "$$dtr"],
-                  },
-                ],
-              },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              dateTimeRetrieved: 0,
-              courseInfo: 0,
-            },
-          },
-        ],
-        as: "courseStats",
-      },
-    },
-    {
-      $unwind: {
-        path: "$courseStats",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-  ],
+		{
+			$lookup: {
+				from: "sectionsTS",
+				let: {
+					sem: "$semester",
+					year: "$year",
+					classNum: "$classNumber"
+				},
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{
+										$eq: [
+											"$courseInfo.semester",
+											"$$sem"
+										]
+									},
+									{
+										$eq: [
+											"$courseInfo.year",
+											"$$year"
+										]
+									},
+									{
+										$eq: [
+											"$courseInfo.classNumber",
+											"$$classNum"
+										]
+									}
+								]
+							}
+						}
+					},
+					{
+						$sort: {
+							dateTimeRetrieved: 1
+						}
+					},
+					{
+						$project: {
+							_id: 0,
+							courseInfo: 0
+						}
+					}
+				],
+				as: "courseStats"
+			}
+		}
+	],
   { maxTimeMS: 60000, allowDiskUse: true }
 );
 

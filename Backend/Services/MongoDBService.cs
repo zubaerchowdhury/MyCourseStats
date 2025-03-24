@@ -42,12 +42,6 @@ public class MongoDBService
     /// <returns> A list of historical instructors </returns>
     public async Task<List<string>> QueryHistoricalInstructors(string subjectCode, string catalogNumber)
     {
-        var filter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
-            Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
-            Builders<BsonDocument>.Filter.Nin("instructor", new BsonArray { "X TBA", BsonNull.Value })
-        );
-
         var pipeline = new EmptyPipelineDefinition<BsonDocument>()
             .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $match: { subjectCode: '" + subjectCode + "', catalogNumber: '" + catalogNumber + "', instructor: { $nin: [ 'X TBA', null ] } } }")
             .AppendStage<BsonDocument, BsonDocument, BsonDocument>("{ $unwind: { path: '$instructor', preserveNullAndEmptyArrays: false } }")
