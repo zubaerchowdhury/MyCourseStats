@@ -55,7 +55,7 @@ public class MongoDBService
     }
 
     /// <summary>
-    /// Get capacity of course from "sections" collection and seatsAvailable from "sectionsTS" collection of Spring 2025 for a course
+    /// For a course, get capacity from "sections" collection and seatsAvailable from "sectionsTS" collection of Spring 2025 for a course
     /// based on semester, year, dateTimeRetrieved=2024-11-04T00:14:53.000+00:00, subjectCode, catalogNumber, and classNumber
     /// </summary>
     /// <param name="semester"></param>
@@ -74,74 +74,81 @@ public class MongoDBService
             int classNumberInt = int.Parse(classNumber);
             DateTime retrievedDate = DateTime.Parse(dateTimeRetrieved, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-            // Query for the sections collection to get capacity
-            var sectionsFilter = Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("semester", semester),
-                Builders<BsonDocument>.Filter.Eq("year", yearInt),
-                Builders<BsonDocument>.Filter.Eq("subjectCode", subjectCode),
-                Builders<BsonDocument>.Filter.Eq("catalogNumber", catalogNumber),
-                Builders<BsonDocument>.Filter.Eq("classNumber", classNumberInt),
-                Builders<BsonDocument>.Filter.Gte("dateTimeRetrieved", retrievedDate.Date),
-                Builders<BsonDocument>.Filter.Lt("dateTimeRetrieved", retrievedDate.Date.AddDays(1))
-            );
-
-            var sectionsProjection = Builders<BsonDocument>.Projection
-                .Include("capacity")
-                .Include("dateTimeRetrieved");
-
-            var sectionData = await _sectionsCollection
-                .Find(sectionsFilter)
-                .Project(sectionsProjection)
-                .FirstOrDefaultAsync();
-
-            if (sectionData == null)
-            {
-                return new List<string>();
-            }
-
-            // Query for the time series collection to get seatsAvailable
-            var timeSeriesFilter = Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("courseInfo.semester", semester),
-                Builders<BsonDocument>.Filter.Eq("courseInfo.year", yearInt),
-                Builders<BsonDocument>.Filter.Eq("courseInfo.classNumber", classNumberInt),
-                Builders<BsonDocument>.Filter.Eq("status", "Open")
-            );
-
-            var timeSeriesProjection = Builders<BsonDocument>.Projection
-                .Include("seatsAvailable")
-                .Exclude("_id");
-
-            var timeSeriesData = await _timeSeriesCollection
-                .Find(timeSeriesFilter)
-                .Project(timeSeriesProjection)
-                .FirstOrDefaultAsync();
-
-            if (timeSeriesData == null)
-            {
-                return new List<string>();
-            }
-
-            // Combine the results
-            var result = new List<string>
-            {
-                new BsonDocument
+            var pipeline = new EmptyPipelineDefinition<BsonDocument>()
+                .AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
                 {
-                    { "capacity", sectionData.GetValue("capacity", 0) },
-                    { "seatsAvailable", timeSeriesData.GetValue("seatsAvailable", 0) },
-                    { "dateTimeRetrieved", sectionData.GetValue("dateTimeRetrieved", DateTime.MinValue) }
-                }.ToJson()
-            };
+                    $lookup: {
+                        from: 'sectionsTS',
+                        let: {
+                            sem: '$semester',
+                            year: '$year',
+                            classNum: '$classNumber'
+                        },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ['$courseInfo.semester', '$$sem'] },
+                                            { $eq: ['$courseInfo.year', '$$year'] },
+                                            { $eq: ['$courseInfo.classNumber', '$$classNum'] }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                $sort: { dateTimeRetrieved: 1 }
+                            },
+                            {
+                                $project: {
+                                    seatsAvailable: 1,
+                                    _id: 0
+                                }
+                            }
+                        ],
+                        as: 'courseStats'
+                    }
+                }")
+                .AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
+                {
+                    $match: {
+                        semester: '" + semester + @"',
+                        year: " + yearInt + @",
+                        subjectCode: '" + subjectCode + @"',
+                        catalogNumber: '" + catalogNumber + @"',
+                        classNumber: " + classNumberInt + @",
+                        dateTimeRetrieved: {
+                            $gte: ISODate('" + retrievedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"'),
+                            $lt: ISODate('" + retrievedDate.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')
+                        }
+                    }
+                }");
 
-            return result;
+            var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
+            var result = await _sectionsCollection.AggregateAsync<BsonDocument>(pipeline, options);
+            var resultList = await result.ToListAsync();
+
+            if (resultList.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            // Transform the results into the expected format
+            var transformedResults = resultList.Select(doc => new BsonDocument
+            {
+                { "capacity", doc.GetValue("capacity", 0) },
+                { "seatsAvailable", doc["courseStats"].AsBsonArray.FirstOrDefault()?["seatsAvailable"]?.AsInt32 ?? 0 },
+                { "dateTimeRetrieved", doc.GetValue("dateTimeRetrieved", DateTime.MinValue) }
+            }.ToJson()).ToList();
+
+            return transformedResults;
         }
         catch (Exception ex)
         {
-            // Log the error if needed
             Console.WriteLine($"Error in QueryEnrollmentData: {ex.Message}");
             return new List<string>();
         }
     }
-
 }
 
 /* --sections collections query--
