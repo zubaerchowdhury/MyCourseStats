@@ -3,44 +3,64 @@ using MongoDB.Driver;
 using System.Globalization;
 using MongoDB.Bson;
 
-namespace Backend.Services
+namespace Backend.Services;
+public class StatsService
 {
-    public class StatsService
-    {
-        /// <summary>
-        /// Calculate the enrollment daily percentage filled, percentage changed, daily average change and weekly average change
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns>List of daily percentage filled, percentage changed, daily average change and weekly average change</returns>
-        public List<double> CalculateEnrollmentRates(List<string> data)
-        {
-            List<double> filledPercentage = new List<double>();
-            List<double> changedPercentage = new List<double>();
-            List<double> dailyAverageChange = new List<double>();
-            List<double> weeklyAverageChange = new List<double>();
+		/// <summary>
+		/// Calculate the enrollment daily percentage filled, percentage changed, and average percentage change
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns>List of daily percentage filled, percentage changed, and the average percentage change</returns>
+		public List<List<double>> CalculateEnrollmentRates(BsonDocument data)
+		{
+				List<double> filledPercentages = new List<double>();
+				List<double> changedPercentages = new List<double>();
 
-            var parsedData = data.Select(x => BsonDocument.Parse(x)).ToList();
-            List<double> enrollment = parsedData.Select(x => x["enrollment"].AsDouble).ToList();
-            List<double> capacity = parsedData.Select(x => x["capacity"].AsDouble).ToList();
+				int capacity = data["capacity"].AsInt32;
+				List<BsonDocument> courseStats = data["courseStats"].AsBsonArray.Select(x => x.AsBsonDocument).ToList();
+				
+				DateTime prevDay = new DateTime();
 
-            // TODO: enrollment.count loop should run till end of a week for dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00"
-            for (int i = 0; i < enrollment.Count; i++)
-            {
-                filledPercentage.Add(enrollment[i] / capacity[i] * 100); // % filled
-            }
-            for (int i = 1; i < filledPercentage.Count; i++)
-            {
-                changedPercentage.Add((filledPercentage[i] - filledPercentage[i - 1]) / filledPercentage[i - 1] * 100); // % changed
-            }
-            for (int i = 0; i < 7; i++)
-            {
-                dailyAverageChange.Add(filledPercentage[i] - filledPercentage[i - 1]); //  daily average %
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                weeklyAverageChange.Add(dailyAverageChange[i]); // weekly average %
-            }
-            return new List<double> { filledPercentage.Average(), changedPercentage.Average(), dailyAverageChange.Average(), weeklyAverageChange.Average() };
-        }
-    }
+				for (int i = 0; i < courseStats.Count; i++) 
+				{
+						BsonDocument courseStat = courseStats[i];
+						DateTime dateTimeRetrieved = courseStat["dateTimeRetrieved"].ToUniversalTime().Date;
+						int seatsAvailable = courseStat["seatsAvailable"].AsInt32;
+						DateTime nextDay = prevDay.AddDays(1);
+						bool isSameDay = DateTime.Compare(dateTimeRetrieved, prevDay) == 0;
+						bool isNextDay = DateTime.Compare(dateTimeRetrieved, nextDay) == 0 || i == 0;
+
+						// Calculate filled percentage
+
+						// Percentage of seats filled
+						// If an entry is missing, use the last known value
+						double filled = isNextDay ? 
+								(double)(capacity - seatsAvailable) / capacity * 100 :
+								filledPercentages[^1];
+
+						// Check for duplicate entries
+						// If the date is the same as the previous entry, update the last entry
+						if (isSameDay)
+						{
+								filledPercentages[^1] = filled; // Update the last entry
+								if (filledPercentages.Count > 1)
+								{
+										double change = filledPercentages[^1] - filledPercentages[^2];
+										changedPercentages[^1] = change; // Update the last entry
+								}
+								continue;
+						}
+						filledPercentages.Add(filled);
+
+						// Calculate changed percentage
+						if (filledPercentages.Count > 1)
+						{
+								double change = filledPercentages[^1] - filledPercentages[^2];
+								changedPercentages.Add(change);
+						}
+
+						prevDay = dateTimeRetrieved;
+				}
+			return new List<List<double>> { filledPercentages, changedPercentages, new List<double> {changedPercentages.Average()} };
+		}
 }
