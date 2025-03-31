@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar, Book, Users, Clock, Award, Check, Percent } from 'lucide-react';
-import { mockCourses } from '../data/mockCourses';
+import { useCourses } from "../context/CourseContext";
+
 
 function CourseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const course = mockCourses.find(c => c.id === Number(id));
+  const { courses } = useCourses();
+  const course = courses.find(c => c._id.toString() === id);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   // Mock time slots for the course
@@ -64,12 +66,10 @@ function CourseDetails() {
         <div className="p-8">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
-              <p className="text-lg text-gray-600 mt-2">{course.code}</p>
+              <h1 className="text-3xl font-bold text-gray-900">{course.name}</h1>
+              <p className="text-lg text-gray-600 mt-2">{course.subject}</p>
             </div>
             <div className="flex items-center bg-indigo-50 px-4 py-2 rounded-full">
-              <span className="text-2xl font-bold text-indigo-700">{course.rating}</span>
-              <span className="text-gray-600 ml-2">({course.reviews} reviews)</span>
             </div>
           </div>
 
@@ -82,24 +82,21 @@ function CourseDetails() {
                   <p className="text-base font-medium text-gray-900">{course.instructor}</p>
                 </div>
               </div>
-              <span className="text-lg font-semibold text-indigo-600">{course.enrolledStudents}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center">
                 <Calendar className="h-6 w-6 text-indigo-600" />
                 <div className="ml-4">
                   <p className="text-sm text-gray-500">Schedule</p>
-                  <p className="text-base font-medium text-gray-900">{course.schedule}</p>
                 </div>
               </div>
-              <span className="text-lg font-semibold text-indigo-600">{course.classSize}</span>
+              <span className="text-lg font-semibold text-indigo-600">{course.capacity}</span>
             </div>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center">
                 <Book className="h-6 w-6 text-indigo-600" />
                 <div className="ml-4">
                   <p className="text-sm text-gray-500">Credits</p>
-                  <p className="text-base font-medium text-gray-900">{course.credits} Credits</p>
                 </div>
               </div>
             </div>
@@ -115,8 +112,6 @@ function CourseDetails() {
           </div>
 
           <div className="mt-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Course Description</h2>
-            <p className="text-gray-600 leading-relaxed">{course.description}</p>
           </div>
 
           <div className="mt-8">
