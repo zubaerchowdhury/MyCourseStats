@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
+using MongoDB.Bson;
 
 namespace Backend.Controllers
 {
@@ -57,26 +58,27 @@ namespace Backend.Controllers
         /// <param name="classNumber"></param>
         /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
         /// <returns>2-D List of [Date][filled-percentage, changed-percentage][</returns>
+				// TESTING: curl -X GET "http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273" -H  "accept: text/plain"
         [HttpGet("enrollment-rate")]
-        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string subjectCode, [FromQuery] string catalogNumber, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
         {
-            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(catalogNumber) || string.IsNullOrEmpty(classNumber))
+            if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(classNumber))
             {
-                return BadRequest("Please provide semester, year, subject code, catalog number, and class number.");
+                return BadRequest("Please provide semester, year, and class number.");
             }
             try
             {
-                List<string> data = await _mongoDbService.QueryEnrollmentData(semester, year, subjectCode, catalogNumber, classNumber, dateTimeRetrieved);
-                if (data == null || data.Count == 0)
+                BsonDocument data = await _mongoDbService.QueryEnrollmentData(semester, year, classNumber, dateTimeRetrieved);
+                if (data == null)
                 {
                     return NotFound("No data found for the given course.");
                 }
-                List<double> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
+                List<List<double>> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
                 return Ok(enrollmentRates);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}\n{ex.StackTrace}");
             }
         }
 

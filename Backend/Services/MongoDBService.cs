@@ -56,7 +56,7 @@ public class MongoDBService
 
     /// <summary>
     /// For a course, get capacity from "sections" collection and seatsAvailable from "sectionsTS" collection of Spring 2025 for a course
-    /// based on semester, year, dateTimeRetrieved=2024-11-04T00:14:53.000+00:00, subjectCode, catalogNumber, and classNumber
+    /// based on semester, year, dateTimeRetrieved, and classNumber
     /// </summary>
     /// <param name="semester"></param>
     /// <param name="year"></param>
@@ -65,89 +65,73 @@ public class MongoDBService
     /// <param name="classNumber"></param>
     /// <param name="dateTimeRetrieved"></param>
     /// <returns> A list of capacity and seatsAvailable string</returns>
-    public async Task<List<string>> QueryEnrollmentData(string semester, string year, string subjectCode, string catalogNumber, string classNumber, string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+    public async Task<BsonDocument> QueryEnrollmentData(string semester, string year, string classNumber, string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
     {
-        try
-        {
-            // Convert string parameters to appropriate types
-            int yearInt = int.Parse(year);
-            int classNumberInt = int.Parse(classNumber);
-            DateTime retrievedDate = DateTime.Parse(dateTimeRetrieved, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+				// Convert string parameters to appropriate types
+				int yearInt = int.Parse(year);
+				int classNumberInt = int.Parse(classNumber);
+				DateTime retrievedDate = DateTime.Parse(dateTimeRetrieved, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-            var pipeline = new EmptyPipelineDefinition<BsonDocument>()
-                .AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
-                {
-                    $lookup: {
-                        from: 'sectionsTS',
-                        let: {
-                            sem: '$semester',
-                            year: '$year',
-                            classNum: '$classNumber'
-                        },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: {
-                                        $and: [
-                                            { $eq: ['$courseInfo.semester', '$$sem'] },
-                                            { $eq: ['$courseInfo.year', '$$year'] },
-                                            { $eq: ['$courseInfo.classNumber', '$$classNum'] }
-                                        ]
-                                    }
-                                }
-                            },
-                            {
-                                $sort: { dateTimeRetrieved: 1 }
-                            },
-                            {
-                                $project: {
-                                    seatsAvailable: 1,
-                                    _id: 0
-                                }
-                            }
-                        ],
-                        as: 'courseStats'
-                    }
-                }")
-                .AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
-                {
-                    $match: {
-                        semester: '" + semester + @"',
-                        year: " + yearInt + @",
-                        subjectCode: '" + subjectCode + @"',
-                        catalogNumber: '" + catalogNumber + @"',
-                        classNumber: " + classNumberInt + @",
-                        dateTimeRetrieved: {
-                            $gte: ISODate('" + retrievedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"'),
-                            $lt: ISODate('" + retrievedDate.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')
-                        }
-                    }
-                }");
+				var pipeline = new EmptyPipelineDefinition<BsonDocument>()
+						.AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
+						{
+								$match: {
+										semester: '" + semester + @"',
+										year: " + yearInt + @",
+										classNumber: " + classNumberInt + @",
+								}
+						}")
+						.AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
+						{
+								$lookup: {
+										from: 'sectionsTS',
+										let: {
+												sem: '$semester',
+												year: '$year',
+												classNum: '$classNumber'
+										},
+										pipeline: [
+												{
+														$match: {
+																$expr: {
+																		$and: [
+																				{ $eq: ['$courseInfo.semester', '$$sem'] },
+																				{ $eq: ['$courseInfo.year', '$$year'] },
+																				{ $eq: ['$courseInfo.classNumber', '$$classNum'] }
+																				{ $gte: ['$dateTimeRetrieved', ISODate('" + retrievedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')] },
+																				{ $lt: ['$dateTimeRetrieved', ISODate('" + retrievedDate.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')] }
+																		]
+																}
+														}
+												},
+												{
+														$sort: { dateTimeRetrieved: 1 }
+												},
+												{
+														$project: {
+																seatsAvailable: 1,
+																dateTimeRetrieved: 1,
+																_id: 0
+														}
+												}
+										],
+										as: 'courseStats'
+								}
+						}")
+						.AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
+						{
+							$project:
+								{
+									capacity: 1,
+									courseStats: 1,
+									_id: 0
+								}
+						}");
 
-            var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
-            var result = await _sectionsCollection.AggregateAsync<BsonDocument>(pipeline, options);
-            var resultList = await result.ToListAsync();
+				var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
+				var result = await _sectionsCollection.AggregateAsync<BsonDocument>(pipeline, options);
 
-            if (resultList.Count == 0)
-            {
-                return new List<string>();
-            }
-
-            // Transform the results into the expected format
-            var transformedResults = resultList.Select(doc => new BsonDocument
-            {
-                { "capacity", doc.GetValue("capacity", 0) },
-                { "seatsAvailable", doc["courseStats"].AsBsonArray.FirstOrDefault()?["seatsAvailable"]?.AsInt32 ?? 0 },
-                { "dateTimeRetrieved", doc.GetValue("dateTimeRetrieved", DateTime.MinValue) }
-            }.ToJson()).ToList();
-
-            return transformedResults;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in QueryEnrollmentData: {ex.Message}");
-            return new List<string>();
-        }
+				return await result.SingleOrDefaultAsync();
     }
 }
 
