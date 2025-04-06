@@ -21,24 +21,31 @@ namespace Backend.Controllers
         /// <summary>
         /// API endpoint to get the enrollment rate for the dateTimeRetrieved date for a course based on semester, year, subject code, and catalog number
         /// </summary>
-        /// <param name="semester"></param>
-        /// <param name="year"></param>
-        /// <param name="subjectCode"></param>
-        /// <param name="catalogNumber"></param>
-        /// <param name="classNumber"></param>
-        /// <param name="dateTimeRetrieved"=2024-11-04T00:14:53.000+00:00></param>
-        /// <returns>2-D List of [Date][filled-percentage, changed-percentage][</returns>
+        /// <param name="semester">Course semester</param>
+        /// <param name="year">Course year</param>
+        /// <param name="classNumber">Course class number</param>
+        /// <param name="startingDateString">Date to start enrollment data from</param>
+        /// <param name="numDays">Numbers of days to get enrollment data for</param>
+        /// <returns>List of lists [filled-percentage, changed-percentage, average percentage change (only one element)]</returns>
 				// TESTING: curl -X GET "http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273" -H  "accept: text/plain"
         [HttpGet("enrollment-rate")]
-        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, /*[FromQuery]*/ string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] string startingDateString = "2024-11-04", [FromQuery] int numDays = 7)
         {
             if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(classNumber))
             {
                 return BadRequest("Please provide semester, year, and class number.");
             }
+            if (!DateTime.TryParse(startingDateString, out DateTime startingDate))
+            {
+                return BadRequest("Invalid date format. Please use 'yyyy-MM-dd'.");
+            }
+            if (numDays <= 0)
+            {
+                return BadRequest("Number of days must be greater than 0.");
+            }
             try
             {
-                BsonDocument data = await _mongoDbService.QueryEnrollmentData(semester, year, classNumber, dateTimeRetrieved);
+                BsonDocument data = await _mongoDbService.QueryEnrollmentData(semester, year, classNumber, startingDate, numDays);
                 if (data == null)
                 {
                     return NotFound("No data found for the given course.");

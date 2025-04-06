@@ -61,6 +61,6 @@ public class StatsService
 
 						prevDay = dateTimeRetrieved;
 				}
-			return new List<List<double>> { filledPercentages, changedPercentages, new List<double> {changedPercentages.Average()} };
+				return [filledPercentages, changedPercentages, [changedPercentages.Average()]];
 		}
 }

@@ -60,17 +60,15 @@ public class MongoDBService
     /// </summary>
     /// <param name="semester"></param>
     /// <param name="year"></param>
-    /// <param name="subjectCode"></param>
-    /// <param name="catalogNumber"></param>
     /// <param name="classNumber"></param>
-    /// <param name="dateTimeRetrieved"></param>
+    /// <param name="startingDate"></param>
+    /// <param name="numDays"></param>
     /// <returns> A list of capacity and seatsAvailable string</returns>
-    public async Task<BsonDocument> QueryEnrollmentData(string semester, string year, string classNumber, string dateTimeRetrieved = "2024-11-04T00:14:53.000+00:00")
+    public async Task<BsonDocument> QueryEnrollmentData(string semester, string year, string classNumber, DateTime startingDate, int numDays)
     {
 				// Convert string parameters to appropriate types
 				int yearInt = int.Parse(year);
 				int classNumberInt = int.Parse(classNumber);
-				DateTime retrievedDate = DateTime.Parse(dateTimeRetrieved, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
 				var pipeline = new EmptyPipelineDefinition<BsonDocument>()
 						.AppendStage<BsonDocument, BsonDocument, BsonDocument>(@"
@@ -98,8 +96,8 @@ public class MongoDBService
 																				{ $eq: ['$courseInfo.semester', '$$sem'] },
 																				{ $eq: ['$courseInfo.year', '$$year'] },
 																				{ $eq: ['$courseInfo.classNumber', '$$classNum'] }
-																				{ $gte: ['$dateTimeRetrieved', ISODate('" + retrievedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')] },
-																				{ $lt: ['$dateTimeRetrieved', ISODate('" + retrievedDate.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"')] }
+																				{ $gte: ['$dateTimeRetrieved', ISODate('" + startingDate.ToString("s") + @"')] },
+																				{ $lt: ['$dateTimeRetrieved', ISODate('" + startingDate.AddDays(numDays).ToString("s") + @"')] }
 																		]
 																}
 														}
