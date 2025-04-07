@@ -7,5 +7,6 @@ namespace Backend.Models
         public string SectionsCollectionName { get; set; }
         public string TimeSeriesCollectionName { get; set; }
         
+        public string SubjectsCollectionName { get; set; }
     }
 }

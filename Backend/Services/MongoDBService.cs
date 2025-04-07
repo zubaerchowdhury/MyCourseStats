@@ -10,6 +10,7 @@ public class MongoDBService
     private readonly MongoDBConfig _configuration;
     private readonly IMongoCollection<BsonDocument> _sectionsCollection;
     private readonly IMongoCollection<BsonDocument> _timeSeriesCollection;
+    private readonly IMongoCollection<CourseSubject> _subjectsCollection;
 
     /// <summary>
     /// Constructor for MongoDBService
@@ -31,6 +32,7 @@ public class MongoDBService
 
         _sectionsCollection = database.GetCollection<BsonDocument>(configuration.SectionsCollectionName);
         _timeSeriesCollection = database.GetCollection<BsonDocument>(configuration.TimeSeriesCollectionName);
+        _subjectsCollection = database.GetCollection<CourseSubject>(configuration.SubjectsCollectionName);
     }
 
     /// <summary>
@@ -131,47 +133,27 @@ public class MongoDBService
 
 				return await result.SingleOrDefaultAsync();
     }
+
+    public async Task<List<CourseSubject>> GetSubjects(string semester, int year)
+    {
+	    bool includeSemester = !string.IsNullOrEmpty(semester);
+	    bool includeYear = year > 0;
+	    FilterDefinition<CourseSubject> filter = Builders<CourseSubject>.Filter.Empty;
+	    if (includeSemester && includeYear)
+	    {
+		    filter = Builders<CourseSubject>.Filter.And(
+			    Builders<CourseSubject>.Filter.Eq("semester", semester),
+			    Builders<CourseSubject>.Filter.Eq("year", year)
+		    );
+	    }
+	    else if (includeSemester)
+	    {
+		    filter = Builders<CourseSubject>.Filter.Eq("semester", semester);
+	    }
+	    else if (includeYear)
+	    {
+		    filter = Builders<CourseSubject>.Filter.Eq("year", year);
+	    }
+	    return await _subjectsCollection.Find(filter).ToListAsync();
+    }
 }
-
-/* --sections collections query--
-
-- Ideal Query- 
-{
-  semester: "Spring",
-  year: 2025,
-  subjectCode: "ECE",
-  catalogNumber: "118",
-  classNumber: 6273,
-  dateTimeRetrieved: {
-    $gte: ISODate("2025-11-04T00:00:00.000Z"),
-    $lt: ISODate("2025-11-11T00:00:00.000Z")
-  }
-}
-
-- Adjusted Query -
-{
-  semester: "Spring",
-  year: 2025,
-  subjectCode: "ECE",
-  catalogNumber: "118",
-  classNumber: 6273,
-  dateTimeRetrieved: {
-    $gte: ISODate("2025-03-23T00:00:00.000Z"),
-    $lt: ISODate("2025-03-30T00:00:00.000Z")
-  }
-}
-
-
---sectionsTS collections query--
-{
-  "courseInfo.semester": "Spring",
-  "courseInfo.classNumber": 6273,
-  "courseInfo.year": 2025,
-  "status": "Open"
-}
-{
-  seatsAvailable: 1,
-  _id: 0
-}
-
-*/
