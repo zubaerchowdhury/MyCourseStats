@@ -50,7 +50,7 @@ function App() {
              </div>
              <div className="mt-8 md:mt-0 md:order-1">
                <p className="text-center text-base text-gray-400">
-                 &copy; 2024 MyCourseStats. All rights reserved.
+                 &copy; 2025 MyCourseStats. All rights reserved.
                </p>
              </div>
            </div>
