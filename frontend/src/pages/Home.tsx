@@ -8,43 +8,11 @@ interface AdvancedSearchFilters {
   subject?: [string, string];
   catalogNum?: number;
   name?: string;
-  level?: string;
   days?: string[];
   timeStart?: Date;
   timeEnd?: Date;
-  timeOfDay?: string;
-  instructor: string[];
+  instructor?: string[];
   semester?: string[];
-
-  _id: string;
-  name: string;
-  subject: [string, string]; // Tuple with exactly two string elements
-  catalogNumber: number;
-  academicCareer: string;
-  semester: string;
-  year: number;
-  sectionType: string;
-  sectionCode: string;
-  classNumber: number;
-  session: string;
-  days: string[]; // List of strings
-  timeStart: Date;
-  timeEnd: Date;
-  classroom: string;
-  instructor: string[]; // List of strings
-  startDate: Date;
-  endDate: Date;
-  status: string;
-  seatsAvailable: number;
-  capacity: number;
-  waitlistAvailable: number;
-  waitlistCapacity: number;
-  reservedSeatsAvailable: number;
-  reservedSeatsCapacity: number;
-  multipleMeetings: boolean;
-  topic: string;
-  dateTimeRetrieved: Date;
-  notes: string;
 }
 
 function Home() {
@@ -71,17 +39,26 @@ function Home() {
       };
 
       if (isAdvancedOpen) {
-        if (advancedFilters.credits !== undefined) {
-          params.credits = advancedFilters.credits.toString();
+        if (advancedFilters.subject?.length) {
+          params.subject = advancedFilters.subject.join(',');
         }
-        if (advancedFilters.level) {
-          params.level = advancedFilters.level;
+        if (advancedFilters.catalogNum !== undefined) {
+          params.catalogNum = advancedFilters.catalogNum.toString();
         }
-        if (advancedFilters.timeOfDay) {
-          params.timeOfDay = advancedFilters.timeOfDay;
+        if (advancedFilters.name) {
+          params.name = advancedFilters.name;
         }
-        if (advancedFilters.daysOfWeek?.length) {
-          params.daysOfWeek = advancedFilters.daysOfWeek.join(',');
+        if (advancedFilters.days?.length) {
+          params.days = advancedFilters.days.join(',');
+        }
+        if (advancedFilters.timeStart) {
+          params.timeStart = advancedFilters.timeStart.toString();
+        }
+        if (advancedFilters.timeEnd) {
+          params.timeEnd = advancedFilters.timeEnd.toString();
+        }
+        if (advancedFilters.instructor?.length) {
+          params.instructor = advancedFilters.instructor.join(',');
         }
         if (advancedFilters.semester?.length) {
           params.daysOfWeek = advancedFilters.semester.join(',');
@@ -114,7 +91,7 @@ function Home() {
                 <span className="block text-indigo-600"></span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                We help ambitious businesses like yours generate more profits by building awareness, driving web traffic, connecting with customers, and growing overall sales.
+                We help students gauge the popularity of their ideal class schedule.
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="w-full max-w-2xl">
@@ -177,26 +154,28 @@ function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Credits
+                              Subject
                             </label>
                             <select
-                              value={advancedFilters.credits || ''}
-                              onChange={(e) => handleAdvancedFilterChange('credits', e.target.value ? Number(e.target.value) : undefined)}
+                              value={advancedFilters.subject || ''}
+                              onChange={(e) => handleAdvancedFilterChange('subject', e.target.value)}
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
                               <option value="">Any</option>
-                              {[1, 2, 3, 4, 5].map((credit) => (
-                                <option key={credit} value={credit}>{credit} Credits</option>
-                              ))}
+                              <option value="100">Electrical and Computer Engineering</option>
+                              <option value="200">Biomedical Engineering</option>
+                              <option value="300">Math</option>
+                              <option value="400">400 Level</option>
+                              <option value="graduate">Graduate</option>
                             </select>
                           </div>
                           
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Course Level
+                              Catalog Number
                             </label>
                             <select
-                              value={advancedFilters.level || ''}
+                              value={advancedFilters.catalogNum || ''}
                               onChange={(e) => handleAdvancedFilterChange('level', e.target.value)}
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
