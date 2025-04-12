@@ -24,9 +24,9 @@ function Home() {
 
   const searchCategories: { value: SearchCategory; label: string; placeholder?: string }[] = [
     { value: 'class_name', label: 'Class Name', placeholder: 'Search by class name...' },
-    { value: 'class_code', label: 'Class Code', placeholder: 'Enter class code (e.g., CS101)...' },
-    { value: 'department', label: 'Department', placeholder: 'Search by department...' },
-    { value: 'instructor', label: 'Instructor', placeholder: 'Search by instructor name...' },
+    { value: 'class_code', label: 'Class Code', placeholder: 'Search class code (e.g., CS101)...' },
+    { value: 'department', label: 'Department', placeholder: 'Search by department (e.g., )...' },
+    { value: 'instructor', label: 'Instructor', placeholder: 'Search by instructor full name...' },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
