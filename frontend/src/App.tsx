@@ -22,7 +22,6 @@ function App() {
                <div className="hidden md:flex items-center space-x-8">
                  <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
                  <a href="#" className="text-gray-600 hover:text-gray-900">Search by Schools</a>
-                 <a href="#" className="text-gray-600 hover:text-gray-900">Search by Classes</a>
                </div>
              </div>
            </div>
