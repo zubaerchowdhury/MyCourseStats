@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, X, Filter } from 'lucide-react';
+import Select from 'react';
 
 type SearchCategory = 'class_name' | 'class_code' | 'department' | 'instructor';
 
@@ -27,6 +28,14 @@ function Home() {
     { value: 'class_code', label: 'Class Code', placeholder: 'Enter class code (e.g., CS101)...' },
     { value: 'department', label: 'Department', placeholder: 'Search by department...' },
     { value: 'instructor', label: 'Instructor', placeholder: 'Search by instructor name...' },
+  ];
+
+  const daysOptions = [
+    { value: 'Mon', label: 'Monday' },
+    { value: 'Tue', label: 'Tuesday' },
+    { value: 'Wed', label: 'Wednesday' },
+    { value: 'Thu', label: 'Thursday' },
+    { value: 'Fri', label: 'Friday' },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -191,11 +200,31 @@ function Home() {
                               value={advancedFilters.catalogNum || ''}
                               onChange={(e) => 
                                 handleAdvancedFilterChange('name', e.target.value || undefined)}
-                              placeholder="e.g. 101"
+                              placeholder="e.g. Calculus"
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             />
                           </div>
                           
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Days
+                            </label>
+                            <Select
+                              isMulti
+                              name="days"
+                              options={daysOptions}
+                              value={daysOptions.filter(option =>
+                                (advancedFilters.days || []).includes(option.value)
+                              )}
+                              onChange={(e) => 
+                                handleAdvancedFilterChange('days', 
+                                  e.map((option) => option.value)
+                                )
+                              }
+                              className="basic-multi-select"
+                              classNamePrefix="select"
+                            />
+                          </div>
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Time of Day
@@ -212,21 +241,7 @@ function Home() {
                             </select>
                           </div>
                           
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Days of Week
-                            </label>
-                            <select
-                              value={advancedFilters.daysOfWeek || ''}
-                              onChange={(e) => handleAdvancedFilterChange('daysOfWeek', e.target.value ? [e.target.value] : undefined)}
-                              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                              <option value="">Any</option>
-                              <option value="mwf">Monday/Wednesday/Friday</option>
-                              <option value="tr">Tuesday/Thursday</option>
-                              <option value="weekend">Weekend</option>
-                            </select>
-                          </div> */
+                          
                         </div>
                       </div>
                     )}
