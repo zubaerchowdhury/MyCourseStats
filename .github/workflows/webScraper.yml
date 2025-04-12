@@ -1,8 +1,8 @@
 name: Scraping UMiami Course Data
 
 on: 
-  schedule:
-    - cron: "0 4 * * *" # Every day at 4 AM UTC (11 PM ET)
+  # schedule:
+  #   - cron: "0 4 * * *" # Every day at 4 AM UTC (11 PM ET)
   workflow_dispatch:
 
 env:
