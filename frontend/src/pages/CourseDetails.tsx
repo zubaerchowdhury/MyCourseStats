@@ -23,16 +23,16 @@ function CourseDetails() {
   const enrollmentProbability = 85;
 
   const getEnrollmentDescription = (probability: number) => {
-    if (probability >= 90) {
+    if (probability >= 80 && probability <= 100) {
       return "Very High Chance: This course typically fills up quickly. Immediate registration is recommended.";
-    } else if (probability >= 70) {
-      return "Good Chance: The course has moderate demand. Registration within the next week is advised.";
     } else if (probability >= 50) {
-      return "Fair Chance: You have a reasonable chance of securing a spot. Monitor the enrollment status.";
-    } else if (probability >= 30) {
-      return "Low Chance: The course may be reaching capacity. Consider alternative time slots.";
+        return "Good Chance: The course has moderate demand. Registration within the next week is advised.";
+    } else if (probability >= 20) {
+        return "Poor Chance: You have little chance of securing a spot. Monitor the enrollment status.";
+    } else if (probability >= 0) {
+        return "Very Low Chance: The course is nearly full. Please consider waitlist options or alternative courses.";
     } else {
-      return "Very Low Chance: The course is nearly full. Please consider waitlist options or alternative courses.";
+        return "Error: Invalid probability score.";
     }
   };
 
@@ -172,7 +172,7 @@ function CourseDetails() {
                 <div className="flex items-center ml-8">
                   <div className={`
                     text-4xl font-bold flex items-center
-                    ${enrollmentProbability >= 70 ? 'text-green-600' : 
+                    ${enrollmentProbability >= 80 ? 'text-green-600' : 
                       enrollmentProbability >= 50 ? 'text-yellow-600' : 'text-red-600'}
                   `}>
                     {enrollmentProbability}

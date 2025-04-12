@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { fetchCourses } from "../utils/fetchCourses";
-import { Course } from "../utils/fetchCourses";
+import { Course, fetchCourses } from "../utils/fetchCourses";
 
 // Define the shape of the context data
 interface CourseContextType {
