@@ -162,11 +162,10 @@ function Home() {
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
                               <option value="">Any</option>
-                              <option value="100">Electrical and Computer Engineering</option>
-                              <option value="200">Biomedical Engineering</option>
-                              <option value="300">Math</option>
-                              <option value="400">400 Level</option>
-                              <option value="graduate">Graduate</option>
+                              <option value="ECE">Electrical and Computer Engineering</option>
+                              <option value="BME">Biomedical Engineering</option>
+                              <option value="MTH">Mathematics</option>
+                              <option value="CHM">Chemistry</option>
                             </select>
                           </div>
                           
@@ -174,18 +173,27 @@ function Home() {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Catalog Number
                             </label>
-                            <select
+                            <input
+                              type="number"
                               value={advancedFilters.catalogNum || ''}
-                              onChange={(e) => handleAdvancedFilterChange('level', e.target.value)}
+                              onChange={(e) => 
+                                handleAdvancedFilterChange('catalogNum', e.target.value ? Number(e.target.value) : undefined)}
+                              placeholder="e.g. 101"
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                              <option value="">Any</option>
-                              <option value="100">100 Level</option>
-                              <option value="200">200 Level</option>
-                              <option value="300">300 Level</option>
-                              <option value="400">400 Level</option>
-                              <option value="graduate">Graduate</option>
-                            </select>
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Keyword
+                            </label>
+                            <input
+                              type="string"
+                              value={advancedFilters.catalogNum || ''}
+                              onChange={(e) => 
+                                handleAdvancedFilterChange('name', e.target.value || undefined)}
+                              placeholder="e.g. 101"
+                              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            />
                           </div>
                           
                           <div>
@@ -218,7 +226,7 @@ function Home() {
                               <option value="tr">Tuesday/Thursday</option>
                               <option value="weekend">Weekend</option>
                             </select>
-                          </div>
+                          </div> */
                         </div>
                       </div>
                     )}
