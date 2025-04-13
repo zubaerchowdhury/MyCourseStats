@@ -24,20 +24,16 @@ namespace Backend.Controllers
         /// <param name="semester">Course semester</param>
         /// <param name="year">Course year</param>
         /// <param name="classNumber">Course class number</param>
-        /// <param name="startingDateString">Date to start enrollment data from</param>
+        /// <param name="startingDate">Date to start enrollment data from</param>
         /// <param name="numDays">Numbers of days to get enrollment data for</param>
         /// <returns>List of lists [filled-percentage, changed-percentage, average percentage change (only one element)]</returns>
 				// TESTING: curl -X GET "http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273" -H  "accept: text/plain"
         [HttpGet("enrollment-rate")]
-        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] string startingDateString = "2024-11-04", [FromQuery] int numDays = 7)
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] DateTime startingDate, [FromQuery] int numDays = 7)
         {
             if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(classNumber))
             {
                 return BadRequest("Please provide semester, year, and class number.");
-            }
-            if (!DateTime.TryParse(startingDateString, out DateTime startingDate))
-            {
-                return BadRequest("Invalid date format. Please use 'yyyy-MM-dd'.");
             }
             if (numDays <= 0)
             {
