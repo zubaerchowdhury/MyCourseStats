@@ -14,9 +14,6 @@ interface searchFilters {
 }
 
 function Home() {
-  //const [searchQuery, setSearchQuery] = useState<string>('');
-  //const [searchCategory, setSearchCategory] = useState<SearchCategory>('class_name');
-  //const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [searchFilters, setsearchFilters] = useState<searchFilters>({});
   const navigate = useNavigate();
   const searchCategories: { value: SearchCategory; label: string; placeholder?: string }[] = [
@@ -31,11 +28,15 @@ function Home() {
     { value: 'fall-2025', label: 'Fall 2025' },
   ];
 
-  const handleSearch = () => {
-    if (searchFilters.semester && searchFilters.year && searchFilters.subject && searchFilters.catalogNum) {
-      navigate(`/results?semester=${searchFilters.semester}&year=${searchFilters.year.toString()}&subject=${searchFilters.subject.join('')}&catalogNum=${searchFilters.catalogNum.toString()}`);
-      // Convert all values to strings for URLSearchParams
-    }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+
+  if (searchFilters.semester) params.append('semester', searchFilters.semester);
+  if (searchFilters.subject) params.append('subject', searchFilters.subject.join(' '));
+  if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
+
+  navigate(`/search?${params.toString()}`);
   };
 
   const setField = (key: keyof searchFilters, value: any) => {
@@ -45,7 +46,6 @@ function Home() {
     }));
   };
 
-  //const currentCategory = searchCategories.find(cat => cat.value === searchCategory);
 
   return (
     <div className="relative bg-white overflow-hidden">
@@ -87,7 +87,7 @@ function Home() {
                         </label>
                         <select
                           value={searchFilters.subject || ''}
-                          onChange={(value) => setsearchFilters({searchFilters, subject: value})}
+                          onChange={(e) => setField('subject', e.target.value)}
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
                           <option value="">Any</option>
@@ -113,7 +113,6 @@ function Home() {
                           />
                           <button
                             type="submit"
-                            onClick={() => handleSearch}
                             className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           >
                             Search
