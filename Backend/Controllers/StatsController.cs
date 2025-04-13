@@ -50,7 +50,7 @@ namespace Backend.Controllers
                 {
                     return NotFound("No data found for the given course.");
                 }
-                List<List<double>> enrollmentRates = _statsService.CalculateEnrollmentRates(data);
+                List<List<double>> enrollmentRates = _statsService.CalculateEnrollmentRates(data, numDays);
                 return Ok(enrollmentRates);
             }
             catch (Exception ex)
