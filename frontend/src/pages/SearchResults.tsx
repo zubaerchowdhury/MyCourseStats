@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft, BookOpen, Users, Calendar } from "lucide-react";
+import { Search, ArrowLeft, BookOpen, Users, Calendar, ChevronDown } from "lucide-react";
 import { mockCourses } from "../data/mockCourses";
 import { useCourses } from "../context/CourseContext";
 import { Course } from "../utils/fetchCourses";
@@ -93,7 +93,7 @@ function SearchResults() {
         </div>
       </div>
       <div className="bg-white shadow rounded-lg p-6 mb-8">
-      // TODO: Make a field (i.e Subject) required to search
+      {/*TODO: Make a field (i.e Subject) required to search*/}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -149,7 +149,7 @@ function SearchResults() {
             />
           </div>
         </div>
-        // TODO: Add a button that handles the search and updates the URL with the filters
+        {/*TODO: Add a button that handles the search and updates the URL with the filters*/}
         {Object.values(filters).some((value) => value) && (
           <div className="mt-4">
             <button
@@ -188,18 +188,18 @@ function SearchResults() {
             <div key={course._id} className="bg-white shadow rounded-lg p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  //TODO: add an expand button + functionality to expand the course details
+                  {/*TODO: add an expand button + functionality to expand the course details*/}
                   <h2 className="text-xl font-semibold text-gray-900">
                     {course.name}
                   </h2>
-                  //TODO: put the subject code and course instructor next to the course name after a '|'
+                  {/*TODO: put the subject code and course instructor next to the course name after a '|'*/}
                   <p className="text-sm text-gray-500 mt-1">
                     {course.subjectCode} • {course.instructor}
                   </p>
                 </div>
                 <div className="flex items-center bg-indigo-50 px-3 py-1 rounded-full"></div>
               </div>
-              //TODO: format characteristics in a row (see pictures)
+              {/*TODO: format characteristics in a row (see pictures)*/}
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center">
@@ -223,7 +223,7 @@ function SearchResults() {
                 </div>
               </div>
 
-              //TODO: add past instructors button and see details button
+              {/*TODO: add past instructors button and see details button*/}
               <div className="mt-6 flex justify-end">
                 <button className="bg-white border border-indigo-600 text-indigo-600 px-4 py-2 rounded-lg mr-3 hover:bg-indigo-50 transition-colors">
                   Past Instructors
