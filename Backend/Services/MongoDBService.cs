@@ -58,11 +58,13 @@ public class MongoDBService
                 "{ $group: { _id: { subjectCode: '$subjectCode', catalogNumber: '$catalogNumber' }, instructors: { $addToSet: '$instructor' } } }");
 
         var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
-        var result = await _sectionsCollection.AggregateAsync<BsonDocument>(pipeline, options);
-        var resultList = await result.ToListAsync();
-        return resultList.Count == 0
-            ? []
-            : resultList.First()["instructors"].AsBsonArray.Select(x => x.AsString).ToList();
+        var result = await _sectionsCollection.Aggregate<BsonDocument>(pipeline, options).ToListAsync();
+        var instructors = result.Count == 0
+	        ? []
+	        : result.First()["instructors"].AsBsonArray.Select(x => x.AsString);
+        return (from instructor in instructors
+				where instructor != "TBA" && instructor != "X TBA" && instructor != "-"
+		        select instructor).ToList();
     }
 
     /// <summary>
