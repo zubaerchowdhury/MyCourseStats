@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, X, Filter } from 'lucide-react';
-import Select from 'react';
-//import { Dropdown } from '../components/Dropdown';
-
-type SearchCategory = 'class_name' | 'class_code' | 'department' | 'instructor';
+import { X } from 'lucide-react';
 
 interface searchFilters {
-  subject?: [string, string];
+  subjectCode?: string;
   catalogNum?: number;
   semester?: string;
   year?: number;
 }
 
 function Home() {
-  const [searchFilters, setsearchFilters] = useState<searchFilters>({});
   const navigate = useNavigate();
-  const searchCategories: { value: SearchCategory; label: string; placeholder?: string }[] = [
-    { value: 'class_name', label: 'Class Name', placeholder: 'Search by class name...' },
-    { value: 'class_code', label: 'Class Code', placeholder: 'Search class code (e.g., CS101)...' },
-    { value: 'department', label: 'Department', placeholder: 'Search by department (e.g., )...' },
-    { value: 'instructor', label: 'Instructor', placeholder: 'Search by instructor full name...' },
-  ];
+  const [searchFilters, setsearchFilters] = useState<searchFilters>({
+    subjectCode: '',
+    catalogNum: undefined,
+    semester: '',
+    year: undefined,
+  });
+  
+  
 
   const semesterYearOptions = [
     { value: 'spring-2025', label: 'Spring 2025' },
@@ -32,16 +29,18 @@ function Home() {
     e.preventDefault();
     const params = new URLSearchParams();
 
-  if (searchFilters.semester) params.append('semester', searchFilters.semester);
-  if (searchFilters.subject) params.append('subject', searchFilters.subject.join(' '));
-  if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
+    if (searchFilters.semester) params.append('semester', searchFilters.semester);
+    if (searchFilters.year) params.append('year', searchFilters.year.toString());
+    if (searchFilters.subjectCode) params.append('subjectCode', searchFilters.subjectCode);
+    if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
 
-  navigate(`/search?${params.toString()}`);
+    console.log('Search Params:', params.toString());
+    navigate(`/search?${params.toString()}`);
   };
 
   const setField = (key: keyof searchFilters, value: any) => {
     setsearchFilters(prev => ({
-      ...prev,
+      ...prev, 
       [key]: value,
     }));
   };
@@ -86,8 +85,8 @@ function Home() {
                           Subject
                         </label>
                         <select
-                          value={searchFilters.subject || ''}
-                          onChange={(e) => setField('subject', e.target.value)}
+                          value={searchFilters.subjectCode || ''}
+                          onChange={(e) => setField('subjectCode', e.target.value)}
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
                           <option value="">Any</option>

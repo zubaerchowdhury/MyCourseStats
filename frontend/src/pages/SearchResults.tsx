@@ -7,6 +7,14 @@ import { useCourses } from "../context/CourseContext";
 function SearchResults() {
   const { courses = [], loading, error } = useCourses();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    console.log('Query Parameters:', {
+      semester:searchParams.get('semester'),
+      subject: searchParams.get('subject'),
+      catalogNum: searchParams.get('catalogNum'),
+    });
+  },[searchParams])
   const navigate = useNavigate();
   const initialQuery = searchParams.get('q') || '';
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
