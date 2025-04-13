@@ -150,9 +150,8 @@ function SearchResults() {
               <p className="text-gray-500 text-lg">No courses found matching your criteria.</p>
             </div>
           ) : (
-            updatedFilteredCourses.map((course)) => (
-              <div key={courses._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
-                <div className="p-6">
+            updatedFilteredCourses.map(course => (
+              <div key={course._id} className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{course.name}</h2>
@@ -194,8 +193,10 @@ function SearchResults() {
                   </button>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          )
+          )
+          }
         </div>
       ) : (
         <div className="text-center py-16">
@@ -215,7 +216,7 @@ function SearchResults() {
             </button>
           </div>
         </div>
-      )}
+      )
     </div>
   );
 }
