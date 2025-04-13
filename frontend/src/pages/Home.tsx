@@ -2,28 +2,20 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, X, Filter } from 'lucide-react';
 import Select from 'react';
+//import { Dropdown } from '../components/Dropdown';
 
 type SearchCategory = 'class_name' | 'class_code' | 'department' | 'instructor';
 
-interface SearchFilters {
+interface searchFilters {
   subject?: [string, string];
   catalogNum?: number;
-  name?: string;
-  days?: string[];
-  timeStart?: Date;
-  timeEnd?: Date;
-  instructor?: string[];
-  semester?: string[];
+  semester?: string;
   year?: number;
 }
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchCategory, setSearchCategory] = useState<SearchCategory>('class_name');
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState<SearchFilters>({});
+  const [searchFilters, setsearchFilters] = useState<searchFilters>({});
   const navigate = useNavigate();
-
   const searchCategories: { value: SearchCategory; label: string; placeholder?: string }[] = [
     { value: 'class_name', label: 'Class Name', placeholder: 'Search by class name...' },
     { value: 'class_code', label: 'Class Code', placeholder: 'Search class code (e.g., CS101)...' },
@@ -38,25 +30,22 @@ function Home() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      // Convert all values to strings for URLSearchParams
-      const params: Record<string, string> = {
-        q: searchQuery,
-        category: searchCategory,
-      };
-      const queryParams = new URLSearchParams(params);
-      navigate(`/search?${queryParams.toString()}`);
-    }
+    const params = new URLSearchParams();
+
+  if (searchFilters.semester) params.append('semester', searchFilters.semester);
+  if (searchFilters.subject) params.append('subject', searchFilters.subject.join(' '));
+  if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
+
+  navigate(`/search?${params.toString()}`);
   };
 
-  const handleAdvancedFilterChange = (key: keyof SearchFilters, value: any) => {
-    setAdvancedFilters(prev => ({
+  const setField = (key: keyof searchFilters, value: any) => {
+    setsearchFilters(prev => ({
       ...prev,
       [key]: value,
     }));
   };
 
-  const currentCategory = searchCategories.find(cat => cat.value === searchCategory);
 
   return (
     <div className="relative bg-white overflow-hidden">
@@ -80,8 +69,8 @@ function Home() {
                         Semester & Year
                       </label>
                       <select
-                        value={advancedFilters.semester || ''}
-                        onChange={(e) => handleAdvancedFilterChange('semester', e.target.value)}
+                        value={searchFilters.semester || ''}
+                        onChange={(e) => setField('semester', e.target.value)}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       >
                         <option value="">Any</option>
@@ -97,8 +86,8 @@ function Home() {
                           Subject
                         </label>
                         <select
-                          value={advancedFilters.subject || ''}
-                          onChange={(e) => handleAdvancedFilterChange('subject', e.target.value)}
+                          value={searchFilters.subject || ''}
+                          onChange={(e) => setField('subject', e.target.value)}
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
                           <option value="">Any</option>
@@ -115,16 +104,15 @@ function Home() {
                         
                           <input
                             type="number"
-                            value={advancedFilters.catalogNum || ''}
+                            value={searchFilters.catalogNum || ''}
                             onChange={(e) => 
-                              handleAdvancedFilterChange('catalogNum', e.target.value ? Number(e.target.value) : undefined)
+                              setField('catalogNum', e.target.value ? Number(e.target.value) : undefined)
                             }
                             placeholder="e.g. 101"
                             className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                           />
                           <button
-                            type="button"
-                            onClick={() => handleSearch}
+                            type="submit"
                             className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           >
                             Search
@@ -134,18 +122,10 @@ function Home() {
                     </div>
                     
                     <div className="flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-                        className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
-                      >
-                        <Filter className="h-4 w-4 mr-1" />
-                        {isAdvancedOpen ? 'Hide Advanced Search' : 'Show Advanced Search'}
-                      </button>
-                      {Object.keys(advancedFilters).length > 0 && (
+                      {Object.keys(searchFilters).length > 0 && (
                         <button
                           type="button"
-                          onClick={() => setAdvancedFilters({})}
+                          onClick={() => setsearchFilters({})}
                           className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
                         >
                           <X className="h-4 w-4 mr-1" />

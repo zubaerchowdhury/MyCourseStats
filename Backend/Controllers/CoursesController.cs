@@ -79,6 +79,8 @@ public class CoursesController : ControllerBase
     /// <summary>
     /// Searches for course sections
     /// </summary>
+    /// <param name="semester"></param>
+    /// <param name="year"></param>
     /// <param name="subjectCode"></param>
     /// <param name="catalogNumber"></param>
     /// <param name="name">course name</param>
@@ -86,9 +88,7 @@ public class CoursesController : ControllerBase
     /// <param name="startDate">start date greater than or equal to</param>
     /// <param name="endDate">end date less than or equal to</param>
     /// <param name="instructor">instructor full name</param>
-    /// <param name="semester"></param>
-    /// <param name="year"></param>
-    /// <returns>A list of courses</returns>
+    /// <returns>A list of courses containers in which it will either be a course with one or multiple meetings</returns>
     [HttpGet("course-search")]
     public async Task<IActionResult> CourseSearch([FromQuery] string semester, [FromQuery] int year,
         [FromQuery] string subjectCode,
