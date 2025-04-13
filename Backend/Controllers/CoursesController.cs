@@ -10,15 +10,15 @@ namespace Backend.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class CoursesController: ControllerBase
+public class CoursesController : ControllerBase
 {
     private readonly MongoDBService _mongoDbService;
-    
+
     public CoursesController(MongoDBService mongoDbService)
     {
         _mongoDbService = mongoDbService;
     }
-    
+
     /// <summary>
     /// API endpoint to get historical instructors based on subject name, subject code, and catalog number
     /// </summary>
@@ -52,7 +52,7 @@ public class CoursesController: ControllerBase
     /// <summary>
     /// Get list of all subjects
     /// </summary>
-    /// <returns>A list of objects containing subject name and code</returns>
+    /// <returns>A list of objects containing subject name and catalog number</returns>
     // TESTING: http://localhost:5184/api/Courses/subjects
     [HttpGet("subjects")]
     public async Task<IActionResult> GetSubjects([FromQuery] string? semester = null, int year = 0)
@@ -71,4 +71,5 @@ public class CoursesController: ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
 }
