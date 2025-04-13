@@ -93,6 +93,7 @@ function SearchResults() {
         </div>
       </div>
       <div className="bg-white shadow rounded-lg p-6 mb-8">
+      // TODO: Make a field (i.e Subject) required to search
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -148,7 +149,7 @@ function SearchResults() {
             />
           </div>
         </div>
-
+        // TODO: Add a button that handles the search and updates the URL with the filters
         {Object.values(filters).some((value) => value) && (
           <div className="mt-4">
             <button
@@ -164,39 +165,41 @@ function SearchResults() {
       <div className="space=y-6">
         {updatedFilteredCourses.length === 0 ? (
           <div className="text-center py-16">
-          <div className="flex justify-center">
-            <BookOpen className="h-16 w-16 text-gray-400" />
+            <div className="flex justify-center">
+              <BookOpen className="h-16 w-16 text-gray-400" />
+            </div>
+            <h2 className="mt-4 text-2xl font-semibold text-gray-900">
+              No courses found
+            </h2>
+            <p className="mt-2 text-gray-600">
+              We couldn't find any courses matching your search criteria.
+            </p>
+            <div className="mt-6">
+              <button
+                onClick={handleBackToHome}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Return to Home
+              </button>
+            </div>
           </div>
-          <h2 className="mt-4 text-2xl font-semibold text-gray-900">
-            No courses found
-          </h2>
-          <p className="mt-2 text-gray-600">
-            We couldn't find any courses matching your search criteria.
-          </p>
-          <div className="mt-6">
-            <button
-              onClick={handleBackToHome}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Return to Home
-            </button>
-          </div>
-        </div>
         ) : (
           updatedFilteredCourses.map((course) => (
             <div key={course._id} className="bg-white shadow rounded-lg p-6">
               <div className="flex justify-between items-start">
                 <div>
+                  //TODO: add an expand button + functionality to expand the course details
                   <h2 className="text-xl font-semibold text-gray-900">
                     {course.name}
                   </h2>
+                  //TODO: put the subject code and course instructor next to the course name after a '|'
                   <p className="text-sm text-gray-500 mt-1">
                     {course.subjectCode} • {course.instructor}
                   </p>
                 </div>
                 <div className="flex items-center bg-indigo-50 px-3 py-1 rounded-full"></div>
               </div>
-
+              //TODO: format characteristics in a row (see pictures)
               <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center">
@@ -220,9 +223,10 @@ function SearchResults() {
                 </div>
               </div>
 
+              //TODO: add past instructors button and see details button
               <div className="mt-6 flex justify-end">
                 <button className="bg-white border border-indigo-600 text-indigo-600 px-4 py-2 rounded-lg mr-3 hover:bg-indigo-50 transition-colors">
-                  Add to Schedule
+                  Past Instructors
                 </button>
                 <button
                   onClick={() => handleViewDetails(parseInt(course._id))}

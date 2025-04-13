@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 
 interface searchFilters {
   subjectCode?: string;
@@ -12,17 +12,15 @@ interface searchFilters {
 function Home() {
   const navigate = useNavigate();
   const [searchFilters, setsearchFilters] = useState<searchFilters>({
-    subjectCode: '',
+    subjectCode: "",
     catalogNum: undefined,
-    semester: '',
+    semester: "",
     year: undefined,
   });
-  
-  
 
   const semesterYearOptions = [
-    { value: 'spring-2025', label: 'Spring 2025' },
-    { value: 'fall-2025', label: 'Fall 2025' },
+    { value: "spring-2025", label: "Spring 2025" },
+    { value: "fall-2025", label: "Fall 2025" },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -30,24 +28,25 @@ function Home() {
     const params = new URLSearchParams();
 
     if (searchFilters.semester) {
-      const [semester, year] = searchFilters.semester.split('-');
-      params.append('semester', semester);
-      params.append('year', year);
+      const [semester, year] = searchFilters.semester.split("-");
+      params.append("semester", semester);
+      params.append("year", year);
     }
-    if (searchFilters.subjectCode) params.append('subjectCode', searchFilters.subjectCode);
-    if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
+    if (searchFilters.subjectCode)
+      params.append("subjectCode", searchFilters.subjectCode);
+    if (searchFilters.catalogNum)
+      params.append("catalogNum", searchFilters.catalogNum.toString());
 
-    console.log('Search Params:', params.toString());
+    console.log("Search Params:", params.toString());
     navigate(`/search?${params.toString()}`);
   };
 
   const setField = (key: keyof searchFilters, value: any) => {
-    setsearchFilters(prev => ({
-      ...prev, 
+    setsearchFilters((prev) => ({
+      ...prev,
       [key]: value,
     }));
   };
-
 
   return (
     <div className="relative bg-white overflow-hidden">
@@ -60,36 +59,39 @@ function Home() {
                 <span className="block text-indigo-600"></span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                We help students gauge the popularity of their ideal class schedule.
+                We help students gauge the popularity of their ideal class
+                schedule.
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="w-full max-w-2xl">
                   <form onSubmit={handleSearch} className="space-y-4">
                     <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Semester & Year
-                      </label>
-                      <select
-                        value={searchFilters.semester || ''}
-                        onChange={(e) => setField('semester', e.target.value)}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      >
-                        <option value="">Any</option>
-                        {semesterYearOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                      <div className="relative flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Semester & Year
+                        </label>
+                        <select
+                          value={searchFilters.semester || ""}
+                          onChange={(e) => setField("semester", e.target.value)}
+                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                          <option value="">Any</option>
+                          {semesterYearOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <div className="relative flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Subject
                         </label>
                         <select
-                          value={searchFilters.subjectCode || ''}
-                          onChange={(e) => setField('subjectCode', e.target.value)}
+                          value={searchFilters.subjectCode || ""}
+                          onChange={(e) =>
+                            setField("subjectCode", e.target.value)
+                          }
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
                           <option value="">Any</option>
@@ -103,27 +105,32 @@ function Home() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Catalog Number
                         </label>
-                        
-                          <input
-                            type="number"
-                            value={searchFilters.catalogNum || ''}
-                            onChange={(e) => 
-                              setField('catalogNum', e.target.value ? Number(e.target.value) : undefined)
-                            }
-                            placeholder="e.g. 101"
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                          />
+
+                        <input
+                          type="number"
+                          value={searchFilters.catalogNum || ""}
+                          onChange={(e) =>
+                            setField(
+                              "catalogNum",
+                              e.target.value
+                                ? Number(e.target.value)
+                                : undefined
+                            )
+                          }
+                          placeholder="e.g. 101"
+                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        />
                       </div>
                       <div className="relative flex-1">
-                      <button
-                            type="submit"
-                            className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          >
-                            Search
-                          </button>   
+                        <button
+                          type="submit"
+                          className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                          Search
+                        </button>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       {Object.keys(searchFilters).length > 0 && (
                         <button
@@ -136,8 +143,6 @@ function Home() {
                         </button>
                       )}
                     </div>
-
-                    
                   </form>
                 </div>
               </div>
