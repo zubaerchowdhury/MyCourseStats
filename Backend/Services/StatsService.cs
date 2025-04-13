@@ -11,7 +11,7 @@ public class StatsService
 		/// </summary>
 		/// <param name="data"></param>
 		/// <returns>List of daily percentage filled, percentage changed, and the average percentage change</returns>
-		public List<List<double>> CalculateEnrollmentRates(BsonDocument data)
+		public List<List<double>> CalculateEnrollmentRates(BsonDocument data, int numDays)
 		{
 				List<double> filledPercentages = new List<double>();
 				List<double> changedPercentages = new List<double>();
@@ -61,6 +61,17 @@ public class StatsService
 
 						prevDay = dateTimeRetrieved;
 				}
+				// Fill in missing values if necessary
+				if (filledPercentages.Count != numDays)
+				{
+						int missingDays = numDays - filledPercentages.Count;
+						for (int i = 0; i < missingDays; i++)
+						{
+								filledPercentages.Add(filledPercentages[^1]);
+								changedPercentages.Add(0);
+						}
+				}
+				
 				return [filledPercentages, changedPercentages, [changedPercentages.Average()]];
 		}
 }
