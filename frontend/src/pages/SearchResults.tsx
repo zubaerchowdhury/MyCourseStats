@@ -1,40 +1,58 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, ArrowLeft, BookOpen, Users, Calendar } from 'lucide-react';
 import { mockCourses } from '../data/mockCourses';
 import { useCourses } from "../context/CourseContext";
+import { Course } from "../utils/fetchCourses";
 
 function SearchResults() {
   const { courses = [], loading, error } = useCourses();
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    console.log('Query Parameters:', {
-      semester:searchParams.get('semester'),
-      subject: searchParams.get('subject'),
-      catalogNum: searchParams.get('catalogNum'),
-    });
-  },[searchParams])
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialQuery = searchParams.get('q') || '';
-  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
+  const [updatedFilteredCourses, setFilteredCourses] = useState<Course[]>([]);
 
-  const filteredCourses = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim();
-    if (!query) return courses;
+  const [filters, setFilters] = useState({
+    subjectCode: searchParams.get('subjectCode') || '',
+    catalogNum: searchParams.get('catalogNum') ? Number(searchParams.get('catalogNum')) : undefined,
+    semester: searchParams.get('semester') || '',
+    year: searchParams.get('year') ? Number(searchParams.get('year')) : undefined
+  });
 
-    return courses.filter(course => 
-      course.name.toLowerCase().includes(query) ||
-      course.subject.map(str => str.toLowerCase()).includes(query) ||
-      course.instructor.map(str => str.toLowerCase()).includes(query)
-    );
-  }, [searchQuery, courses]);
+  const semesterYearOptions = [
+    { value: 'spring-2025', label: 'Spring 2025' },
+    { value: 'fall-2025', label: 'Fall 2025' },
+  ];
+  
+  useEffect(() => {
+    const filtered = courses.filter(course => {
+      const matchesSubject = filters.subjectCode ? course.subjectCode.toLowerCase().includes(filters.subjectCode.toLowerCase()) : true;
+      const matchesCatalogNum = filters.catalogNum ? course.catalogNumber === filters.catalogNum : true;
+      const matchesSemester = filters.semester ? course.semester.toLowerCase().includes(filters.semester.toLowerCase()) : true;
+      const matchesYear = filters.year ? course.year === filters.year : true;
+      return matchesSubject && matchesCatalogNum && matchesSemester && matchesYear;
+    });
+    setFilteredCourses(filtered);
+  }, [filters]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
+  const handleFilterChange = (key: string, value: any) => {
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+
+    const params = new URLSearchParams();
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value) params.append(key,value.toString());
+    });
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      subjectCode: '',
+      catalogNum: undefined,
+      semester: '',
+      year: undefined
+    });
+    setSearchParams(new URLSearchParams());
   };
 
   const handleBackToHome = () => {
@@ -58,16 +76,16 @@ function SearchResults() {
         
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-gray-900">
-            Search Results for "{searchQuery}"
+            Search Results
           </h1>
           
           <div className="mt-4 sm:mt-0 relative w-full max-w-xs">
-            <form onSubmit={handleSearch}>
+            <form onSubmit={handleFilterChange}>
               <input
                 type="text"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent shadow-sm text-sm placeholder-gray-500"
                 placeholder="Refine your search..."
-                value={searchQuery}
+                value={handleFilterChange}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <button 
@@ -89,7 +107,7 @@ function SearchResults() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{course.name}</h2>
-                    <p className="text-sm text-gray-500 mt-1">{course.subject} • {course.instructor}</p>
+                    <p className="text-sm text-gray-500 mt-1">{course.subjectCode} • {course.instructor}</p>
                   </div>
                   <div className="flex items-center bg-indigo-50 px-3 py-1 rounded-full">
                   </div>
