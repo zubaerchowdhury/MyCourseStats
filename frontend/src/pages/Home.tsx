@@ -29,8 +29,11 @@ function Home() {
     e.preventDefault();
     const params = new URLSearchParams();
 
-    if (searchFilters.semester) params.append('semester', searchFilters.semester);
-    if (searchFilters.year) params.append('year', searchFilters.year.toString());
+    if (searchFilters.semester) {
+      const [semester, year] = searchFilters.semester.split('-');
+      params.append('semester', semester);
+      params.append('year', year);
+    }
     if (searchFilters.subjectCode) params.append('subjectCode', searchFilters.subjectCode);
     if (searchFilters.catalogNum) params.append('catalogNum', searchFilters.catalogNum.toString());
 
