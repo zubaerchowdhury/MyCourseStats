@@ -4,6 +4,7 @@ import { Search, ArrowLeft, BookOpen, Users, Calendar } from 'lucide-react';
 import { mockCourses } from '../data/mockCourses';
 import { useCourses } from "../context/CourseContext";
 import { Course } from "../utils/fetchCourses";
+import { X } from 'lucide-react';
 
 function SearchResults() {
   const { courses = [], loading, error } = useCourses();
@@ -64,8 +65,8 @@ function SearchResults() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
+    <div className="mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button 
           onClick={handleBackToHome}
           className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -73,37 +74,85 @@ function SearchResults() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           <span>Back to Home</span>
         </button>
-        
         <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-gray-900">
             Search Results
           </h1>
-          
-          <div className="mt-4 sm:mt-0 relative w-full max-w-xs">
-            <form onSubmit={handleFilterChange}>
-              <input
-                type="text"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent shadow-sm text-sm placeholder-gray-500"
-                placeholder="Refine your search..."
-                value={handleFilterChange}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button 
-                type="submit"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
-          </div>
         </div>
       </div>
-      
-      {filteredCourses.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6">
-          {filteredCourses.map((course) => (
-            <div key={course._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
-              <div className="p-6">
+        
+      <div className="bg-white shadow rounded-lg p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Semester
+            </label>
+            <select
+              value={filters.semester}
+              onChange={(e) => handleFilterChange('semester', e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="">Any</option>
+              {semesterYearOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subject
+            </label>
+            <select
+              value={filters.subjectCode}
+              onChange={(e) => handleFilterChange('subjectCode', e.target.value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="">Any</option>
+              <option value="ECE">ECE</option>
+              <option value="BME">BME</option>
+              <option value="MTH">MTH</option>
+              <option value="CHM">CHM</option>
+            </select>
+          </div>
+            
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Catalog Number
+            </label>
+            <input
+              type="number"
+              value={filters.catalogNum || ''}
+              onChange={(e) => handleFilterChange('catalogNum', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="e.g. 101"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+          {Object.values(filters).some(value => value) && (
+            <div className="mt-4">
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+              >
+                <X className="h-4 w-4 mr-1" />
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="space=y-6"> 
+          {updatedFilteredCourses.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No courses found matching your criteria.</p>
+            </div>
+          ) : (
+            updatedFilteredCourses.map((course)) => (
+              <div key={courses._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+                <div className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">{course.name}</h2>
