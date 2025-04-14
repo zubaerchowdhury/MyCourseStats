@@ -1,62 +1,46 @@
-export interface Course {
-    _id: string;
+// src/types/courses.ts
+
+export interface CourseMeeting {
+    classroom: string;
+    instructor: string[];
+    days: string[];
+    timeStart: string;
+    timeEnd: string;
+    startDate: string;
+    endDate: string;
     name: string;
-    subjectName: string;
-    subjectCode: string;
-    catalogNumber: number;
-    academicCareer: string;
-    semester: string;
-    year: number;
+    catalogNumber: string;
     sectionType: string;
     sectionCode: string;
     classNumber: number;
-    session: string;
-    days: string[]; // List of strings
-    timeStart: Date;
-    timeEnd: Date;
-    classroom: string;
-    instructor: string[]; // List of strings
-    startDate: Date;
-    endDate: Date;
-    status: string;
-    seatsAvailable: number;
     capacity: number;
-    waitlistAvailable: number;
-    waitlistCapacity: number;
-    reservedSeatsAvailable: number;
-    reservedSeatsCapacity: number;
     multipleMeetings: boolean;
-    topic: string;
-    dateTimeRetrieved: Date;
-    notes: string;
-}
+  }
+  
+  export interface CourseData {
+    courseWithOneMeeting: CourseMeeting;
+    courseWithMultipleMeetings: CourseMeeting | null;
+  }
+  
 
-export async function fetchCourses(): Promise<Course[]> {
-    try {
-        const response: Response = await fetch('http://localhost:8000/api/courses', {
-            method: 'GET',
-        });
-
-        if (!response.ok) {
-            throw new Error('Error fetching course data from backend');
-        }
-
-        const rawData = await response.json(); // Response is in JSON format
-
-        // Convert datetime fields from strings to Date objects
-        const courses: Course[] = rawData.map((course: any) => ({
-            ...course,
-            _id:course._id.toString(),
-            timeStart: new Date(course.timeStart),
-            timeEnd: new Date(course.timeEnd),
-            startDate: new Date(course.startDate),
-            endDate: new Date(course.endDate),
-            dateTimeRetrieved: new Date(course.dateTimeRetrieved),
-        }));
-
-        return courses;
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
+  export const fetchCourses = async (
+    semester: string,
+    year: number,
+    subjectCode: string,
+    catalogNumber: string
+  ): Promise<CourseData[]> => {
+    const baseUrl = 'http://localhost:5184/api/Courses/course-search';
+    const params = new URLSearchParams({
+      semester,
+      year: year.toString(),
+      subjectCode,
+      catalogNumber,
+    });
+  
+    const response = await fetch(`${baseUrl}?${params.toString()}`);
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch courses data');
     }
-}
+    return await response.json();
+  };

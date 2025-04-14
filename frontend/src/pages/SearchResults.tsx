@@ -261,6 +261,22 @@ function SearchResults() {
                           <p className="text-sm font-medium">
                             {course.classNumber}
                           </p>
+                          <p className="text-xs text-gray-500 mt-1">Section Code</p>
+                          <p className="text-sm font-medium">
+                            {course.sectionCode}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">Days</p>
+                          <p className="text-sm font-medium">
+                            {course.days.join(", ")}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">Start Time - End Time</p>
+                          <p className="text-sm font-medium">
+                            {course.timeStart.toLocaleTimeString()} - {course.timeEnd.toLocaleTimeString()}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">Start Date - End Date</p>
+                          <p className="text-sm font-medium">
+                            {course.startDate.toLocaleDateString()} - {course.endDate.toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center bg-gray-50 rounded-lg p-3">
@@ -268,42 +284,19 @@ function SearchResults() {
                           <Users className="h-4 w-4 text-gray-500" />
                         </div>
                         <div>
+                          <p className="text-xs text-gray-500">Classroom</p>
+                          <p className="text-sm font-medium">
+                            {course.classroom}
+                          </p>
+                          <p className="text-xs text-gray-500">Capacity</p>
+                          <p className="text-sm font-medium">
+                          {course.seatsAvailable} / {course.capacity} seats available
+                          </p>
                           <p className="text-xs text-gray-500">Instructor</p>
                           <p className="text-sm font-medium">
                             {Array.isArray(course.instructor) 
                               ? course.instructor.join(", ") 
                               : course.instructor}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Capacity</p>
-                          <p className="text-sm font-medium">
-                            {course.seatsAvailable} / {course.capacity} seats available
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                        <div className="bg-gray-100 rounded-full p-2 mr-2">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Schedule</p>
-                          <p className="text-sm font-medium">
-                            {course.days.join(", ")} • {course.timeStart.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {course.timeEnd.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                        <div className="bg-gray-100 rounded-full p-2 mr-2">
-                          <BookOpen className="h-4 w-4 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Capacity</p>
-                          <p className="text-sm font-medium">
-                            {course.seatsAvailable} / {course.capacity} seats available
                           </p>
                         </div>
                       </div>
