@@ -6,13 +6,12 @@ import SearchForm from "../components/SearchForm";
 
 function SearchResults() {
   const courses = mockCourses; 
-  const loading = false;
-  const error = null;
   
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
-
+	const [loading, setLoading] = useState<boolean>(false);
+	const [error, setError] = useState<string | null>(null);
   const [expandedResults, setExpandedResults] = useState<Record<string, boolean>>({});
   const toggleExpand = (courseId: string) => {
     setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
@@ -68,7 +67,7 @@ function SearchResults() {
           <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
         </div>
       </div>
-      <div className="bg-white shadow rounded-lg p-6 mb-8">
+      <div className="bg-white shadow rounded-lg p-6">
         <SearchForm 
           onSearch={handleSearch} 
           showSearchButton={true}

@@ -136,7 +136,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   return (
     <div className="relative" ref={dropdownRef}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
           {label} {required && <span className="text-red-400">*</span>}
         </label>
       )}
@@ -167,7 +167,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-10"
+          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-10 pl-1"
         />
         <div
           className="absolute inset-y-0 right-0 flex items-center pr-2 cursor-pointer"

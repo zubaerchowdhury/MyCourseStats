@@ -33,7 +33,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       setFilters({
         subjectCode: subjectCode || "",
         catalogNum: catalogNum || "",
-        semester: semester ? `${semester}-${year}` : "",
+        semester: semester && year ? `${semester}-${year}` : "",
       });
     }
   }, [searchParams, setFilters]);
@@ -71,6 +71,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       catalogNum: "",
       semester: "",
     });
+		setSubjectOptions([])
   };
 
   const setField = (field: keyof SearchFilters, value: any) => {
@@ -100,13 +101,13 @@ const SearchForm: React.FC<SearchFormProps> = ({
       <form onSubmit={handleSearch} className="space-y-4">
         <div className="flex flex-col md:flex-row gap-2">
           <div className="relative flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
               Semester <span className="text-red-400">*</span>
             </label>
             <select
               value={filters.semester || ""}
               onChange={(e) => setField("semester", e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
             >
               {semesterYearOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -126,7 +127,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
           />
 
           <div className="relative flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
               Catalog Number
             </label>
             <input
@@ -134,7 +135,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               value={filters.catalogNum || ""}
               onChange={(e) => setField("catalogNum", e.target.value)}
               placeholder="e.g. 101"
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
             />
           </div>
 
