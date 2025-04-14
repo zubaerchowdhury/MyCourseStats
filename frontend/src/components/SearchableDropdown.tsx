@@ -17,6 +17,13 @@ interface SearchableDropdownProps {
   disabled?: boolean;
 }
 
+interface subject {
+	name: string;
+	code: string;
+	semester: string;
+	year: number;
+}
+
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   value,
   onChange,
@@ -54,10 +61,24 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
+					if (response.status === 404) {
+						setError('No options found for this semester');
+						return;
+					} else if (response.status >= 500) {
+						setError('Server error, please try again later');
+						return;
+					}
           throw new Error('Failed to fetch options');
         }
         const data = await response.json();
-        setOptions(data);
+				
+				// Transform data into the expected format
+				const transformedData = data.map((item: subject) => ({
+					value: item.code,
+					label: `${item.name}`,
+				}));
+
+        setOptions(transformedData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error occurred');
         console.error('Error fetching options:', err);
