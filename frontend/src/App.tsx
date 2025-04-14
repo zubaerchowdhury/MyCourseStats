@@ -1,6 +1,5 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Github, Twitter, Linkedin, Code2 } from "lucide-react";
+import { Code2 } from "lucide-react";
 import { CourseProvider } from "./context/CourseContext";
 import Home from "./pages/Home";
 import SearchResults from "./pages/SearchResults";
@@ -24,9 +23,6 @@ function App() {
                 <div className="hidden md:flex items-center space-x-8">
                   <a href="#" className="text-gray-600 hover:text-gray-900">
                     About
-                  </a>
-                  <a href="#" className="text-gray-600 hover:text-gray-900">
-                    Search by Schools
                   </a>
                 </div>
               </div>
