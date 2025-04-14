@@ -60,11 +60,11 @@ public class MongoDBService
         var options = new AggregateOptions { MaxTime = TimeSpan.FromMilliseconds(60000), AllowDiskUse = true };
         var result = await _sectionsCollection.Aggregate<BsonDocument>(pipeline, options).ToListAsync();
         var instructors = result.Count == 0
-	        ? []
-	        : result.First()["instructors"].AsBsonArray.Select(x => x.AsString);
+            ? []
+            : result.First()["instructors"].AsBsonArray.Select(x => x.AsString);
         return (from instructor in instructors
-				where instructor != "TBA" && instructor != "X TBA" && instructor != "-"
-		        select instructor).ToList();
+            where instructor != "TBA" && instructor != "X TBA" && instructor != "-"
+            select instructor).ToList();
     }
 
     /// <summary>
@@ -180,42 +180,55 @@ public class MongoDBService
     {
         var filterBuilder = Builders<BsonDocument>.Filter;
         var filter = filterBuilder.And(filterBuilder.Eq("semester", semester), filterBuilder.Eq("year", year));
-        filter = filterBuilder.And(filterBuilder.Eq("subjectCode", subjectCode));
+        filter &= filterBuilder.Eq("subjectCode", subjectCode);
 
         if (!string.IsNullOrEmpty(catalogNumber))
         {
-            filter = filterBuilder.And(filter, filterBuilder.Eq("catalogNumber", catalogNumber));
+            filter &= filterBuilder.Eq("catalogNumber", catalogNumber);
         }
 
         if (!string.IsNullOrEmpty(name))
         {
-            filter = filterBuilder.And(filter, filterBuilder.Text(name));
+            filter &= filterBuilder.Text(name);
         }
 
         if (days is { Count: > 0 })
         {
-            var arrayFilter = filterBuilder.ElemMatch("days", filterBuilder.In("days", days));
-            var nestedArrayFilter = filterBuilder.ElemMatch("days", arrayFilter);
-            var daysFilter = filterBuilder.Or(arrayFilter, nestedArrayFilter);
-            filter = filterBuilder.And(filter, daysFilter);
+            filter &= new BsonDocument("$or", new BsonArray
+            {
+                new BsonDocument("days",
+                    new BsonDocument("$elemMatch",
+                        new BsonDocument("$elemMatch",
+                            new BsonDocument("$in",
+                                new BsonArray(days))))),
+                new BsonDocument("days",
+                    new BsonDocument("$in",
+                        new BsonArray(days)))
+            });
         }
 
         if (startDate != null)
         {
-            filter = filterBuilder.And(filter, filterBuilder.Gte("startDate", startDate));
+            filter &= filterBuilder.Gte("startDate", startDate);
         }
 
         if (endDate != null)
         {
-            filter = filterBuilder.And(filter, filterBuilder.Lte("endDate", endDate));
+            filter &= filterBuilder.Lte("endDate", endDate);
         }
 
         if (!string.IsNullOrEmpty(instructor))
         {
-            var arrayFilter = filterBuilder.ElemMatch("instructor", filterBuilder.In("instructor", instructor));
-            var nestedArrayFilter = filterBuilder.ElemMatch("instructor", arrayFilter);
-            var instructorFilter = filterBuilder.Or(arrayFilter, nestedArrayFilter);
-            filter = filterBuilder.And(filter, instructorFilter);
+            filter &= new BsonDocument("$or", new BsonArray
+            {
+                new BsonDocument("instructor",
+                    new BsonDocument("$elemMatch",
+                        new BsonDocument("$elemMatch",
+                            new BsonDocument("$eq", instructor)))),
+                new BsonDocument("instructor",
+                    new BsonDocument("$elemMatch",
+                        new BsonDocument("$eq", instructor)))
+            });
         }
 
         var projectionBuilder = Builders<BsonDocument>.Projection;
