@@ -11,6 +11,11 @@ function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [updatedFilteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  
+  const [expandedResults, setExpandedResults] = useState<Record<string, boolean>>({});
+  const toggleExpand = (courseId: string) => {
+    setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
+  };
 
   const [filters, setFilters] = useState({
     subjectCode: searchParams.get("subjectCode") || "",
@@ -187,6 +192,18 @@ function SearchResults() {
           updatedFilteredCourses.map((course) => (
             <div key={course._id} className="bg-white shadow rounded-lg p-6">
               <div className="flex justify-between items-start">
+                <button 
+                  onClick={() => toggleExpand(course._id)}
+                  className="mr-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  aria-label={expandedResults[course._id] ? "Collapse details" : "Expand details"}
+                >
+                  <ChevronDown 
+                    className={`h-5 w-5 transform transition-transform ${
+                      expandedResults[course._id] ? 'rotate-180' : ''
+                    }`} 
+                  />
+                </button>
+
                 <div>
                   {/*TODO: add an expand button + functionality to expand the course details*/}
                   <h2 className="text-xl font-semibold text-gray-900">
