@@ -257,6 +257,14 @@ function SearchResults() {
                 {expandedResults[course._id] && (
                   <div className="mt-4">
                     <div className="flex flex-wrap gap-4 mt-4">
+                    <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                        <div>
+                          <p className="text-xs text-gray-500">Class Number</p>
+                          <p className="text-sm font-medium">
+                            {course.classNumber}
+                          </p>
+                        </div>
+                      </div>
                       <div className="flex items-center bg-gray-50 rounded-lg p-3">
                         <div className="bg-gray-100 rounded-full p-2 mr-2">
                           <Users className="h-4 w-4 text-gray-500" />

@@ -3,7 +3,7 @@
     name: string;
     subjectName: string;
     subjectCode: string;
-    catalogNumber: number;
+    catalogNumber: string;
     academicCareer: string;
     semester: string;
     year: number;
@@ -37,7 +37,7 @@
       name: "Introduction to Electrical and Computer Engineering",
       subjectName: "Electrical and Computer Engineering",
       subjectCode: "ECE",
-      catalogNumber: 101,
+      catalogNumber: "101",
       academicCareer: "Undergraduate",
       semester: "spring",
       year: 2025,
@@ -69,7 +69,7 @@
       name: "Calculus II",
       subjectName: "Mathematics",
       subjectCode: "MATH",
-      catalogNumber: 201,
+      catalogNumber: "201",
       academicCareer: "Undergraduate",
       semester: "spring",
       year: 2025,
