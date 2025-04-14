@@ -1,68 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import SearchableDropdown from "../components/SearchableDropdown";
-
-interface searchFilters {
-  subjectCode?: string;
-  catalogNum?: string;
-  semester?: string;
-  year?: number;
-}
+import React from "react";
+import SearchForm from "../components/SearchForm";
 
 function Home() {
-  const navigate = useNavigate();
-  const [searchFilters, setsearchFilters] = useState<searchFilters>({
-    subjectCode: "",
-    catalogNum: "",
-    semester: "",
-    year: undefined,
-  });
-
-  const semesterYearOptions = [
-    { value: "", label: "" },
-    { value: "Spring-2025", label: "Spring 2025" },
-    { value: "Fall-2025", label: "Fall 2025" },
-  ];
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-
-    if (!searchFilters.semester) {
-      alert("Please select a semester");
-      return;
-    }
-    if (!searchFilters.subjectCode) {
-      alert("Please select a subject");
-      return;
-    }
-    const [semester, year] = searchFilters.semester.split("-");
-    params.append("semester", semester);
-    params.append("year", year);
-    params.append("subjectCode", searchFilters.subjectCode);
-    if (searchFilters.catalogNum)
-      params.append("catalogNum", searchFilters.catalogNum);
-
-    console.log("Search Params:", params.toString());
-    navigate(`/search?${params.toString()}`);
-  };
-
-  const setField = (key: keyof searchFilters, value: any) => {
-    setsearchFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const params = new URLSearchParams();
-  if (searchFilters.semester) {
-    const [semester, year] = searchFilters.semester.split("-");
-    params.append("semester", semester);
-    params.append("year", year);
-  }
-  const subjectApiUrl = `http://localhost:5184/api/Courses/subjects?${params.toString()}`;
-
   return (
     <div className="flex-grow relative bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -79,68 +18,7 @@ function Home() {
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="w-full max-w-2xl">
-                  <form onSubmit={handleSearch} className="space-y-4">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Semester <span className="text-red-400">*</span>
-                        </label>
-                        <select
-                          value={searchFilters.semester || ""}
-                          onChange={(e) => setField("semester", e.target.value)}
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                          {semesterYearOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <SearchableDropdown
-                        label="Subject"
-                        apiUrl={subjectApiUrl}
-                        required
-                        value={searchFilters.subjectCode || ""}
-                        onChange={(value) => setField("subjectCode", value)}
-                        placeholder="Select or search for a subject"
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                      <div className="relative flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Catalog Number
-                        </label>
-
-                        <input
-                          type="text"
-                          value={searchFilters.catalogNum || ""}
-                          placeholder="e.g. 101"
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="relative flex-1">
-                        <button
-                          type="submit"
-                          className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          Search
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      {Object.keys(searchFilters).length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setsearchFilters({})}
-                          className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Clear Filters
-                        </button>
-                      )}
-                    </div>
-                  </form>
+                  <SearchForm />
                 </div>
               </div>
             </div>

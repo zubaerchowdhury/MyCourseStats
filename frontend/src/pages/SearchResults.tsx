@@ -1,93 +1,49 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft, BookOpen, Users, Calendar, ChevronDown } from "lucide-react";
+import { ArrowLeft, BookOpen, Users, Calendar, ChevronDown } from "lucide-react";
 import { mockCourses, Course } from "../data/mockCourses";
-import { useCourses } from "../context/CourseContext";
-import { X } from "lucide-react";
+import SearchForm from "../components/SearchForm";
 
 function SearchResults() {
-  // Using mockCourses directly
   const courses = mockCourses; 
   const loading = false;
   const error = null;
   
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [updatedFilteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
 
   const [expandedResults, setExpandedResults] = useState<Record<string, boolean>>({});
   const toggleExpand = (courseId: string) => {
     setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };
 
-  const [filters, setFilters] = useState({
-    subjectCode: searchParams.get("subjectCode") || "",
-    catalogNum: searchParams.get("catalogNum") ||"",
-    semester: searchParams.get("semester") || "",
-    year: searchParams.get("year")
-      ? Number(searchParams.get("year"))
-      : undefined,
-  });
-
-  const semesterYearOptions = [
-    { value: "spring-2025", label: "Spring 2025" },
-    { value: "fall-2025", label: "Fall 2025" },
-  ];
-
+  // Update filteredCourses when searchParams change
   useEffect(() => {
     const filtered = courses.filter((course) => {
-      const matchesSubject = filters.subjectCode
+      const matchesSubject = searchParams.get("subjectCode")
         ? course.subjectCode
             .toLowerCase()
-            .includes(filters.subjectCode.toLowerCase())
+            .includes(searchParams.get("subjectCode")!.toLowerCase())
         : true;
-      const matchesCatalogNum = filters.catalogNum
-        ? course.catalogNumber === filters.catalogNum
+      const matchesCatalogNum = searchParams.get("catalogNum")
+        ? course.catalogNumber === searchParams.get("catalogNum")
         : true;
-      const matchesSemester = filters.semester
-        ? course.semester.toLowerCase().includes(filters.semester.toLowerCase())
+      const matchesSemester = searchParams.get("semester")
+        ? course.semester.toLowerCase().includes(searchParams.get("semester")!.toLowerCase())
         : true;
-      const matchesYear = filters.year ? course.year === filters.year : true;
+      const matchesYear = searchParams.get("year")
+        ? course.year === Number(searchParams.get("year"))
+        : true;
       return (
         matchesSubject && matchesCatalogNum && matchesSemester && matchesYear
       );
     });
     setFilteredCourses(filtered);
-  }, [filters, courses]);
+  }, [searchParams, courses]);
 
-  const handleFilterChange = (key: string, value: any) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-
-    const params = new URLSearchParams();
-    Object.entries(newFilters).forEach(([key, value]) => {
-      if (value) params.append(key, value.toString());
-    });
+  const handleSearch = (params: URLSearchParams) => {
     setSearchParams(params);
-  };
-
-  const handleSearch = () => {
-    // Required field validation
-    if (!filters.subjectCode) {
-      alert("Subject field is required to search");
-      return;
-    }
-    
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value.toString());
-    });
-    setSearchParams(params);
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      subjectCode: "",
-      catalogNum: "",
-      semester: "",
-      year: undefined,
-    });
-    setSearchParams(new URLSearchParams());
   };
 
   const handleBackToHome = () => {
@@ -113,85 +69,14 @@ function SearchResults() {
         </div>
       </div>
       <div className="bg-white shadow rounded-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Semester
-            </label>
-            <select
-              value={filters.semester}
-              onChange={(e) => handleFilterChange("semester", e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Any</option>
-              {semesterYearOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subject <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={filters.subjectCode}
-              onChange={(e) =>
-                handleFilterChange("subjectCode", e.target.value)
-              }
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Any</option>
-              <option value="ECE">ECE</option>
-              <option value="BME">BME</option>
-              <option value="MTH">MTH</option>
-              <option value="CHM">CHM</option>
-              <option value="MATH">MATH</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Catalog Number
-            </label>
-            <input
-              type="number"
-              value={filters.catalogNum || ""}
-              onChange={(e) =>
-                handleFilterChange(
-                  "catalogNum",
-                  e.target.value ? Number(e.target.value) : undefined
-                )
-              }
-              placeholder="e.g. 101"
-              className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
-          </div>
-        </div>
-        
-        <div className="mt-4 flex justify-between">
-          <button
-            onClick={handleSearch}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            <Search className="h-4 w-4 mr-1" />
-            Search
-          </button>
-          
-          {Object.values(filters).some((value) => value) && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear Filters
-            </button>
-          )}
-        </div>
+        <SearchForm 
+          onSearch={handleSearch} 
+          showSearchButton={true}
+          showClearButton={true}
+        />
       </div>
-      <div className="space=y-6">
-        {updatedFilteredCourses.length === 0 ? (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {filteredCourses.length === 0 ? (
           <div className="text-center py-16">
             <div className="flex justify-center">
               <BookOpen className="h-16 w-16 text-gray-400" />
@@ -213,7 +98,7 @@ function SearchResults() {
           </div>
         ) : (
           <div className="space-y-4">
-            {updatedFilteredCourses.map((course) => (
+            {filteredCourses.map((course) => (
               <div key={course._id} className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-2">
@@ -255,7 +140,7 @@ function SearchResults() {
                 {expandedResults[course._id] && (
                   <div className="mt-4">
                     <div className="flex flex-wrap gap-4 mt-4">
-                    <div className="flex items-center bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
                         <div>
                           <p className="text-xs text-gray-500">Class Number</p>
                           <p className="text-sm font-medium">
@@ -290,7 +175,7 @@ function SearchResults() {
                           </p>
                           <p className="text-xs text-gray-500">Capacity</p>
                           <p className="text-sm font-medium">
-                          {course.seatsAvailable} / {course.capacity} seats available
+                            {course.seatsAvailable} / {course.capacity} seats available
                           </p>
                           <p className="text-xs text-gray-500">Instructor</p>
                           <p className="text-sm font-medium">
