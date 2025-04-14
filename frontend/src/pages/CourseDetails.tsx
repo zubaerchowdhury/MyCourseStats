@@ -215,6 +215,7 @@ function CourseDetails() {
               </div>
             </div>
           </div>
+          {/* TODO: Add interactive month Calendar and probability of enrollment for each day below each date */}
         </div>
       </div>
     </div>
