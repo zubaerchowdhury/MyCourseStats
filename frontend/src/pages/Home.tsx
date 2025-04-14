@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import SearchableDropdown from "../components/SearchableDropdown";
 
 interface searchFilters {
   subjectCode?: string;
@@ -19,6 +20,7 @@ function Home() {
   });
 
   const semesterYearOptions = [
+    { value: "", label: "" },
     { value: "Spring-2025", label: "Spring 2025" },
     { value: "Fall-2025", label: "Fall 2025" },
   ];
@@ -27,13 +29,18 @@ function Home() {
     e.preventDefault();
     const params = new URLSearchParams();
 
-    if (searchFilters.semester) {
-      const [semester, year] = searchFilters.semester.split("-");
-      params.append("semester", semester);
-      params.append("year", year);
+    if (!searchFilters.semester) {
+      alert("Please select a semester");
+      return;
     }
-    if (searchFilters.subjectCode)
-      params.append("subjectCode", searchFilters.subjectCode);
+    if (!searchFilters.subjectCode) {
+      alert("Please select a subject");
+      return;
+    }
+    const [semester, year] = searchFilters.semester.split("-");
+    params.append("semester", semester);
+    params.append("year", year);
+    params.append("subjectCode", searchFilters.subjectCode);
     if (searchFilters.catalogNum)
       params.append("catalogNum", searchFilters.catalogNum);
 
@@ -47,6 +54,14 @@ function Home() {
       [key]: value,
     }));
   };
+
+  const params = new URLSearchParams();
+  if (searchFilters.semester) {
+    const [semester, year] = searchFilters.semester.split("-");
+    params.append("semester", semester);
+    params.append("year", year);
+  }
+  const subjectApiUrl = `http://localhost:5184/api/Courses/subjects?${params.toString()}`;
 
   return (
     <div className="relative bg-white overflow-hidden">
@@ -68,7 +83,7 @@ function Home() {
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Semester & Year
+                          Semester <span className="text-red-400">*</span>
                         </label>
                         <select
                           value={searchFilters.semester || ""}
@@ -82,40 +97,23 @@ function Home() {
                           ))}
                         </select>
                       </div>
-                      <div className="relative flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Subject
-                        </label>
-                        <select
-                          value={searchFilters.subjectCode || ""}
-                          onChange={(e) =>
-                            setField("subjectCode", e.target.value)
-                          }
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                          <option value="">Any</option>
-                          <option value="ECE">ECE</option>
-                          <option value="BME">BME</option>
-                          <option value="MTH">MTH</option>
-                          <option value="CHM">CHM</option>
-                        </select>
-                      </div>
+                      <SearchableDropdown
+                        label="Subject"
+                        apiUrl={subjectApiUrl}
+                        required
+                        value={searchFilters.subjectCode || ""}
+                        onChange={(value) => setField("subjectCode", value)}
+                        placeholder="Select or search for a subject"
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      />
                       <div className="relative flex-1">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Catalog Number
                         </label>
 
                         <input
-                          type="number"
+                          type="text"
                           value={searchFilters.catalogNum || ""}
-                          onChange={(e) =>
-                            setField(
-                              "catalogNum",
-                              e.target.value
-                                ? Number(e.target.value)
-                                : undefined
-                            )
-                          }
                           placeholder="e.g. 101"
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         />
