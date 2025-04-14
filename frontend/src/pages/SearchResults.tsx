@@ -22,9 +22,7 @@ function SearchResults() {
 
   const [filters, setFilters] = useState({
     subjectCode: searchParams.get("subjectCode") || "",
-    catalogNum: searchParams.get("catalogNum")
-      ? Number(searchParams.get("catalogNum"))
-      : undefined,
+    catalogNum: searchParams.get("catalogNum") ||"",
     semester: searchParams.get("semester") || "",
     year: searchParams.get("year")
       ? Number(searchParams.get("year"))
@@ -85,7 +83,7 @@ function SearchResults() {
   const clearFilters = () => {
     setFilters({
       subjectCode: "",
-      catalogNum: undefined,
+      catalogNum: "",
       semester: "",
       year: undefined,
     });
