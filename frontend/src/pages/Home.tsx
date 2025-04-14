@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 
 interface searchFilters {
   subjectCode?: string;
-  catalogNum?: number;
+  catalogNum?: string;
   semester?: string;
   year?: number;
 }
@@ -13,14 +13,14 @@ function Home() {
   const navigate = useNavigate();
   const [searchFilters, setsearchFilters] = useState<searchFilters>({
     subjectCode: "",
-    catalogNum: undefined,
+    catalogNum: "",
     semester: "",
     year: undefined,
   });
 
   const semesterYearOptions = [
-    { value: "spring-2025", label: "Spring 2025" },
-    { value: "fall-2025", label: "Fall 2025" },
+    { value: "Spring-2025", label: "Spring 2025" },
+    { value: "Fall-2025", label: "Fall 2025" },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ function Home() {
     if (searchFilters.subjectCode)
       params.append("subjectCode", searchFilters.subjectCode);
     if (searchFilters.catalogNum)
-      params.append("catalogNum", searchFilters.catalogNum.toString());
+      params.append("catalogNum", searchFilters.catalogNum);
 
     console.log("Search Params:", params.toString());
     navigate(`/search?${params.toString()}`);
@@ -75,7 +75,6 @@ function Home() {
                           onChange={(e) => setField("semester", e.target.value)}
                           className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
-                          <option value="">Any</option>
                           {semesterYearOptions.map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
