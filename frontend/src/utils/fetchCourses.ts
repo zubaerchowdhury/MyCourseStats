@@ -1,7 +1,8 @@
 export interface Course {
     _id: string;
     name: string;
-    subject: [string, string]; // Tuple with exactly two string elements
+    subjectName: string;
+    subjectCode: string;
     catalogNumber: number;
     academicCareer: string;
     semester: string;

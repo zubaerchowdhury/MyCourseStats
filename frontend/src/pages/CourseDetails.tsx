@@ -67,7 +67,7 @@ function CourseDetails() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{course.name}</h1>
-              <p className="text-lg text-gray-600 mt-2">{course.subject}</p>
+              <p className="text-lg text-gray-600 mt-2">{course.subjectCode}</p>
             </div>
             <div className="flex items-center bg-indigo-50 px-4 py-2 rounded-full">
             </div>
