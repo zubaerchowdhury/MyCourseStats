@@ -25,6 +25,7 @@ interface CalendarProps {
   courseId: string; // Add this to fetch data for specific course
 }
 
+/* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
 const Calendar: React.FC<CalendarProps> = ({ courseId }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarData, setCalendarData] = useState<[number[], number[]]>([
