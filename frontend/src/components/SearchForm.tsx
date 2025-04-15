@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
-import { SearchFilters, useSearch } from "../context/SearchContext";
+import { SearchFilters, useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 
 interface SearchFormProps {
   onSearch?: (params: URLSearchParams) => void;
@@ -24,19 +24,44 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   // Initialize filters from URL params if they exist
   useEffect(() => {
-    const subjectCode = searchParams.get("subjectCode");
-    const catalogNum = searchParams.get("catalogNum");
-    const semester = searchParams.get("semester");
-    const year = searchParams.get("year");
+    // Map URL parameters to filters
+		let searchFilters: SearchFilters = {
+			semester: "",
+			year: undefined,
+      subjectCode: "",      
+    };
+		searchParams.forEach((value, key) => {
+			// Get keyof SearchFilters from key
+			const filterKey = key as keyof SearchFilters;
+			if (key === "year") {
+				searchFilters = {
+					...filters,
+					[filterKey]: parseInt(value),
+				};
+			}
+			else if (key === "days") {
+				searchFilters = {
+					...filters,
+					[filterKey]: value.split(","),
+				};
+			}
+			else if (key === "startDate" || key === "endDate") {
+				searchFilters = {
+					...filters,
+					[filterKey]: new Date(value),
+				};
+			}
+			else {
+				searchFilters = {
+					...filters,
+					[filterKey]: value,
+				};
+			}
+		});
 
-    if (subjectCode || catalogNum || semester) {
-      setFilters({
-        subjectCode: subjectCode || "",
-        catalogNum: catalogNum || "",
-        semester: semester && year ? `${semester}-${year}` : "",
-      });
-    }
-  }, [searchParams, setFilters]);
+    // Set filters state variable
+		setFilters(searchFilters);
+  }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -51,12 +76,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       return;
     }
 
-    const params = new URLSearchParams();
-    const [semester, year] = filters.semester.split("-");
-    params.append("semester", semester);
-    params.append("year", year);
-    params.append("subjectCode", filters.subjectCode);
-    if (filters.catalogNum) params.append("catalogNum", filters.catalogNum);
+    const params = new URLSearchParams(getSearchFiltersStrings(filters));
 
     if (onSearch) {
       onSearch(params);
@@ -67,9 +87,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   const clearFilters = () => {
     setFilters({
-      subjectCode: "",
-      catalogNum: "",
-      semester: "",
+			semester: "",
+			year: undefined,
+      subjectCode: "",      
     });
 		setSubjectOptions([])
   };
@@ -77,10 +97,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const setField = (field: keyof SearchFilters, value: any) => {
     if (field === "semester") {
       setSubjectOptions([]);
+			const [ semester, year ] = value.split("-"); 
 			setFilters({
 				...filters,
+				semester: semester,
+				year: parseInt(year),
 				subjectCode: "",
-				[field]: value,
 			});
 			return;
     }
@@ -105,7 +127,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               Semester <span className="text-red-400">*</span>
             </label>
             <select
-              value={filters.semester || ""}
+							value={`${filters.semester}-${filters.year}` || ""}
               onChange={(e) => setField("semester", e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
             >

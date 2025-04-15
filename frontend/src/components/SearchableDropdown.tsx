@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSearch } from "../context/SearchContext";
+import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 
 interface SearchableDropdownProps {
   value: string;
@@ -54,10 +54,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     const fetchOptions = async () => {
       setIsSubjectLoading(true);
       setError(null);
-      const params = new URLSearchParams();
-      const [semester, year] = filters.semester.split("-");
-      params.append("semester", semester);
-      params.append("year", year);
+      const params = new URLSearchParams(getSearchFiltersStrings(filters));
+      params.append("semester", filters.semester);
+      params.append("year", filters.year?.toString() || "");
       try {
         const response = await fetch(
           `http://localhost:5184/api/Courses/subjects?${params.toString()}`

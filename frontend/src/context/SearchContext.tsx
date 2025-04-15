@@ -2,9 +2,27 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the shape of our search filters
 export interface SearchFilters {
-  subjectCode: string;
-  catalogNum: string;
   semester: string;
+	year: number | undefined;
+	subjectCode: string;
+  catalogNum?: string;
+	courseName?: string;
+	days?: string[];
+	instructor?: string;
+	startDate?: Date;
+	endDate?: Date;
+}
+
+export const getSearchFiltersStrings = (filters: SearchFilters) => {
+	let result = {}
+	Object.entries(filters).forEach(([key, value]) => {
+		if (value) {
+			result = {
+				...result,
+				[key]: value.toString()};
+		}
+	});
+	return result;
 }
 
 // Define the shape of our subject options
@@ -29,9 +47,10 @@ const SearchContext = createContext<SearchContextType | undefined>(undefined);
 export const SearchProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   // States to be shared
   const [filters, setFilters] = useState<SearchFilters>({
-    subjectCode: "",
-    catalogNum: "",
     semester: "",
+		year: undefined,
+		subjectCode: "",
+    catalogNum: ""
   });
   
   const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);

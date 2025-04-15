@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Users, Calendar, ChevronDown } from "lucide-react";
-import { mockCourses, Course } from "../data/mockCourses";
 import SearchForm from "../components/SearchForm";
+import { CourseSection, fetchCourses } from "../utils/fetchCourses";
 
-function SearchResults() {
-  const courses = mockCourses; 
-  
+function SearchResults() {  
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>(mockCourses);
+  const [filteredCourses, setFilteredCourses] = useState<CourseSection[]>([]);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
   const [expandedResults, setExpandedResults] = useState<Record<string, boolean>>({});
@@ -19,27 +17,8 @@ function SearchResults() {
 
   // Update filteredCourses when searchParams change
   useEffect(() => {
-    const filtered = courses.filter((course) => {
-      const matchesSubject = searchParams.get("subjectCode")
-        ? course.subjectCode
-            .toLowerCase()
-            .includes(searchParams.get("subjectCode")!.toLowerCase())
-        : true;
-      const matchesCatalogNum = searchParams.get("catalogNum")
-        ? course.catalogNumber === searchParams.get("catalogNum")
-        : true;
-      const matchesSemester = searchParams.get("semester")
-        ? course.semester.toLowerCase().includes(searchParams.get("semester")!.toLowerCase())
-        : true;
-      const matchesYear = searchParams.get("year")
-        ? course.year === Number(searchParams.get("year"))
-        : true;
-      return (
-        matchesSubject && matchesCatalogNum && matchesSemester && matchesYear
-      );
-    });
-    setFilteredCourses(filtered);
-  }, [searchParams, courses]);
+    //fetchCourses();
+  }, [searchParams]);
 
   const handleSearch = (params: URLSearchParams) => {
     setSearchParams(params);
@@ -97,7 +76,7 @@ function SearchResults() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredCourses.map((course) => (
+            {/* {filteredCourses.map((course) => (
               <div key={course._id} className="bg-white shadow rounded-lg p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-2">
@@ -200,7 +179,7 @@ function SearchResults() {
                   </button>
                 </div>
               </div>
-            ))}
+            ))} */}
           </div>
         )}
       </div>

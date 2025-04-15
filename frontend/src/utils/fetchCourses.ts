@@ -1,46 +1,40 @@
-// src/types/courses.ts
+import { SearchFilters, getSearchFiltersStrings } from "../context/SearchContext";
 
-export interface CourseMeeting {
-    classroom: string;
-    instructor: string[];
-    days: string[];
-    timeStart: string;
-    timeEnd: string;
-    startDate: string;
-    endDate: string;
-    name: string;
-    catalogNumber: string;
-    sectionType: string;
-    sectionCode: string;
-    classNumber: number;
-    capacity: number;
-    multipleMeetings: boolean;
-  }
+export interface CourseSection {
+	name: string;
+	catalogNumber: string;
+	sectionType: string;
+	sectionCode: string;
+	classNumber: number;
+	capacity: number;
+	multipleMeetings: boolean;
+	classroom: string | string[];
+	instructor: string[] | string[][];
+	days: string[] | string[][];
+	timeStart: Date | Date[];
+	timeEnd: Date | Date[];
+	startDate: Date | Date[];
+	endDate: Date | Date[];
+}
   
-  export interface CourseData {
-    courseWithOneMeeting: CourseMeeting;
-    courseWithMultipleMeetings: CourseMeeting | null;
-  }
-  
+interface CourseContainer {
+	courseWithOneMeeting: CourseSection | null;
+	courseWithMultipleMeetings: CourseSection | null;
+}
 
-  export const fetchCourses = async (
-    semester: string,
-    year: number,
-    subjectCode: string,
-    catalogNumber: string
-  ): Promise<CourseData[]> => {
-    const baseUrl = 'http://localhost:5184/api/Courses/course-search';
-    const params = new URLSearchParams({
-      semester,
-      year: year.toString(),
-      subjectCode,
-      catalogNumber,
-    });
-  
-    const response = await fetch(`${baseUrl}?${params.toString()}`);
-  
-    if (!response.ok) {
-      throw new Error('Failed to fetch courses data');
-    }
-    return await response.json();
-  };
+export const fetchCourses = async (
+	filters: SearchFilters
+): Promise<CourseSection[]> => {
+	const baseUrl = 'http://localhost:5184/api/Courses/course-search';
+	const params = new URLSearchParams(getSearchFiltersStrings(filters));
+	const response = await fetch(`${baseUrl}?${params.toString()}`);
+
+	if (!response.ok && response.status !== 404) {
+		throw new Error('Failed to fetch courses data');
+	}
+	const data = await response.json();
+	const courses: CourseSection[] = data.map((container: CourseContainer) => {
+		return container.courseWithOneMeeting || container.courseWithMultipleMeetings;
+	});
+	return courses;
+};
