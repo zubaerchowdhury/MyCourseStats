@@ -1,28 +1,78 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Users, Calendar, ChevronDown } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Users,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 import SearchForm from "../components/SearchForm";
-import { CourseSection, fetchCourses } from "../utils/fetchCourses";
 
-function SearchResults() {  
-  const [searchParams, setSearchParams] = useSearchParams();
+interface CourseSection {
+  name: string;
+  catalogNumber: string;
+  sectionType: string;
+  sectionCode: string;
+  classNumber: number;
+  capacity: number;
+  multipleMeetings: boolean;
+  classroom: string | string[];
+  instructor: string[] | string[][];
+  days: string[] | string[][];
+  timeStart: Date | Date[];
+  timeEnd: Date | Date[];
+  startDate: Date | Date[];
+  endDate: Date | Date[];
+}
+
+interface CourseContainer {
+  courseWithOneMeeting: CourseSection | null;
+  courseWithMultipleMeetings: CourseSection | null;
+}
+
+function SearchResults() {
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [filteredCourses, setFilteredCourses] = useState<CourseSection[]>([]);
-	const [loading, setLoading] = useState<boolean>(false);
-	const [error, setError] = useState<string | null>(null);
-  const [expandedResults, setExpandedResults] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedResults, setExpandedResults] = useState<
+    Record<string, boolean>
+  >({});
   const toggleExpand = (courseId: string) => {
     setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };
 
   // Update filteredCourses when searchParams change
   useEffect(() => {
-    //fetchCourses();
-  }, [searchParams]);
+    const fetchCourses = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const baseUrl = "http://localhost:5184/api/Courses/course-search";
+        const response = await fetch(`${baseUrl}?${searchParams.toString()}`);
 
-  const handleSearch = (params: URLSearchParams) => {
-    setSearchParams(params);
-  };
+        if (!response.ok && response.status !== 404) {
+          throw new Error("Failed to fetch courses data");
+        }
+        const data = await response.json();
+        const transformedData: CourseSection[] = data.map(
+          (container: CourseContainer) => {
+            container.courseWithOneMeeting ||
+              container.courseWithMultipleMeetings;
+          }
+        );
+        setFilteredCourses(transformedData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [searchParams]);
 
   const handleBackToHome = () => {
     navigate("/");
@@ -47,11 +97,7 @@ function SearchResults() {
         </div>
       </div>
       <div className="bg-white shadow rounded-lg p-6">
-        <SearchForm 
-          onSearch={handleSearch} 
-          showSearchButton={true}
-          showClearButton={true}
-        />
+        <SearchForm />
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {filteredCourses.length === 0 ? (

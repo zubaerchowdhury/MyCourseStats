@@ -10,13 +10,10 @@ import {
   Check,
   Percent,
 } from "lucide-react";
-import { useCourses } from "../context/CourseContext";
 
 function CourseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { courses } = useCourses();
-  const course = courses.find((c) => c._id.toString() === id);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
   // Mock time slots for the course

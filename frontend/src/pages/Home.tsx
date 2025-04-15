@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import SearchForm from "../components/SearchForm";
 
 function Home() {
+	const navigate = useNavigate();
   return (
     <div className="flex-grow relative bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -17,7 +19,7 @@ function Home() {
               </p>
               <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                 <div className="w-full max-w-2xl">
-                  <SearchForm />
+                  <SearchForm onSearch={(params: URLSearchParams) => navigate(`/search?${params.toString()}`)}/>
                 </div>
               </div>
             </div>

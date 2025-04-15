@@ -55,8 +55,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       setIsSubjectLoading(true);
       setError(null);
       const params = new URLSearchParams(getSearchFiltersStrings(filters));
-      params.append("semester", filters.semester);
-      params.append("year", filters.year?.toString() || "");
       try {
         const response = await fetch(
           `http://localhost:5184/api/Courses/subjects?${params.toString()}`

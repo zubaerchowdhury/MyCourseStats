@@ -17,13 +17,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
   showClearButton = true,
   className = "",
 }) => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { filters, setFilters, setSubjectOptions } = useSearch();
 
   // Initialize filters from URL params if they exist
   useEffect(() => {
+		if (searchParams.size === 0) return;
+
     // Map URL parameters to filters
 		let searchFilters: SearchFilters = {
 			semester: "",
@@ -77,11 +78,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
     }
 
     const params = new URLSearchParams(getSearchFiltersStrings(filters));
+		setSearchParams(params);
 
     if (onSearch) {
       onSearch(params);
-    } else {
-      navigate(`/search?${params.toString()}`);
     }
   };
 
