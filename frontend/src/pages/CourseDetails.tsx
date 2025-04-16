@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 function CourseDetails() {
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
 
