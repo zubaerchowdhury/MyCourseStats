@@ -5,7 +5,7 @@ export interface SearchFilters {
   semester: string;
 	year: number | undefined;
 	subjectCode: string;
-  catalogNum?: string;
+  catalogNumber?: string;
 	name?: string;
 	days?: string[];
 	instructor?: string;
@@ -50,7 +50,7 @@ export const SearchProvider: React.FC<{children: ReactNode}> = ({ children }) =>
     semester: "",
 		year: undefined,
 		subjectCode: "",
-    catalogNum: ""
+    catalogNumber: ""
   });
   
   const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);

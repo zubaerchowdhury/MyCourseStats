@@ -61,11 +61,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         );
         if (!response.ok) {
           if (response.status === 404) {
-            setError("No options found for this semester");
-            return;
+            throw new Error("No options found for this semester");
           } else if (response.status >= 500) {
-            setError("Server error, please try again later");
-            return;
+            throw new Error("Server error, please try again later");
           }
           throw new Error("Failed to fetch options");
         }

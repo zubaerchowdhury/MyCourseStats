@@ -32,7 +32,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<SearchResults />} />
-            <Route path="/course/:id" element={<CourseDetails />} />
+            <Route path="/course" element={<CourseDetails />} />
           </Routes>
 
           {/* Footer */}

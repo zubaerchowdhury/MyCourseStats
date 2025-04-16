@@ -133,7 +133,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             value={filters.name || ""}
             onChange={(e) => setField("name", e.target.value)}
             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Search by class name, subject code, or catalog number..."
+            placeholder="Search by class name..."
           />
           {filters.name && (
             <button 
@@ -179,8 +179,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </label>
             <input
               type="text"
-              value={filters.catalogNum || ""}
-              onChange={(e) => setField("catalogNum", e.target.value)}
+              value={filters.catalogNumber || ""}
+              onChange={(e) => setField("catalogNumber", e.target.value)}
               placeholder="e.g. 101"
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
             />
