@@ -6,7 +6,7 @@ export interface SearchFilters {
 	year: number | undefined;
 	subjectCode: string;
   catalogNum?: string;
-	courseName?: string;
+	name?: string;
 	days?: string[];
 	instructor?: string;
 	startDate?: Date;

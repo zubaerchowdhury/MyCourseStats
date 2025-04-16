@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
 import { SearchFilters, useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 
@@ -17,6 +17,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   showClearButton = true,
   className = "",
 }) => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { filters, setFilters, setSubjectOptions } = useSearch();
@@ -68,11 +69,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
     if (e) e.preventDefault();
 
     // Validation
-    if (!filters.semester) {
-      alert("Please select a semester");
+    if (!filters.name && !filters.semester) {
+      alert("Please enter a course name or select a semester");
       return;
     }
-    if (!filters.subjectCode) {
+    if (!filters.name && !filters.semester && !filters.subjectCode) {
       alert("Please select a subject");
       return;
     }
@@ -82,6 +83,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
     if (onSearch) {
       onSearch(params);
+    } else {
+      navigate(`/search?${params.toString()}`);
     }
   };
 
@@ -121,6 +124,28 @@ const SearchForm: React.FC<SearchFormProps> = ({
   return (
     <div className={className}>
       <form onSubmit={handleSearch} className="space-y-4">
+      <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            value={filters.name || ""}
+            onChange={(e) => setField("name", e.target.value)}
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            placeholder="Search by class name, subject code, or catalog number..."
+          />
+          {filters.name && (
+            <button 
+              type="button"
+              onClick={() => setField("name", "")}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
         <div className="flex flex-col md:flex-row gap-2">
           <div className="relative flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
