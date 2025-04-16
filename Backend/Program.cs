@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:8080", "http://localhost:5173")
+        policy.WithOrigins(Enumerable.Range(8080, 10).Select(port => $"http://localhost:{port}").ToArray())
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
