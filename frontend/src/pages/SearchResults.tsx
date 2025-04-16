@@ -37,6 +37,9 @@ function SearchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [filteredCourses, setFilteredCourses] = useState<CourseSection[]>([]);
+  const [searchSemester, setSearchSemester] = useState<string>("");
+  const [searchYear, setSearchYear] = useState<number | undefined>(undefined);
+  const [searchSubjectCode, setSearchSubjectCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedResults, setExpandedResults] = useState<
@@ -45,44 +48,66 @@ function SearchResults() {
   const toggleExpand = (courseId: number) => {
     setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
   };
-
-  const { filters } = useSearch();
+  const setCurrentSearchVars = (
+    semester: string,
+    year: number | undefined,
+    subjectCode: string
+  ) => {
+    setSearchSemester(semester);
+    setSearchYear(year);
+    setSearchSubjectCode(subjectCode);
+  };
 
   // Update filteredCourses when searchParams change
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       setError(null);
+      setCurrentSearchVars(
+        searchParams.get("semester") || "",
+        parseInt(searchParams.get("year") || ""),
+        searchParams.get("subjectCode") || ""
+      );
       try {
         const baseUrl = "http://localhost:5184/api/Courses/course-search";
         const response = await fetch(`${baseUrl}?${searchParams.toString()}`);
 
         if (!response.ok && response.status !== 404) {
-					if (response.status >= 500) {
-						throw new Error("Server error, please try again later");
-					}
+          if (response.status >= 500) {
+            throw new Error("Server error, please try again later");
+          }
           throw new Error("Failed to fetch courses data");
         }
         const data = await response.json();
         const transformedData: CourseSection[] = data.map(
           (container: CourseContainer) => {
-            const course: CourseSection = container.courseWithOneMeeting ? container.courseWithOneMeeting as CourseSection : container.courseWithMultipleMeetings as CourseSection;
-						// Transform date strings to Date objects
-						if (course.multipleMeetings) {
-							course.timeStart = (course.timeStart as Date[]).map((time) => new Date(time.toString()));
-							course.timeEnd = (course.timeEnd as Date[]).map((time) => new Date(time.toString()));
-							course.startDate = (course.startDate as Date[]).map((date) => new Date(date.toString()));
-							course.endDate = (course.endDate as Date[]).map((date) => new Date(date.toString()));
-							return course;
-						}
-						const transformedCourse: CourseSection = {
-							...course,
-							timeStart: new Date(course.timeStart.toString()),
-							timeEnd: new Date(course.timeEnd.toString()),
-							startDate: new Date(course.startDate.toString()),
-							endDate: new Date(course.endDate.toString()),
-						};
-						return transformedCourse;
+            const course: CourseSection = container.courseWithOneMeeting
+              ? (container.courseWithOneMeeting as CourseSection)
+              : (container.courseWithMultipleMeetings as CourseSection);
+            // Transform date strings to Date objects
+            if (course.multipleMeetings) {
+              course.timeStart = (course.timeStart as Date[]).map(
+                (time) => new Date(time.toString())
+              );
+              course.timeEnd = (course.timeEnd as Date[]).map(
+                (time) => new Date(time.toString())
+              );
+              course.startDate = (course.startDate as Date[]).map(
+                (date) => new Date(date.toString())
+              );
+              course.endDate = (course.endDate as Date[]).map(
+                (date) => new Date(date.toString())
+              );
+              return course;
+            }
+            const transformedCourse: CourseSection = {
+              ...course,
+              timeStart: new Date(course.timeStart.toString()),
+              timeEnd: new Date(course.timeEnd.toString()),
+              startDate: new Date(course.startDate.toString()),
+              endDate: new Date(course.endDate.toString()),
+            };
+            return transformedCourse;
           }
         );
         setFilteredCourses(transformedData);
@@ -102,8 +127,8 @@ function SearchResults() {
 
   const handleViewDetails = (course: CourseSection) => {
     const params = new URLSearchParams();
-    params.append("semester", filters.semester);
-    params.append("year", filters.year?.toString() || "");
+    params.append("semester", searchSemester);
+    params.append("year", searchYear?.toString() || "");
     params.append("classNumber", course.classNumber.toString());
     navigate(`/course/${params.toString()}`);
   };
@@ -193,14 +218,11 @@ function SearchResults() {
 
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">
-                        {course.name} | {filters.subjectCode}{" "}
-                        {course.catalogNumber}
+                        {course.name} | {searchSubjectCode} {course.catalogNumber}
                       </h2>
-                      {!course.multipleMeetings && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          {course.instructor.join(", ")}
-                        </p>
-                      )}
+                      {Array.isArray(course.instructor)
+                        ? course.instructor.join(", ")
+                        : course.instructor}
                     </div>
                   </div>
                 </div>
