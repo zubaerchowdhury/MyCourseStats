@@ -3,6 +3,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Users, ChevronDown, Loader2 } from "lucide-react";
 import SearchForm from "../components/SearchForm";
 
+interface Course {
+	name: string;
+	subjectCode: string;
+	catalogNumber: string;
+	sections: CourseSection[];
+}
+
 interface CourseSection {
   name: string;
   catalogNumber: string;
