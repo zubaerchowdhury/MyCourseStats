@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import {
-  useNavigate,
-  useSearchParams,
-  useLocation,
-} from "react-router-dom";
-import Calendar from "../components/Calendar";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Book,
@@ -14,26 +9,58 @@ import {
   Check,
   Percent,
 } from "lucide-react";
+import axios from "axios";
+import Calendar from "../components/Calendar";
 
 function CourseDetails() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-	const [courseStats, setCourseStats] = useState<number[][]>([]);
+  const [courseStats, setCourseStats] = useState<number[][]>([]);
   const location = useLocation();
   const course = location.state?.course;
 
   // TODO: Use fetch to get the enrollment probability from the backend
-  const enrollmentProbability = 85;
+  const [enrollmentProbability, setEnrollmentProbability] = useState<number>(0);
 
-  const getEnrollmentDescription = (probability: number) => {
-    if (probability >= 80 && probability <= 100) {
+  useEffect(() => {
+    const fetchEnrollmentRate = async () => {
+      if (!course) return;
+
+      try {
+        const response = await axios.get("/api/stats/enrollment-rate", {
+          params: {
+            semester: course.semester,
+            year: course.year,
+            classNumber: course.classNumber,
+            startingDate: new Date().toISOString(),
+            numDays: 7,
+          },
+        });
+
+        // The response contains [filledPercentages, changedPercentages, averageChange]
+        // We take the most recent filled percentage
+        const [filledPercentages] = response.data;
+        setEnrollmentProbability(
+          filledPercentages[filledPercentages.length - 1]
+        );
+      } catch (error) {
+        console.error("Failed to fetch enrollment rate:", error);
+        setEnrollmentProbability(0);
+      }
+    };
+
+    fetchEnrollmentRate();
+  }, [course]);
+
+  const getEnrollmentDescription = (enrollmentProbability: number) => {
+    if (enrollmentProbability >= 80 && enrollmentProbability <= 100) {
       return "Very High Chance: This course typically fills up quickly. Immediate registration is recommended.";
-    } else if (probability >= 50) {
+    } else if (enrollmentProbability >= 50) {
       return "Good Chance: The course has moderate demand. Registration within the next week is advised.";
-    } else if (probability >= 20) {
+    } else if (enrollmentProbability >= 20) {
       return "Poor Chance: You have little chance of securing a spot. Monitor the enrollment status.";
-    } else if (probability >= 0) {
+    } else if (enrollmentProbability >= 0) {
       return "Very Low Chance: The course is nearly full. Please consider waitlist options or alternative courses.";
     } else {
       return "Error: Invalid probability score.";
@@ -67,7 +94,6 @@ function CourseDetails() {
         <span>Back to Search</span>
       </button>
 
-      
       <div className="mt-8">
         <Calendar courseStats={courseStats} />
       </div>

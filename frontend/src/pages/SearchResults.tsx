@@ -252,11 +252,21 @@ function SearchResults() {
                                 Start Time - End Time
                               </p>
                               <p className="text-sm font-medium">
-                                {(
-                                  course.timeStart as Date
-                                ).toLocaleTimeString()}{" "}
+                                {(course.timeStart as Date).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}{" "}
                                 -{" "}
-                                {(course.timeEnd as Date).toLocaleTimeString()}
+                                {(course.timeEnd as Date).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
                               </p>
                               <p className="text-xs text-gray-500 mt-1">
                                 Start Date - End Date
