@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -8,7 +9,12 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// Add this helper function after the imports
+const getAdjustedDay = (date: Date): number => {
+  const day = getDay(date);
+  return day === 0 ? 6 : day - 1; // Convert Sunday (0) to 6, and other days to 0-5
+};
 
 interface CalendarDay {
   date: Date;
@@ -21,7 +27,7 @@ interface Week {
 }
 
 interface CalendarProps {
-  courseStats: number[][]; 
+  courseStats: number[][];
 }
 
 /* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
@@ -37,15 +43,13 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const monthEnd = endOfMonth(currentMonth);
   const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  useEffect(() => {
-    
-  }, [monthStr, courseStats]);
+  useEffect(() => {}, [monthStr, courseStats]);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   const [cumulativeWeekly, dailyPercent] = calendarData;
-  const paddingDays = Array(getDay(monthStart)).fill(null);
+  const paddingDays = Array(getAdjustedDay(monthStart)).fill(null);
 
   const weeks: Week[] = [];
   let currentWeek: (CalendarDay | null)[] = [];
@@ -59,7 +63,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
       daily: dailyPercent[i] ?? null,
     });
 
-    if (getDay(date) === 6 || i === allDays.length - 1) {
+    if (getAdjustedDay(date) === 6 || i === allDays.length - 1) {
       // Fill remaining days in last week
       const remainingDays = 7 - currentWeek.length;
       for (let j = 0; j < remainingDays; j++) {
@@ -97,7 +101,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
       </div>
 
       <div className="grid grid-cols-8 text-center text-sm font-semibold text-gray-600 mb-2">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Weekly %"].map(
+        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Weekly %"].map(
           (day) => (
             <div key={day} className="py-2">
               {day}
