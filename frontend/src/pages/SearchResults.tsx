@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  BookOpen,
-  Users,
-  Calendar,
-  ChevronDown,
-  Loader2,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, Users, ChevronDown, Loader2 } from "lucide-react";
 import SearchForm from "../components/SearchForm";
-import { useSearch } from "../context/SearchContext";
 
 interface CourseSection {
   name: string;
@@ -130,7 +122,7 @@ function SearchResults() {
     params.append("semester", searchSemester);
     params.append("year", searchYear?.toString() || "");
     params.append("classNumber", course.classNumber.toString());
-    navigate(`/course/${params.toString()}`);
+    navigate(`/course/${params.toString()}`, { state: { course } });
   };
 
   return (
@@ -218,7 +210,8 @@ function SearchResults() {
 
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">
-                        {course.name} | {searchSubjectCode} {course.catalogNumber}
+                        {course.name} | {searchSubjectCode}{" "}
+                        {course.catalogNumber}
                       </h2>
                       {Array.isArray(course.instructor)
                         ? course.instructor.join(", ")

@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
+import Calendar from "../components/Calendar";
 import {
   ArrowLeft,
-  Calendar,
+  //Calendar,
   Book,
   Users,
   Clock,
@@ -15,14 +21,8 @@ function CourseDetails() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-
-  // Mock time slots for the course
-  // const timeSlots = [
-  //   { id: 1, time: 'Mon, Wed, Fri 10:00 AM - 11:30 AM', available: true },
-  //   { id: 2, time: 'Tue, Thu 1:00 PM - 2:30 PM', available: true },
-  //   { id: 3, time: 'Mon, Wed 2:00 PM - 3:30 PM', available: false },
-  //   { id: 4, time: 'Tue, Thu 3:00 PM - 4:30 PM', available: true },
-  // ];
+  const location = useLocation();
+  const course = location.state?.course;
 
   // TODO: Use fetch to get the enrollment probability from the backend
   const enrollmentProbability = 85;
@@ -57,6 +57,7 @@ function CourseDetails() {
     );
   }
 
+  // TODO: Remove mock UI components and render course section from transformedCourse
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <button
@@ -212,8 +213,10 @@ function CourseDetails() {
               </div>
             </div>
           </div>
-          {/* TODO: Add interactive month Calendar and probability of enrollment for each day below each date (react-calendar OR simple-react-calendar)*/}
         </div>
+      </div>
+      <div className="mt-8">
+        <Calendar courseId={course.classNumber.toString()} />
       </div>
     </div>
   );
