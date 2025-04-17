@@ -1,15 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import {
-  ArrowLeft,
-  Book,
-  Users,
-  Clock,
-  Award,
-  Check,
-  Percent,
-} from "lucide-react";
-import axios from "axios";
+import { ArrowLeft } from "lucide-react";
 import Calendar from "../components/Calendar";
 
 function CourseDetails() {
@@ -28,22 +19,34 @@ function CourseDetails() {
       if (!course) return;
 
       try {
-        const response = await axios.get("/api/stats/enrollment-rate", {
-          params: {
-            semester: course.semester,
-            year: course.year,
-            classNumber: course.classNumber,
-            startingDate: new Date().toISOString(),
-            numDays: 7,
-          },
+        const params = new URLSearchParams({
+          semester: course.semester,
+          year: String(course.year),
+          classNumber: String(course.classNumber),
+          startingDate: new Date().toISOString(),
+          numDays: "7",
         });
+
+        const response = await fetch(
+          `/api/stats/enrollment-rate?${params.toString()}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
 
         // The response contains [filledPercentages, changedPercentages, averageChange]
         // We take the most recent filled percentage
-        const [filledPercentages] = response.data;
-        setEnrollmentProbability(
-          filledPercentages[filledPercentages.length - 1]
-        );
+        const [filledPercentages] = data;
+        if (filledPercentages && filledPercentages.length > 0) {
+          setEnrollmentProbability(
+            filledPercentages[filledPercentages.length - 1]
+          );
+        } else {
+          setEnrollmentProbability(0); // Handle case where filledPercentages is empty
+        }
       } catch (error) {
         console.error("Failed to fetch enrollment rate:", error);
         setEnrollmentProbability(0);
