@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import {
   format,
   startOfMonth,
@@ -32,7 +33,19 @@ interface CalendarProps {
 
 /* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
 const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [searchParams] = useSearchParams();
+  const semester = searchParams.get("semester");
+  const year = searchParams.get("year");
+
+  // Initialize currentMonth based on searchParams
+  const getInitialMonth = () => {
+    if (semester === "Spring" && year === "2025") {
+      return new Date(2024, 10); // November is 10 (0-based month)
+    }
+    return new Date();
+  };
+
+  const [currentMonth, setCurrentMonth] = useState(getInitialMonth());
   const [calendarData, setCalendarData] = useState<[number[], number[]]>([
     [],
     [],
@@ -118,7 +131,13 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
                 key={idx}
                 className={`
                   h-16 flex flex-col items-center justify-center border rounded-lg
-                  ${!day ? "bg-gray-50" : "bg-white hover:bg-gray-50"}
+                  ${
+                    !day
+                      ? "bg-gray-50"
+                      : format(day.date, "yyyy-MM-dd") === "2024-11-04"
+                      ? "bg-[#C9E4C5]" // pickle color for Spring 2024 enrollment start date
+                      : "bg-white hover:bg-gray-50"
+                  }
                   transition-colors duration-200
                 `}
               >

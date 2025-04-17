@@ -44,10 +44,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
       semester: "",
       year: undefined,
       subjectCode: "",
-      days: [],
-      instructor: "",
-      startDate: undefined,
-      endDate: undefined,
     };
     searchParams.forEach((value, key) => {
       // Get keyof SearchFilters from key
@@ -89,6 +85,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
     }
     if (!filters.name && !filters.semester && !filters.subjectCode) {
       alert("Please select a subject");
+      return;
+    }
+    if (filters.semester === "Fall-2025") {
+      alert("Work in progress: Please select another semester");
       return;
     }
 
