@@ -87,7 +87,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       alert("Please select a subject");
       return;
     }
-    if (filters.semester === "Fall-2025") {
+    if (filters.semester === "Fall" && filters.year === 2025) {
       alert("Work in progress: Please select another semester");
       return;
     }
