@@ -9,7 +9,6 @@ import {
   subMonths,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import axios from "axios";
 
 interface CalendarDay {
   date: Date;
@@ -22,11 +21,11 @@ interface Week {
 }
 
 interface CalendarProps {
-  courseId: string; // Add this to fetch data for specific course
+  courseStats: number[][]; 
 }
 
 /* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
-const Calendar: React.FC<CalendarProps> = ({ courseId }) => {
+const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [calendarData, setCalendarData] = useState<[number[], number[]]>([
     [],
@@ -39,23 +38,8 @@ const Calendar: React.FC<CalendarProps> = ({ courseId }) => {
   const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   useEffect(() => {
-    const fetchCalendarData = async () => {
-      try {
-        const response = await axios.get(`/api/calendar/percentages`, {
-          params: {
-            month: monthStr,
-            courseId: courseId,
-          },
-        });
-        setCalendarData(response.data);
-      } catch (error) {
-        console.error("Failed to fetch calendar data:", error);
-        setCalendarData([[], []]);
-      }
-    };
-
-    fetchCalendarData();
-  }, [monthStr, courseId]);
+    
+  }, [monthStr, courseStats]);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));

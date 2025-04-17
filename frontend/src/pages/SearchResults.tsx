@@ -122,7 +122,7 @@ function SearchResults() {
     params.append("semester", searchSemester);
     params.append("year", searchYear?.toString() || "");
     params.append("classNumber", course.classNumber.toString());
-    navigate(`/course/${params.toString()}`, { state: { course } });
+    navigate(`/course?${params.toString()}`, { state: { course: course } });
   };
 
   return (
