@@ -2,7 +2,11 @@ import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X, Search } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
-import { SearchFilters, useSearch, getSearchFiltersStrings } from "../context/SearchContext";
+import {
+  SearchFilters,
+  useSearch,
+  getSearchFiltersStrings,
+} from "../context/SearchContext";
 
 interface SearchFormProps {
   onSearch?: (params: URLSearchParams) => void;
@@ -24,45 +28,42 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   // Initialize filters from URL params if they exist
   useEffect(() => {
-		if (searchParams.size === 0) return;
+    if (searchParams.size === 0) return;
 
     // Map URL parameters to filters
-		let searchFilters: SearchFilters = {
-			semester: "",
-			year: undefined,
-      subjectCode: "",      
+    let searchFilters: SearchFilters = {
+      semester: "",
+      year: undefined,
+      subjectCode: "",
     };
-		searchParams.forEach((value, key) => {
-			// Get keyof SearchFilters from key
-			const filterKey = key as keyof SearchFilters;
-			if (key === "year") {
-				searchFilters = {
-					...filters,
-					[filterKey]: parseInt(value),
-				};
-			}
-			else if (key === "days") {
-				searchFilters = {
-					...filters,
-					[filterKey]: value.split(","),
-				};
-			}
-			else if (key === "startDate" || key === "endDate") {
-				searchFilters = {
-					...filters,
-					[filterKey]: new Date(value),
-				};
-			}
-			else {
-				searchFilters = {
-					...filters,
-					[filterKey]: value,
-				};
-			}
-		});
+    searchParams.forEach((value, key) => {
+      // Get keyof SearchFilters from key
+      const filterKey = key as keyof SearchFilters;
+      if (key === "year") {
+        searchFilters = {
+          ...filters,
+          [filterKey]: parseInt(value),
+        };
+      } else if (key === "days") {
+        searchFilters = {
+          ...filters,
+          [filterKey]: value.split(","),
+        };
+      } else if (key === "startDate" || key === "endDate") {
+        searchFilters = {
+          ...filters,
+          [filterKey]: new Date(value),
+        };
+      } else {
+        searchFilters = {
+          ...filters,
+          [filterKey]: value,
+        };
+      }
+    });
 
     // Set filters state variable
-		setFilters(searchFilters);
+    setFilters(searchFilters);
   }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -77,9 +78,13 @@ const SearchForm: React.FC<SearchFormProps> = ({
       alert("Please select a subject");
       return;
     }
+    if (filters.semester === "Fall-2025") {
+      alert("Work in progress: Please select another semester");
+      return;
+    }
 
     const params = new URLSearchParams(getSearchFiltersStrings(filters));
-		setSearchParams(params);
+    setSearchParams(params);
 
     if (onSearch) {
       onSearch(params);
@@ -90,24 +95,24 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   const clearFilters = () => {
     setFilters({
-			semester: "",
-			year: undefined,
-      subjectCode: "",      
+      semester: "",
+      year: undefined,
+      subjectCode: "",
     });
-		setSubjectOptions([])
+    setSubjectOptions([]);
   };
 
   const setField = (field: keyof SearchFilters, value: any) => {
     if (field === "semester") {
       setSubjectOptions([]);
-			const [ semester, year ] = value.split("-"); 
-			setFilters({
-				...filters,
-				semester: semester,
-				year: parseInt(year),
-				subjectCode: "",
-			});
-			return;
+      const [semester, year] = value.split("-");
+      setFilters({
+        ...filters,
+        semester: semester,
+        year: parseInt(year),
+        subjectCode: "",
+      });
+      return;
     }
     setFilters({
       ...filters,
@@ -124,7 +129,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   return (
     <div className={className}>
       <form onSubmit={handleSearch} className="space-y-4">
-      <div className="relative">
+        <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
           </div>
@@ -136,7 +141,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             placeholder="Search by class name..."
           />
           {filters.name && (
-            <button 
+            <button
               type="button"
               onClick={() => setField("name", "")}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
@@ -152,7 +157,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               Semester <span className="text-red-400">*</span>
             </label>
             <select
-							value={`${filters.semester}-${filters.year}` || ""}
+              value={`${filters.semester}-${filters.year}` || ""}
               onChange={(e) => setField("semester", e.target.value)}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
             >
