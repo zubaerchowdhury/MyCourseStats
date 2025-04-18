@@ -48,6 +48,17 @@ const About: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Add description section */}
+      <div className="mt-8 max-w-3xl mx-auto text-center">
+        <h2 className="text-2xl font-semibold mb-4">About Us</h2>
+        <p className="text-gray-600">
+          We are a team of Electrical and Computer Engineering students from
+          University of Miami's Class of 2025. Our goal is to help students make
+          informed decisions about their course selections by providing
+          historical enrollment data and trends in an intuitive and easily
+          digestable format.
+        </p>
+      </div>
     </div>
   );
 };

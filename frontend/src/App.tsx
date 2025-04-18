@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Code2 } from "lucide-react";
 import { SearchProvider } from "./context/SearchContext";
 import Home from "./pages/Home";
@@ -27,9 +27,12 @@ function App() {
                   </span>
                 </div>
                 <div className="hidden md:flex items-center space-x-8">
-                  <a href="about" className="text-gray-600 hover:text-gray-900">
+                  <Link
+                    to="/about"
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
+                  >
                     About
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
