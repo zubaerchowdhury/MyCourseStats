@@ -28,8 +28,14 @@ public class MongoDBService
         {
             throw new InvalidOperationException("MongoDB_URI environment variable is not set.");
         }
+        // Make the Timeout 10 seconds
+        var mongoClientSettings = MongoClientSettings.FromConnectionString(connectionString);
+        mongoClientSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(10);
+        mongoClientSettings.ConnectTimeout = TimeSpan.FromSeconds(10);
+        mongoClientSettings.SocketTimeout = TimeSpan.FromSeconds(10);
+        mongoClientSettings.WaitQueueTimeout = TimeSpan.FromSeconds(10);
 
-        var client = new MongoClient(connectionString);
+        var client = new MongoClient(mongoClientSettings);
         var database = client.GetDatabase(configuration.DatabaseName);
 
         _sectionsCollection = database.GetCollection<BsonDocument>(configuration.SectionsCollectionName);
