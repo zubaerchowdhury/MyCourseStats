@@ -42,7 +42,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
     if (semester === "Spring" && year === "2025") {
       return new Date(2024, 10); // November is 10 (0-based month)
     } else if (semester === "Fall" && year === "2025") {
-      return new Date(2025, 3); // July is 6 (0-based month)
+      return new Date(2025, 2); // March is 2 (0-based month)
     }
     return new Date();
   };

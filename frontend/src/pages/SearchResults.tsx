@@ -77,6 +77,10 @@ function SearchResults() {
           }
           throw new Error("Failed to fetch courses data");
         }
+				else if (response.status === 404) {
+					setFilteredCourses([]);
+					return;
+				}
         const data = await response.json();
         const transformedData: CourseSection[] = data.map(
           (container: CourseContainer) => {

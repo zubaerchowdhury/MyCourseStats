@@ -79,16 +79,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
     if (e) e.preventDefault();
 
     // Validation
-    if (!filters.name && !filters.semester) {
-      alert("Please enter a course name or select a semester");
+    if (!filters.semester) {
+      alert("Please select a semester");
       return;
     }
-    if (!filters.name && !filters.semester && !filters.subjectCode) {
+    if (!filters.subjectCode) {
       alert("Please select a subject");
-      return;
-    }
-    if (filters.semester === "Fall" && filters.year === 2025) {
-      alert("Work in progress: Please select another semester");
       return;
     }
 

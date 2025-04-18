@@ -168,8 +168,10 @@ public class MongoDBService
         {
             filter = Builders<CourseSubject>.Filter.Eq("year", year);
         }
+        
+        var sort = Builders<CourseSubject>.Sort.Ascending("name");
 
-        return await _subjectsCollection.Find(filter).ToListAsync();
+        return await _subjectsCollection.Find(filter).Sort(sort).ToListAsync();
     }
 
     public async Task<List<CourseContainer>> CourseSearch(string semester, int year, string subjectCode,
