@@ -7,6 +7,7 @@ import {
   useSearch,
   getSearchFiltersStrings,
 } from "../context/SearchContext";
+//import { Day } from "date-fns";
 
 interface SearchFormProps {
   onSearch?: (params: URLSearchParams) => void;
@@ -35,6 +36,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>(
     {}
   );
+  const [isDaysDropdownOpen, setIsDaysDropdownOpen] = useState(false);
   // Initialize filters from URL params if they exist
   useEffect(() => {
     if (searchParams.size === 0) return;
@@ -74,6 +76,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
     // Set filters state variable
     setFilters(searchFilters);
   }, []);
+
+  const daysOfWeek: { value: string; label: string }[] = [
+    { value: "Monday", label: "Monday" },
+    { value: "Tuesday", label: "Tuesday" },
+    { value: "Wednesday", label: "Wednesday" },
+    { value: "Thursday", label: "Thursday" },
+    { value: "Friday", label: "Friday" },
+  ];
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -148,6 +158,19 @@ const SearchForm: React.FC<SearchFormProps> = ({
     { value: "Spring-2025", label: "Spring 2025" },
     { value: "Fall-2025", label: "Fall 2025" },
   ];
+
+  const handleDayToggle = (day: string) => {
+    setAdvancedFilters((prev) => {
+      const currentDays = prev.days || [];
+      const newDays = currentDays.includes(day)
+        ? currentDays.filter((d) => d !== day)
+        : [...currentDays, day];
+      return {
+        ...prev,
+        daysOfWeek: newDays,
+      };
+    });
+  };
 
   return (
     <div className={className}>
@@ -258,10 +281,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               type="button"
               onClick={() => setAdvancedFilters({})}
               className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear Filters
-            </button>
+            ></button>
           )}
         </div>
 
@@ -269,19 +289,48 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Days
+                <SearchableDropdown
+                  label="Days"
+                  required
+                  value={filters.days?.join(",") || []}
+                  onChange={(value) => setField("subjectCode", value)}
+                  placeholder="Select or search for a subject"
+                  className="flex-1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
+                  Instructor
                 </label>
-                <select
-                  value={advancedFilters.days || ""}
-                  onChange={(e) =>
-                    handleAdvancedFilterChange(
-                      "credits",
-                      e.target.value ? Number(e.target.value) : undefined
-                    )
-                  }
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                ></select>
+                <input
+                  type="text"
+                  value={filters.instructor || ""}
+                  onChange={(e) => setField("instructor", e.target.value)}
+                  placeholder="e.g. Dr. John Doe"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <SearchableDropdown
+                  label="Days"
+                  required
+                  value={filters.days?.join(",") || []}
+                  onChange={(value) => setField("subjectCode", value)}
+                  placeholder="Select or search for a subject"
+                  className="flex-1"
+                />
+              </div>
+              <div>
+                <SearchableDropdown
+                  label="Days"
+                  required
+                  value={filters.days?.join(',') || []}
+                  onChange={(value) => setField("subjectCode", value)}
+                  placeholder="Select or search for a subject"
+                  className="flex-1"
+                />
               </div>
             </div>
           </div>
