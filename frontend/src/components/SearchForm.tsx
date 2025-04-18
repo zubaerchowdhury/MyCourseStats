@@ -7,7 +7,8 @@ import {
   useSearch,
   getSearchFiltersStrings,
 } from "../context/SearchContext";
-//import { Day } from "date-fns";
+import { Day } from "date-fns";
+import MultiSelectDropdown from "./MultiSelectDropdown";
 
 interface SearchFormProps {
   onSearch?: (params: URLSearchParams) => void;
@@ -159,19 +160,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
     { value: "Fall-2025", label: "Fall 2025" },
   ];
 
-  const handleDayToggle = (day: string) => {
-    setAdvancedFilters((prev) => {
-      const currentDays = prev.days || [];
-      const newDays = currentDays.includes(day)
-        ? currentDays.filter((d) => d !== day)
-        : [...currentDays, day];
-      return {
-        ...prev,
-        daysOfWeek: newDays,
-      };
-    });
-  };
-
   return (
     <div className={className}>
       <form onSubmit={handleSearch} className="space-y-4">
@@ -289,14 +277,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <SearchableDropdown
-                  label="Days"
-                  required
-                  value={filters.days?.join(",") || []}
-                  onChange={(value) => setField("subjectCode", value)}
-                  placeholder="Select or search for a subject"
-                  className="flex-1"
-                />
+                <MultiSelectDropdown>
+                </MultiSelectDropdown>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
@@ -326,7 +308,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 <SearchableDropdown
                   label="Days"
                   required
-                  value={filters.days?.join(',') || []}
+                  value={filters.days?.join(",") || []}
                   onChange={(value) => setField("subjectCode", value)}
                   placeholder="Select or search for a subject"
                   className="flex-1"
