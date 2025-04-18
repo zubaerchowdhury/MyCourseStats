@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
+interface DropdownMultipleSelectProps {
+  onChange: (value: string) => void;
+}
 interface Option {
   value: string;
   label: string;
 }
 
 const daysOfWeek: Option[] = [
-  { value: 'Monday', label: 'Monday' },
-  { value: 'Tuesday', label: 'Tuesday' },
-  { value: 'Wednesday', label: 'Wednesday' },
-  { value: 'Thursday', label: 'Thursday' },
-  { value: 'Friday', label: 'Friday' }
+  { value: "Monday", label: " Monday" },
+  { value: "Tuesday", label: " Tuesday" },
+  { value: "Wednesday", label: " Wednesday" },
+  { value: "Thursday", label: " Thursday" },
+  { value: "Friday", label: " Friday" },
+  { value: "Saturday", label: " Saturday" },
+  { value: "Sunday", label: " Sunday" },
 ];
 
-const DropdownMultipleSelect: React.FC = () => {
+const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
+  onChange
+}) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -29,31 +36,83 @@ const DropdownMultipleSelect: React.FC = () => {
     }
   };
 
+  const handleSelectAll = () => {
+    if (selectedDays.length === daysOfWeek.length) {
+      setSelectedDays([]);
+    } else {
+      setSelectedDays(daysOfWeek.map((day) => day.value));
+    }
+  };
+
+  const allDaysSelected = selectedDays.length === daysOfWeek.length;
+
   return (
-    <div className="dropdown-container">
-      <div className="dropdown-header" onClick={toggleDropdown}>
-        {selectedDays.length === 0
-          ? 'Select days'
-          : selectedDays.map((day) => daysOfWeek.find((d) => d.value === day)?.label).join(', ')}
-        <span className={`arrow ${isOpen ? 'open' : ''}`}></span>
+    <div className="relative flex-1">
+      <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
+        Days
+      </label>
+      <div
+        className="flex items-center justify-between w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1 appearance-none"
+        onClick={toggleDropdown}
+      >
+        <span
+          className={
+            selectedDays.length === 0 ? "text-gray-400" : "text-gray-900"
+          }
+        >
+          {selectedDays.length === 0
+            ? "Select days"
+            : selectedDays.length === daysOfWeek.length
+            ? "All days selected"
+            : selectedDays
+                .map((day) => daysOfWeek.find((d) => d.value === day)?.label)
+                .join(", ")}
+        </span>
+        <svg
+          className="h-5 w-5 text-gray-400 ml-2 flex-shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
+        </svg>
       </div>
       {isOpen && (
-        <ul className="dropdown-list">
-          {daysOfWeek.map((day) => (
+        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base overflow-auto focus:outline-none sm:text-sm">
+          <ul className="dropdown-list px-4 py-2 text-sm text-gray-500">
             <li
-              key={day.value}
-              className={`dropdown-option ${selectedDays.includes(day.value) ? 'selected' : ''}`}
-              onClick={() => handleOptionClick(day.value)}
+              className={`dropdown-option ${allDaysSelected ? "selected" : ""}`}
+              onClick={handleSelectAll}
             >
-              <input
-                type="checkbox"
-                checked={selectedDays.includes(day.value)}
-                readOnly 
-              />
-              {day.label}
+              <input type="checkbox" checked={allDaysSelected} readOnly />
+              <span className="font-medium"> Select All</span>
             </li>
-          ))}
-        </ul>
+
+            {daysOfWeek.map((day) => (
+              <li
+                key={day.value}
+                className={`dropdown-option ${
+                  selectedDays.includes(day.value) ? "selected" : ""
+                }`}
+                onClick={() => {
+                  handleOptionClick(day.value)
+                  onChange(day.value);
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedDays.includes(day.value)}
+                  readOnly
+                />
+                {day.label}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

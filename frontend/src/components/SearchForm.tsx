@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X, Search, Filter } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
-import {
-  SearchFilters,
-  useSearch,
-  getSearchFiltersStrings,
-} from "../context/SearchContext";
-import { Day } from "date-fns";
+import { SearchFilters, useSearch, getSearchFiltersStrings,}
+from "../context/SearchContext";
+//import { Day } from "date-fns";
 import MultiSelectDropdown from "./MultiSelectDropdown";
 
 interface SearchFormProps {
@@ -37,7 +34,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>(
     {}
   );
-  const [isDaysDropdownOpen, setIsDaysDropdownOpen] = useState(false);
+
   // Initialize filters from URL params if they exist
   useEffect(() => {
     if (searchParams.size === 0) return;
@@ -78,14 +75,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
     setFilters(searchFilters);
   }, []);
 
-  const daysOfWeek: { value: string; label: string }[] = [
-    { value: "Monday", label: "Monday" },
-    { value: "Tuesday", label: "Tuesday" },
-    { value: "Wednesday", label: "Wednesday" },
-    { value: "Thursday", label: "Thursday" },
-    { value: "Friday", label: "Friday" },
-  ];
-
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -115,16 +104,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
     } else {
       navigate(`/search?${params.toString()}`);
     }
-  };
-
-  const handleAdvancedFilterChange = (
-    key: keyof AdvancedSearchFilters,
-    value: any
-  ) => {
-    setAdvancedFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
   };
 
   const clearFilters = () => {
@@ -277,7 +256,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <MultiSelectDropdown>
+                <MultiSelectDropdown
+                  onChange={(value) => setField("days", value)}>
                 </MultiSelectDropdown>
               </div>
               <div>
@@ -295,24 +275,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <SearchableDropdown
-                  label="Days"
-                  required
-                  value={filters.days?.join(",") || []}
-                  onChange={(value) => setField("subjectCode", value)}
-                  placeholder="Select or search for a subject"
-                  className="flex-1"
-                />
-              </div>
-              <div>
-                <SearchableDropdown
-                  label="Days"
-                  required
-                  value={filters.days?.join(",") || []}
-                  onChange={(value) => setField("subjectCode", value)}
-                  placeholder="Select or search for a subject"
-                  className="flex-1"
-                />
               </div>
             </div>
           </div>
