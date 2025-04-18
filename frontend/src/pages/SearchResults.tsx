@@ -12,6 +12,7 @@ interface Course {
 
 interface CourseSection {
   name: string;
+	subjectCode: string;
   catalogNumber: string;
   sectionType: string;
   sectionCode: string;
@@ -38,7 +39,6 @@ function SearchResults() {
   const [filteredCourses, setFilteredCourses] = useState<CourseSection[]>([]);
   const [searchSemester, setSearchSemester] = useState<string>("");
   const [searchYear, setSearchYear] = useState<number | undefined>(undefined);
-  const [searchSubjectCode, setSearchSubjectCode] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedResults, setExpandedResults] = useState<
@@ -50,11 +50,9 @@ function SearchResults() {
   const setCurrentSearchVars = (
     semester: string,
     year: number | undefined,
-    subjectCode: string
   ) => {
     setSearchSemester(semester);
     setSearchYear(year);
-    setSearchSubjectCode(subjectCode);
   };
 
   // Update filteredCourses when searchParams change
@@ -65,7 +63,6 @@ function SearchResults() {
       setCurrentSearchVars(
         searchParams.get("semester") || "",
         parseInt(searchParams.get("year") || ""),
-        searchParams.get("subjectCode") || ""
       );
       try {
         const baseUrl = "http://localhost:5184/api/Courses/course-search";
@@ -221,7 +218,7 @@ function SearchResults() {
 
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900">
-                        {course.name} | {searchSubjectCode}{" "}
+                        {course.name} | {course.subjectCode}{" "}
                         {course.catalogNumber}
                       </h2>
                       {Array.isArray(course.instructor)

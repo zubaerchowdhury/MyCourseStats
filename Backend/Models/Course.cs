@@ -3,6 +3,7 @@ namespace Backend.Models;
 public abstract class Course
 {
     public string name { get; set; }
+    public string subjectCode { get; set; }
     public string catalogNumber { get; set; }
     public string sectionType { get; set; }
     public string sectionCode { get; set; }
