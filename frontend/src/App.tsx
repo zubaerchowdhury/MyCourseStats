@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Code2 } from "lucide-react";
 import { SearchProvider } from "./context/SearchContext";
 import Home from "./pages/Home";
-//import About from "./pages/About";
+import About from "./pages/About";
 import SearchResults from "./pages/SearchResults";
 import CourseDetails from "./pages/CourseDetails";
 import MCS_logo from "/Assets/MCS_logo.png";
@@ -17,8 +17,12 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center">
-                <img src={MCS_logo} alt="My Logo" style={{ height: '40px' }} />
-                <span className="ml-2 text-xl font-bold text-gray-900">
+                  <img
+                    src={MCS_logo}
+                    alt="My Logo"
+                    style={{ height: "40px" }}
+                  />
+                  <span className="ml-2 text-xl font-bold text-gray-900">
                     MyCourseStats
                   </span>
                 </div>
@@ -34,7 +38,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             {/* Placeholder for About page */}
-            <Route path="/about" element={<Home />} />
+            <Route path="/about" element={<About />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/course" element={<CourseDetails />} />
           </Routes>
