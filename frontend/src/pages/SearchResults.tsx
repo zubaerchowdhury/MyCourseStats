@@ -19,6 +19,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchForm from "../components/SearchForm";
 import EventNoteIcon from "@mui/icons-material/EventNote"; // Icon for meeting pattern
 import { createTheme } from '@mui/material/styles';
+import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 
 // --- Interfaces ---
 interface Course {
@@ -173,18 +174,32 @@ function SearchResults() {
     setSearchYear(year);
   };
 
+	const { filters } = useSearch();
+
   // --- Data Fetching useEffect ---
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       setError(null);
       setCurrentSearchVars(
-        searchParams.get("semester") || "",
-        parseInt(searchParams.get("year") || "")
+        searchParams.get("semester") || filters.semester || "",
+        parseInt(searchParams.get("year") || filters.year?.toString() || "")
       );
+			let paramsString: string;
+			if (searchParams.has("semester") && searchParams.has("year") && searchParams.has("subjectCode")) {
+				paramsString = searchParams.toString();
+			}
+			else if (filters.semester && filters.year && filters.subjectCode) {
+				paramsString = new URLSearchParams(getSearchFiltersStrings(filters)).toString();
+			}
+			else {
+				setFilteredCourses([]);
+				setLoading(false);
+				return;
+			}
       try {
         const baseUrl = "http://localhost:5184/api/Courses/course-search";
-        const response = await fetch(`${baseUrl}?${searchParams.toString()}`);
+        const response = await fetch(`${baseUrl}?${paramsString}`);
 
         if (!response.ok) {
 					if (response.status === 404) {

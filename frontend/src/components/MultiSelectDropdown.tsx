@@ -65,7 +65,7 @@ const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
             : selectedDays.length === daysOfWeek.length
             ? "All days selected"
             : selectedDays
-                .map((day) => daysOfWeek.find((d) => d.value === day)?.label)
+                .map((day) => daysOfWeek.find((option) => option.value === day)?.label.substring(0, 3))
                 .join(", ")}
         </span>
         <svg

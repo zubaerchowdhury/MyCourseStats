@@ -271,7 +271,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   type="text"
                   value={filters.instructor || ""}
                   onChange={(e) => setField("instructor", e.target.value)}
-                  placeholder="e.g. Dr. John Doe"
+                  placeholder="e.g. Nigel John"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
                 />
               </div>
