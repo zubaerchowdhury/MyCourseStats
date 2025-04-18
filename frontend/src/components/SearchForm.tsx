@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { X, Search, Filter } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
-import { SearchFilters, useSearch, getSearchFiltersStrings,}
-from "../context/SearchContext";
+import {
+  SearchFilters,
+  useSearch,
+  getSearchFiltersStrings,
+} from "../context/SearchContext";
 //import { Day } from "date-fns";
 import MultiSelectDropdown from "./MultiSelectDropdown";
 
@@ -173,7 +176,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               <select
                 value={`${filters.semester}-${filters.year}` || ""}
                 onChange={(e) => setField("semester", e.target.value)}
-                className={`w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1 appearance-none ${
+                className={`w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-10 pl-1 appearance-none ${
                   filters.semester ? "text-gray-900" : "text-gray-500"
                 }`}
               >
@@ -257,8 +260,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <MultiSelectDropdown
-                  onChange={(value) => setField("days", value)}>
-                </MultiSelectDropdown>
+                  onChange={(value) => setField("days", value)}
+                ></MultiSelectDropdown>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
@@ -275,6 +278,16 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <div className="relative flex-1">
+                <SearchableDropdown
+            label="Subject"
+            required
+            value={filters.subjectCode || ""}
+            onChange={(value) => setField("subjectCode", value)}
+            placeholder="Select or search for a subject"
+            className="flex-1"
+          />
+                </div>
               </div>
             </div>
           </div>
