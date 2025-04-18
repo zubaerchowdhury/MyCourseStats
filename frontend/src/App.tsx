@@ -27,7 +27,7 @@ function App() {
                   </span>
                 </div>
                 <div className="hidden md:flex items-center space-x-8">
-                  <a href="#" className="text-gray-600 hover:text-gray-900">
+                  <a href="about" className="text-gray-600 hover:text-gray-900">
                     About
                   </a>
                 </div>
@@ -37,7 +37,6 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* Placeholder for About page */}
             <Route path="/about" element={<About />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/course" element={<CourseDetails />} />

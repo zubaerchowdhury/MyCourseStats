@@ -1,68 +1,51 @@
 import React from "react";
-import Marcos from "../Assets/Marcos.png";
-import Zubaer from "../Assets/Zubaer.png";
-import Hannah from "../Assets/Hannah.png";
 
 const About: React.FC = () => {
   return (
-    <div className="about-container" style={{ padding: "20px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-around",
-          flexDirection: "row",
-          gap: "20px",
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            textAlign: "center",
-            padding: "15px",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-          }}
-        >
+    <div className="about-container p-5">
+      <div className="flex justify-around gap-5">
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
           <img
-            src={Marcos}
-            alt="Marcos"
-            style={{ maxWidth: "200px", height: "auto" }}
+            src={"/Assets/Marcos.png"}
+            alt="Marcos Morales"
+            className="w-48 h-auto object-contain"
           />
-          <p style={{ marginTop: "10px" }}>placeholderText1</p>
+          <p className="mt-3 text-center">
+            <p className="text-center">
+              B.S. Computer Engineering – Software Option
+            </p>
+            <p className="text-center">
+              Dual Major in Computer Science – Flexible
+            </p>
+          </p>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            textAlign: "center",
-            padding: "15px",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-          }}
-        >
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
           <img
-            src={Zubaer}
-            alt="Zubaer"
-            style={{ maxWidth: "200px", height: "auto" }}
+            src={"/Assets/Zubaer.png"}
+            alt="Zubaer Chowdhury"
+            className="w-48 h-auto object-contain"
           />
-          <p style={{ marginTop: "10px" }}>placeholderText2</p>
+          <p className="mt-3 text-center">
+            <p className="text-center">
+              B.S. Computer Engineering – Software Option
+            </p>
+            <p className="text-center">
+              Dual Major in Computer Science – Comprehensive
+            </p>
+          </p>
         </div>
 
-        <div
-          style={{
-            flex: 1,
-            textAlign: "center",
-            padding: "15px",
-            borderRadius: "8px",
-            backgroundColor: "#f5f5f5",
-          }}
-        >
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
           <img
-            src={Hannah}
-            alt="Hannah"
-            style={{ maxWidth: "200px", height: "auto" }}
+            src={"/Assets/Hannah.png"}
+            alt="Hannah Penano"
+            className="w-48 h-auto object-contain"
           />
-          <p style={{ marginTop: "10px" }}>placeholderText3</p>
+          <div className="mt-3 text-center">
+            <p className="text-center">B.S. Electrical Engineering</p>
+            <p className="text-center">Dual Major in Biomedical Engineering</p>
+          </div>
         </div>
       </div>
     </div>
