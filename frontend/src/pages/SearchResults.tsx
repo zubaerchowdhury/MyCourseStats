@@ -1,22 +1,42 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Users, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react"; // Keep lucide for specific icons if needed
+// MUI Imports
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+  Alert,
+  Paper,
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchForm from "../components/SearchForm";
+import EventNoteIcon from "@mui/icons-material/EventNote"; // Icon for meeting pattern
+import { createTheme } from '@mui/material/styles';
 
+// --- Interfaces ---
 interface Course {
-	name: string;
-	subjectCode: string;
-	catalogNumber: string;
-	sections: CourseSection[];
+  name: string;
+  subjectCode: string;
+  catalogNumber: string;
+  sections: CourseSection[];
 }
 
 interface CourseSection {
+  // Existing fields
   name: string;
-	subjectCode: string;
+  subjectCode: string;
   catalogNumber: string;
-  sectionType: string;
-  sectionCode: string;
-  classNumber: number;
+  sectionType: string; // e.g., LEC, LAB
+  sectionCode: string; // e.g., D, 1T
+  session: string | null; // e.g., Regular Academic
+  classNumber: number; // Unique identifier for the section instance
   capacity: number;
   multipleMeetings: boolean;
   classroom: string | string[];
@@ -33,84 +53,202 @@ interface CourseContainer {
   courseWithMultipleMeetings: CourseSection | null;
 }
 
+// --- Helper Functions ---
+// Add a helper for single time formatting (used in multiple meetings table)
+const formatSingleTime = (date: Date | undefined): string => {
+  if (!date) return "TBA";
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+};
+// Add a helper for single date range formatting (used in multiple meetings table)
+const formatSingleDateRange = (
+  start: Date | undefined,
+  end: Date | undefined
+): string => {
+  if (!start || !end) return "TBA";
+  const options: Intl.DateTimeFormatOptions = {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  };
+  return `${start.toLocaleDateString(
+    undefined,
+    options
+  )} - ${end.toLocaleDateString(undefined, options)}`;
+};
+// Modify formatTime to handle array case differently if needed in summary
+const formatTime = (date: Date | Date[] | undefined): string => {
+  if (!date) return "TBA";
+  if (Array.isArray(date)) return "Multiple"; // Keep summary simple
+  return (date as Date).toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+// Modify formatTimeRange for summary
+// This function is used to format the time range for the summary
+const formatTimeRange = (
+  start: Date | Date[] | undefined,
+  end: Date | Date[] | undefined
+): string => {
+  if (!start || !end) return "TBA";
+  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+  return `${formatTime(start)} - ${formatTime(end)}`;
+};
+// Modify formatDateRange for summary
+const formatDateRange = (
+  start: Date | Date[] | undefined,
+  end: Date | Date[] | undefined
+): string => {
+  if (!start || !end) return "TBA";
+  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+  const options: Intl.DateTimeFormatOptions = {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+  };
+  return `${(start as Date).toLocaleDateString(undefined, options)} - ${(
+    end as Date
+  ).toLocaleDateString(undefined, options)}`;
+};
+// Modify formatInstructors for summary
+const formatInstructors = (
+  instructor: string[] | string[][] | undefined
+): string => {
+  if (!instructor) return "Staff";
+  if (Array.isArray(instructor)) {
+    // Check if all instructors are the same in a flat list
+    const flatInstructors = instructor.flat();
+    const firstInstructor = flatInstructors[0];
+    if (flatInstructors.every((inst) => inst === firstInstructor)) {
+      return firstInstructor; // Show name if consistent
+    }
+    return "Multiple"; // Indicate multiple if names vary
+  }
+  return instructor;
+};
+// Modify formatDays for summary
+const formatDays = (days: string[] | string[][] | undefined): string => {
+  if (!days) return "TBA";
+  if (Array.isArray(days)) {
+    // Combine all unique days, sort them (optional), and format
+    const uniqueDays = [...new Set(days.flat())];
+    // Basic sort order (e.g., Mo, Tu, We, Th, Fr, Sa, Su) - adjust if needed
+    const dayOrder = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+    uniqueDays.sort(
+      (a, b) =>
+        dayOrder.indexOf(a.substring(0, 2)) -
+        dayOrder.indexOf(b.substring(0, 2))
+    );
+    return uniqueDays.map((day) => day.substring(0, 2)).join("");
+  }
+  return "TBA"; // Should not happen based on interface
+};
+// Modify formatClassroom for summary
+const formatClassroom = (classroom: string | string[] | undefined): string => {
+  if (!classroom) return "TBA";
+  if (Array.isArray(classroom)) {
+    // Check if all classrooms are the same
+    const firstClassroom = classroom[0];
+    if (classroom.every((cr) => cr === firstClassroom)) {
+      return firstClassroom; // Show room if consistent
+    }
+    return "Multiple"; // Indicate multiple if rooms vary
+  }
+  return classroom;
+};
+
+// --- Component ---
 function SearchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [filteredCourses, setFilteredCourses] = useState<CourseSection[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [searchSemester, setSearchSemester] = useState<string>("");
   const [searchYear, setSearchYear] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedResults, setExpandedResults] = useState<
-    Record<string, boolean>
-  >({});
-  const toggleExpand = (courseId: number) => {
-    setExpandedResults((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
-  };
-  const setCurrentSearchVars = (
-    semester: string,
-    year: number | undefined,
-  ) => {
+
+  // Updated setCurrentSearchVars to include subjectCode
+  const setCurrentSearchVars = (semester: string, year: number | undefined) => {
     setSearchSemester(semester);
     setSearchYear(year);
   };
 
-  // Update filteredCourses when searchParams change
+  // --- Data Fetching useEffect ---
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       setError(null);
       setCurrentSearchVars(
         searchParams.get("semester") || "",
-        parseInt(searchParams.get("year") || ""),
+        parseInt(searchParams.get("year") || "")
       );
       try {
         const baseUrl = "http://localhost:5184/api/Courses/course-search";
         const response = await fetch(`${baseUrl}?${searchParams.toString()}`);
 
-        if (!response.ok && response.status !== 404) {
+        if (!response.ok) {
+					if (response.status === 404) {
+						setFilteredCourses([]);
+						return;
+					}
           if (response.status >= 500) {
             throw new Error("Server error, please try again later");
           }
           throw new Error("Failed to fetch courses data");
-        }
-				else if (response.status === 404) {
-					setFilteredCourses([]);
-					return;
-				}
+        } 
+
         const data = await response.json();
-        const transformedData: CourseSection[] = data.map(
-          (container: CourseContainer) => {
-            const course: CourseSection = container.courseWithOneMeeting
-              ? (container.courseWithOneMeeting as CourseSection)
-              : (container.courseWithMultipleMeetings as CourseSection);
-            // Transform date strings to Date objects
-            if (course.multipleMeetings) {
-              course.timeStart = (course.timeStart as Date[]).map(
-                (time) => new Date(time.toString())
-              );
-              course.timeEnd = (course.timeEnd as Date[]).map(
-                (time) => new Date(time.toString())
-              );
-              course.startDate = (course.startDate as Date[]).map(
-                (date) => new Date(date.toString())
-              );
-              course.endDate = (course.endDate as Date[]).map(
-                (date) => new Date(date.toString())
-              );
-              return course;
-            }
-            const transformedCourse: CourseSection = {
-              ...course,
-              timeStart: new Date(course.timeStart.toString()),
-              timeEnd: new Date(course.timeEnd.toString()),
-              startDate: new Date(course.startDate.toString()),
-              endDate: new Date(course.endDate.toString()),
-            };
-            return transformedCourse;
+        let courses: Course[] = [];
+        let curCourse: Course = {
+          name: "",
+          subjectCode: "",
+          catalogNumber: "",
+          sections: [],
+        };
+        data.forEach((container: CourseContainer) => {
+          const courseSection: CourseSection = container.courseWithOneMeeting
+            ? (container.courseWithOneMeeting as CourseSection)
+            : (container.courseWithMultipleMeetings as CourseSection);
+          // Transform date strings to Date objects
+          if (courseSection.multipleMeetings) {
+            courseSection.timeStart = (courseSection.timeStart as Date[]).map(
+              (time) => new Date(time.toString())
+            );
+            courseSection.timeEnd = (courseSection.timeEnd as Date[]).map(
+              (time) => new Date(time.toString())
+            );
+            courseSection.startDate = (courseSection.startDate as Date[]).map(
+              (date) => new Date(date.toString())
+            );
+            courseSection.endDate = (courseSection.endDate as Date[]).map(
+              (date) => new Date(date.toString())
+            );
+          } else {
+            courseSection.timeStart = new Date(
+              courseSection.timeStart.toString()
+            );
+            courseSection.timeEnd = new Date(courseSection.timeEnd.toString());
+            courseSection.startDate = new Date(
+              courseSection.startDate.toString()
+            );
+            courseSection.endDate = new Date(courseSection.endDate.toString());
           }
-        );
-        setFilteredCourses(transformedData);
+          // List is sorted by catalog number, 
+					// so we can check if the current section is the start of a different course
+          if (curCourse.catalogNumber !== courseSection.catalogNumber) {
+            if (curCourse.catalogNumber !== "") {
+              courses.push(curCourse);
+            }
+            curCourse = {
+              name: courseSection.name,
+              subjectCode: courseSection.subjectCode,
+              catalogNumber: courseSection.catalogNumber,
+              sections: [],
+            };
+          }
+          curCourse.sections.push(courseSection);
+        });
+        setFilteredCourses(courses);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error occurred");
       } finally {
@@ -119,23 +257,33 @@ function SearchResults() {
     };
 
     fetchCourses();
-  }, [searchParams]);
+  }, [searchParams]); // Dependency remains searchParams
 
+  // --- Navigation Handlers ---
   const handleBackToHome = () => {
     navigate("/");
   };
 
-  const handleViewDetails = (course: CourseSection) => {
+  // Navigate to course details page with search params
+  // and pass the selected section as state
+  const handleViewDetailsPage = (section: CourseSection) => {
     const params = new URLSearchParams();
     params.append("semester", searchSemester);
     params.append("year", searchYear?.toString() || "");
-    params.append("classNumber", course.classNumber.toString());
-    navigate(`/course?${params.toString()}`, { state: { course: course } });
+    params.append("classNumber", section.classNumber.toString());
+    // Pass necessary state if the target page needs it immediately
+    navigate(`/course?${params.toString()}`, {
+      state: { courseSection: section },
+    });
   };
 
+  // --- Render Logic ---
   return (
-    <div className="mb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Container maxWidth="lg" sx={{ mb: 4 }}>
+      {" "}
+      {/* Use MUI Container */}
+      {/* Header Section */}
+      <Box sx={{ py: 4 }}>
         <button
           onClick={handleBackToHome}
           className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -143,33 +291,41 @@ function SearchResults() {
           <ArrowLeft className="h-4 w-4 mr-1" />
           <span>Back to Home</span>
         </button>
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
         </div>
-        <div className="bg-white shadow rounded-lg p-6">
+        <Paper elevation={2} sx={{ p: 3 }}>
+          {" "}
+          {/* Search Form Wrapper */}
           <SearchForm />
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        </Paper>
+      </Box>
+      {/* Results Section */}
+      <Box>
         {loading ? (
-          <div className="text-center py-16">
-            <Loader2 className="h-16 w-16 text-indigo-600 mx-auto animate-spin" />
-            <p className="mt-4 text-gray-600">Loading courses...</p>
-          </div>
+          // ... Loading indicator ...
+          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+            <CircularProgress size={60} />
+            <Typography sx={{ ml: 2, alignSelf: "center" }}>
+              Loading courses...
+            </Typography>
+          </Box>
         ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-red-600 text-lg font-medium">{error}</p>
-            <div className="mt-6">
-              <button
-                onClick={handleBackToHome}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Return to Home
-              </button>
-            </div>
-          </div>
+          // ... Error Alert ...
+          <>
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+            <button
+              onClick={handleBackToHome}
+              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              <span>Back to Home</span>
+            </button>
+          </>
         ) : filteredCourses.length === 0 ? (
+          // ... No Results ...
           <div className="text-center py-16">
             <div className="flex justify-center">
               <BookOpen className="h-16 w-16 text-gray-400" />
@@ -190,141 +346,367 @@ function SearchResults() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredCourses.map((course: CourseSection) => (
-              <div
-                key={course.classNumber}
-                className="bg-white shadow rounded-lg p-6"
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {filteredCourses.map((course) => (
+              <Paper
+                key={`${course.subjectCode}-${course.catalogNumber}`}
+                elevation={1}
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-2">
-                    <button
-                      onClick={() => toggleExpand(course.classNumber)}
-                      className="mt-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-                      aria-label={
-                        expandedResults[course.classNumber]
-                          ? "Collapse details"
-                          : "Expand details"
-                      }
+                {/* ... Course Header ... */}
+                <Box
+                  sx={{
+                    p: 2,
+                    borderBottom: 1,
+                    borderColor: "divider",
+                    bgcolor: "grey.100",
+                  }}
+                >
+                  <Typography variant="h6" component="h2">
+                    {course.name} |{" "}
+                    <Typography
+                      component="span"
+                      fontWeight="bold"
+                      color="primary"
                     >
-                      <ChevronDown
-                        className={`h-5 w-5 transform transition-transform ${
-                          expandedResults[course.classNumber]
-                            ? "rotate-180"
-                            : ""
-                        }`}
-                      />
-                    </button>
+                      {course.subjectCode} {course.catalogNumber}
+                    </Typography>
+                  </Typography>
+                </Box>
 
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
-                        {course.name} | {course.subjectCode}{" "}
-                        {course.catalogNumber}
-                      </h2>
-                      {Array.isArray(course.instructor)
-                        ? course.instructor.join(", ")
-                        : course.instructor}
-                    </div>
-                  </div>
-                </div>
-
-                {expandedResults[course.classNumber] && (
-                  <div className="mt-4">
-                    <div className="flex flex-wrap gap-4 mt-4">
-                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Class Number</p>
-                          <p className="text-sm font-medium">
-                            {course.classNumber}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Section Code
-                          </p>
-                          <p className="text-sm font-medium">
-                            {course.sectionCode}
-                          </p>
-                          {!course.multipleMeetings && (
-                            <>
-                              <p className="text-xs text-gray-500 mt-1">Days</p>
-                              <p className="text-sm font-medium">
-                                {course.days.join(", ")}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Start Time - End Time
-                              </p>
-                              <p className="text-sm font-medium">
-                                {(course.timeStart as Date).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}{" "}
-                                -{" "}
-                                {(course.timeEnd as Date).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Start Date - End Date
-                              </p>
-                              <p className="text-sm font-medium">
-                                {(
-                                  course.startDate as Date
-                                ).toLocaleDateString()}{" "}
-                                -{" "}
-                                {(course.endDate as Date).toLocaleDateString()}
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center bg-gray-50 rounded-lg p-3">
-                        <div className="bg-gray-100 rounded-full p-2 mr-2">
-                          <Users className="h-4 w-4 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Classroom</p>
-                          <p className="text-sm font-medium">
-                            {course.classroom}
-                          </p>
-                          <p className="text-xs text-gray-500">Capacity</p>
-                          <p className="text-sm font-medium">
-                            {course.capacity} seats
-                          </p>
-                          <p className="text-xs text-gray-500">Instructor</p>
-                          <p className="text-sm font-medium">
-                            {Array.isArray(course.instructor)
-                              ? course.instructor.join(", ")
-                              : course.instructor}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6 flex justify-end">
-                  <button className="bg-white border border-indigo-600 text-indigo-600 px-4 py-2 rounded-lg mr-3 hover:bg-indigo-50 transition-colors">
-                    Past Instructors
-                  </button>
-                  <button
-                    onClick={() => handleViewDetails(course)}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                <Box>
+                  {/* Optional: Header Row for Sections */}
+                  <Grid
+                    container
+                    spacing={1}
+                    sx={{
+                      p: 1,
+                      borderBottom: 1,
+                      borderColor: "divider",
+                      display: { xs: "none", md: "flex" },
+                      color: "text.secondary",
+                      typography: "caption",
+                      textAlign: "center",
+                    }}
                   >
-                    View Details
-                  </button>
-                </div>
-              </div>
+                    <Grid size={{ md: 2 }}>SECTION</Grid>
+                    <Grid size={{ md: 2 }}>DAYS</Grid>
+                    <Grid size={{ md: 1.85 }}>TIME</Grid>
+                    <Grid size={{ md: 2 }}>ROOM</Grid>
+                    <Grid size={{ md: 1.85 }}>INSTRUCTOR</Grid>
+                    <Grid size={{ md: 2 }}>DATES</Grid>
+                  </Grid>
+
+                  {course.sections.map((section) => (
+                    <Accordion
+                      key={section.classNumber}
+                      disableGutters
+                      elevation={0}
+                      square
+                      sx={{
+                        "&:not(:last-child)": {
+                          borderBottom: 1,
+                          borderColor: "divider",
+                        },
+                      }}
+                    >
+                      {/* --- Accordion Summary --- */}
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls={`section-${section.classNumber}-content`}
+                        id={`section-${section.classNumber}-header`}
+                        sx={{
+                          // Updated styling from temp.tsx
+                          bgcolor: "grey.50",
+                          "&.Mui-expanded": {
+                            bgcolor: "grey.100",
+                          },
+                          "&:hover": {
+                            bgcolor: "grey.200",
+                          },
+                          // Keep original alignment style
+                          "& .MuiAccordionSummary-content": {
+                            alignItems: "center",
+                          },
+                        }}
+                      >
+                        <Grid
+                          container
+                          spacing={1}
+                          sx={{
+                            display: { md: "flex" },
+                            typography: "body2",
+                            textAlign: "center",
+														flexGrow: 1,
+                          }}
+                        >
+                          <Grid size={{ md: 2 }}>
+                            {section.sectionCode} - {section.sectionType}
+                          </Grid>
+                          <Grid size={{ md: 2 }}>
+                            {formatDays(section.days)}
+                          </Grid>
+                          <Grid size={{ md: 2 }}>
+                            {formatTimeRange(
+                              section.timeStart,
+                              section.timeEnd
+                            )}
+                          </Grid>
+                          <Grid size={{ md: 2 }}>
+                            {formatClassroom(section.classroom)}
+                          </Grid>
+                          <Grid size={{ md: 2 }}>
+                            {formatInstructors(section.instructor)}
+                          </Grid>
+                          <Grid size={{ md: 2 }}>
+                            {formatDateRange(
+                              section.startDate,
+                              section.endDate
+                            )}
+                          </Grid>
+                        </Grid>
+                      </AccordionSummary>
+
+                      {/* --- Accordion Details --- */}
+                      <AccordionDetails sx={{ bgcolor: "grey.50", p: 3 }}>
+                        {/* === Multiple Meeting Pattern Section (Conditional) === */}
+                        {section.multipleMeetings &&
+                          Array.isArray(section.startDate) && (
+                            <Box sx={{ mb: 3 }}>
+                              <Typography
+                                variant="subtitle2"
+                                gutterBottom
+                                color="text.secondary"
+                                sx={{ display: "flex", alignItems: "center" }}
+                              >
+                                <EventNoteIcon
+                                  fontSize="small"
+                                  sx={{ mr: 0.5 }}
+                                />{" "}
+                                MULTIPLE MEETING PATTERN
+                              </Typography>
+                              <Paper variant="outlined">
+                                {/* Header Row - Use size prop */}
+                                <Grid
+                                  container
+                                  spacing={1}
+                                  sx={{
+                                    p: 1,
+                                    bgcolor: "grey.200",
+                                    typography: "caption",
+                                    fontWeight: "medium",
+                                    textAlign: "left",
+                                  }}
+                                >
+                                  <Grid size={{ xs: 2 }}>DATES</Grid>
+                                  <Grid size={{ xs: 2 }}>INSTRUCTOR</Grid>
+                                  <Grid size={{ xs: 2 }}>DAYS</Grid>
+                                  <Grid size={{ xs: 2 }}>START</Grid>
+                                  <Grid size={{ xs: 2 }}>END</Grid>
+                                  <Grid size={{ xs: 2 }}>ROOM</Grid>
+                                </Grid>
+                                {/* Data Rows */}
+                                {(section.startDate as Date[]).map(
+                                  (_, index) => (
+                                    <Grid
+                                      container
+                                      spacing={1}
+                                      key={index}
+                                      sx={{
+                                        p: 1,
+                                        typography: "body2",
+                                        textAlign: "left",
+                                        borderTop: index > 0 ? 1 : 0,
+                                        borderColor: "divider",
+                                      }}
+                                    >
+                                      <Grid size={{ xs: 2 }}>
+                                        {formatSingleDateRange(
+                                          (section.startDate as Date[])?.[
+                                            index
+                                          ],
+                                          (section.endDate as Date[])?.[index]
+                                        )}
+                                      </Grid>
+                                      <Grid size={{ xs: 2 }}>
+                                        {Array.isArray(
+                                          section.instructor?.[index]
+                                        )
+                                          ? (
+                                              section.instructor?.[
+                                                index
+                                              ] as string[]
+                                            ).join(", ")
+                                          : section.instructor?.[index] ||
+                                            "Staff"}
+                                      </Grid>
+                                      <Grid size={{ xs: 2 }}>
+                                        {Array.isArray(section.days?.[index])
+                                          ? (section.days?.[index] as string[])
+                                              .map((d) => d.substring(0, 2))
+                                              .join("")
+                                          : "TBA"}
+                                      </Grid>
+                                      <Grid size={{ xs: 2 }}>
+                                        {formatSingleTime(
+                                          (section.timeStart as Date[])?.[index]
+                                        )}
+                                      </Grid>
+                                      <Grid size={{ xs: 2 }}>
+                                        {formatSingleTime(
+                                          (section.timeEnd as Date[])?.[index]
+                                        )}
+                                      </Grid>
+                                      <Grid size={{ xs: 2 }}>
+                                        {section.classroom?.[index] || "TBA"}
+                                      </Grid>
+                                    </Grid>
+                                  )
+                                )}
+                              </Paper>
+                            </Box>
+                          )}
+                        {/* === End Multiple Meeting Pattern Section === */}
+
+                        <Grid container spacing={3}>
+                          {/* Column 1: Information */}
+                          <Grid size={{ xs: 12, md: 6 }}>
+                            <Typography
+                              variant="subtitle2"
+                              gutterBottom
+                              color="text.secondary"
+                            >
+                              INFORMATION
+                            </Typography>
+                            <Grid container spacing={1}>
+                              <Grid size={{ xs: 4 }}>
+                                <Typography variant="body2" fontWeight="medium">
+                                  Class Number:
+                                </Typography>
+                              </Grid>
+                              <Grid size={{ xs: 8 }}>
+                                <Typography variant="body2">
+                                  {section.classNumber}
+                                </Typography>
+                              </Grid>
+                              <Grid size={{ xs: 4 }}>
+                                <Typography variant="body2" fontWeight="medium">
+                                  Session:
+                                </Typography>
+                              </Grid>
+                              <Grid size={{ xs: 8 }}>
+                                <Typography variant="body2">
+                                  {section.session || "N/A"}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+
+                          {/* Column 2: Details & Availability */}
+                          <Grid size={{ xs: 12, md: 6 }}>
+                            {/* Conditionally hide fields if multiple meetings */}
+                            {!section.multipleMeetings && (
+                              <>
+                                <Typography
+                                  variant="subtitle2"
+                                  gutterBottom
+                                  color="text.secondary"
+                                >
+                                  DETAILS
+                                </Typography>
+                                <Grid container spacing={1} sx={{ mb: 2 }}>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Instructor:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {formatInstructors(section.instructor)}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Dates:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {formatDateRange(
+                                        section.startDate,
+                                        section.endDate
+                                      )}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Meets:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {formatDays(section.days)}{" "}
+                                      {formatTime(section.timeStart)} -{" "}
+                                      {formatTime(section.timeEnd)}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Room:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {formatClassroom(section.classroom)}
+                                    </Typography>
+                                  </Grid>
+                                </Grid>
+                              </>
+                            )}
+
+                            {/* Action Buttons */}
+                            <Box
+                              sx={{
+                                mt: 2,
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: 1,
+                              }}
+                            >
+                              <Button variant="outlined" size="small">
+                                Past Instructors
+                              </Button>
+                              <Button
+                                variant="contained"
+                                size="small"
+																onClick={() => handleViewDetailsPage(section)}
+                              >
+                                View Enrollment Details
+                              </Button>
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
+                </Box>
+              </Paper>
             ))}
-          </div>
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 }
 

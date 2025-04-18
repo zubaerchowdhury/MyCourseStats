@@ -243,7 +243,7 @@ public class MongoDBService
         var projection = projectionBuilder.Exclude("_id").Include("subjectCode").Include("classNumber").Include("catalogNumber")
             .Include("sectionType").Include("sectionCode").Include("name").Include("capacity")
             .Include("multipleMeetings").Include("days").Include("instructor").Include("classroom").Include("startDate")
-            .Include("endDate").Include("timeStart").Include("timeEnd");
+            .Include("endDate").Include("timeStart").Include("timeEnd").Include("session");
 
         var sort = Builders<BsonDocument>.Sort.Ascending("catalogNumber");
 
