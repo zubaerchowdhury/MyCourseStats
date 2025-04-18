@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Code2 } from "lucide-react";
 import { SearchProvider } from "./context/SearchContext";
 import Home from "./pages/Home";
+//import About from "./pages/About";
 import SearchResults from "./pages/SearchResults";
 import CourseDetails from "./pages/CourseDetails";
 
@@ -31,6 +32,8 @@ function App() {
 
           <Routes>
             <Route path="/" element={<Home />} />
+            {/* Placeholder for About page */}
+            <Route path="/about" element={<Home />} />
             <Route path="/search" element={<SearchResults />} />
             <Route path="/course" element={<CourseDetails />} />
           </Routes>
