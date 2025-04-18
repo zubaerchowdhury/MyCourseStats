@@ -11,10 +11,10 @@ import {
   subMonths,
 } from "date-fns";
 
-// Add this helper function after the imports
+// adjusted getDay function to convert Sunday (0) to 6
 const getAdjustedDay = (date: Date): number => {
   const day = getDay(date);
-  return day === 0 ? 6 : day - 1; // Convert Sunday (0) to 6, and other days to 0-5
+  return day === 0 ? 6 : day - 1;
 };
 
 interface CalendarDay {
@@ -37,14 +37,46 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const semester = searchParams.get("semester");
   const year = searchParams.get("year");
 
-  // Initialize currentMonth based on searchParams
+  // Initialize currentMonth (0 index) based on searchParams
   const getInitialMonth = () => {
     if (semester === "Spring" && year === "2025") {
-      return new Date(2024, 10); // November is 10 (0-based month)
+      return new Date(2024, 10);
     } else if (semester === "Fall" && year === "2025") {
-      return new Date(2025, 2); // March is 2 (0-based month)
+      return new Date(2025, 2);
     }
     return new Date();
+  };
+
+  // Color the calendar cells based on the semester and year
+  const getDateCellColor = (
+    date: Date,
+    semester: string | null,
+    year: string | null
+  ) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+
+    /* enrollment start date, 
+       deadline to add a course,
+       classes begin,
+       deadline to drop a course without a 'W', 
+       deadline to drop a course with a 'W',
+       classes end */
+    if (semester === "Spring" && year === "2025") {
+      if (dateStr === "2024-11-04") return "bg-[#C9E4C5]";
+      if (dateStr === "2025-01-13") return "bg-[#FC8EAC]";
+      if (dateStr === "2025-01-22") return "bg-[#FF6B6B]";
+      if (dateStr === "2025-01-29") return "bg-[#FFDB00]";
+      if (dateStr === "2025-04-11") return "bg-[#F28500]";
+      if (dateStr === "2025-04-28") return "bg-[#9370DB]";
+    } else if (semester === "Fall" && year === "2025") {
+      if (dateStr === "2025-03-31") return "bg-[#C9E4C5]";
+      if (dateStr === "2025-08-18") return "bg-[#FC8EAC]";
+      if (dateStr === "2025-08-27") return "bg-[#FF6B6B]";
+      if (dateStr === "2025-09-03") return "bg-[#FFDB00]";
+      if (dateStr === "2025-11-07") return "bg-[#F28500]";
+      if (dateStr === "2025-12-02") return "bg-[#9370DB]";
+    }
+    return "bg-white hover:bg-gray-50";
   };
 
   const [currentMonth, setCurrentMonth] = useState(getInitialMonth());
@@ -58,7 +90,22 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const monthEnd = endOfMonth(currentMonth);
   const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  useEffect(() => {}, [monthStr, courseStats]);
+  useEffect(() => {
+    if (courseStats && courseStats.length >= 2) {
+      const [filledPercentages, changedPercentages] = courseStats;
+
+      // For Spring 2025, start from November 4, 2024
+      // For Fall 2025, start from March 31, 2025
+      let startDate = new Date();
+      if (semester === "Spring" && year === "2025") {
+        startDate = new Date(2024, 10, 4); // November 4, 2024
+      } else if (semester === "Fall" && year === "2025") {
+        startDate = new Date(2025, 2, 31); // March 31, 2025
+      }
+
+      setCalendarData([filledPercentages, changedPercentages]);
+    }
+  }, [monthStr, courseStats, semester, year]);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -97,7 +144,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
     <div className="w-full max-w-3xl mx-auto p-4">
       <div className="flex items-start gap-8">
         <div className="flex-1">
-          <div className="flex items-start gap-8 mb-4">
+          <div className="flex items-center justify-center gap-8 mb-4">
             <button
               onClick={handlePrevMonth}
               className="p-2 hover:bg-gray-100 rounded-full"
@@ -105,7 +152,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <h2 className="text-lg font-bold">
+            <h2 className="text-lg font-bold min-w-[160px] text-center">
               {format(currentMonth, "MMMM yyyy")}
             </h2>
             <button
@@ -117,10 +164,19 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
             </button>
           </div>
 
-          <div className="grid grid-cols-8 text-center text-sm font-semibold text-gray-600 mb-2">
+          <div className="grid grid-cols-8 text-center text-sm font-semibold mb-2">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Weekly %"].map(
               (day) => (
-                <div key={day} className="py-2">
+                <div
+                  key={day}
+                  className={`py-2 ${
+                    day === "Sat"
+                      ? "text-[#1E90FF]"
+                      : day === "Sun"
+                      ? "text-[#FF0800]"
+                      : "text-gray-600"
+                  }`}
+                >
                   {day}
                 </div>
               )
@@ -131,25 +187,20 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
             {weeks.map((week, weekIdx) => (
               <div key={weekIdx} className="grid grid-cols-8 gap-2">
                 {week.days.map((day, idx) => (
+                  // Highlight the cell based on the semester and year
                   <div
                     key={idx}
                     className={`
-                  h-16 flex flex-col items-center justify-center border rounded-lg
-                  ${
-                    // pickle color cell for Spring & Fall 2025 enrollment start date
-                    !day
-                      ? "bg-gray-50"
-                      : format(day.date, "yyyy-MM-dd") === "2024-11-04" ||
-                        format(day.date, "yyyy-MM-dd") === "2025-03-31"
-                      ? "bg-[#C9E4C5]" // pickle color for enrollment start dates
-                      : format(day.date, "yyyy-MM-dd") === "2025-01-22" ||
-                        format(day.date, "yyyy-MM-dd") === "2025-08-27"
-                      ? "bg-[#FF6B6B]" // poppy red color for additional dates
-                      : "bg-white hover:bg-gray-50"
-                  }
-                  transition-colors duration-200
+                      h-16 flex flex-col items-center justify-center border rounded-lg
+                      ${
+                        !day
+                          ? "bg-gray-50"
+                          : getDateCellColor(day.date, semester, year)
+                      }
+                      transition-colors duration-200
                 `}
                   >
+                    {/* Display the date and percentage */}
                     {day && (
                       <>
                         <span className="font-semibold text-sm">
@@ -192,10 +243,30 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
             <span className="text-sm text-gray-600">Enrollment Start Date</span>
           </div>
           <div className="flex items-center">
+            <div className="w-4 h-4 bg-[#FC8EAC] rounded mr-2"></div>
+            <span className="text-sm text-gray-600">Classes begin</span>
+          </div>
+          <div className="flex items-center">
             <div className="w-4 h-4 bg-[#FF6B6B] rounded mr-2"></div>
             <span className="text-sm text-gray-600">
-              Last Day to Add a Course
+              Deadline to Add a Course
             </span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-[#FFDB00] rounded mr-2"></div>
+            <span className="text-sm text-gray-600">
+              Deadline to Drop a Course without a 'W'
+            </span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-[#F28500] rounded mr-2"></div>
+            <span className="text-sm text-gray-600">
+              Deadline to Drop a Course with a 'W'
+            </span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-[#9370DB] rounded mr-2"></div>
+            <span className="text-sm text-gray-600">Classes end @ 11:00PM</span>
           </div>
         </div>
       </div>
