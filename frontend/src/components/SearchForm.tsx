@@ -7,7 +7,6 @@ import {
   useSearch,
   getSearchFiltersStrings,
 } from "../context/SearchContext";
-//import { Day } from "date-fns";
 import MultiSelectDropdown from "./MultiSelectDropdown";
 
 interface SearchFormProps {
@@ -22,6 +21,7 @@ interface AdvancedSearchFilters {
   instructor?: string;
   startDate?: Date;
   endDate?: Date;
+  classNumber?: number;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({
@@ -94,7 +94,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
     if (onSearch) {
       onSearch(params);
-    } 
+    }
   };
 
   const clearFilters = () => {
@@ -102,6 +102,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       semester: "",
       year: undefined,
       subjectCode: "",
+      days: []
     });
     setSubjectOptions([]);
   };
@@ -259,22 +260,24 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   type="text"
                   value={filters.instructor || ""}
                   onChange={(e) => setField("instructor", e.target.value)}
-                  placeholder="e.g. Nigel John"
+                  placeholder="e.g. Lokesh Ramamoorthi"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <div className="relative flex-1">
-                <SearchableDropdown
-            label="Subject"
-            required
-            value={filters.subjectCode || ""}
-            onChange={(value) => setField("subjectCode", value)}
-            placeholder="Select or search for a subject"
-            className="flex-1"
-          />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
+                    Class Number
+                  </label>
+                  <input
+                    type="text"
+                    value={filters.classNumber || ""}
+                    onChange={(e) => setField("classNumber", e.target.value)}
+                    placeholder="e.g. 8888"
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
+                  />
                 </div>
               </div>
             </div>

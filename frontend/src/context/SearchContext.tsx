@@ -11,6 +11,7 @@ export interface SearchFilters {
 	instructor?: string;
 	startDate?: Date;
 	endDate?: Date;
+  classNumber?: number;
 }
 
 export const getSearchFiltersStrings = (filters: SearchFilters) => {
