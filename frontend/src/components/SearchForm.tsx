@@ -156,7 +156,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
         </div>
 
         <div className="flex flex-col md:flex-row gap-2">
-          <div className="relative flex-1">
+          <div className="relative flex-grow-1">
             <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
               Semester <span className="text-red-400">*</span>
             </label>
@@ -202,7 +202,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
           <div className="relative flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
-              Catalog Number
+              Catalog #
             </label>
             <input
               type="text"

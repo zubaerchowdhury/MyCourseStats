@@ -18,9 +18,20 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchForm from "../components/SearchForm";
 import EventNoteIcon from "@mui/icons-material/EventNote"; // Icon for meeting pattern
-import { createTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 import { Course, CourseSection, CourseContainer } from "../types/CourseTypes";
+
+export const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#3949ab",
+    },
+    secondary: {
+      main: "#5ce6e7",
+    },
+  },
+});
 
 // --- Helper Functions ---
 // Add a helper for single time formatting (used in multiple meetings table)
@@ -142,105 +153,109 @@ function SearchResults() {
     setSearchYear(year);
   };
 
-	const { filters } = useSearch();
+  const { filters } = useSearch();
 
-	const fetchCourses = async () => {
-		setLoading(true);
-		setError(null);
-		setCurrentSearchVars(
-			searchParams.get("semester") || filters.semester || "",
-			parseInt(searchParams.get("year") || filters.year?.toString() || "")
-		);
-		let paramsString: string;
-		if (searchParams.has("semester") && searchParams.has("year") && searchParams.has("subjectCode")) {
-			paramsString = searchParams.toString();
-		}
-		else if (filters.semester && filters.year && filters.subjectCode) {
-			paramsString = new URLSearchParams(getSearchFiltersStrings(filters)).toString();
-		}
-		else {
-			setFilteredCourses([]);
-			setLoading(false);
-			return;
-		}
-		try {
-			const baseUrl = "http://localhost:5184/api/Courses/course-search";
-			const response = await fetch(`${baseUrl}?${paramsString}`);
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError(null);
+    setCurrentSearchVars(
+      searchParams.get("semester") || filters.semester || "",
+      parseInt(searchParams.get("year") || filters.year?.toString() || "")
+    );
+    let paramsString: string;
+    if (
+      searchParams.has("semester") &&
+      searchParams.has("year") &&
+      searchParams.has("subjectCode")
+    ) {
+      paramsString = searchParams.toString();
+    } else if (filters.semester && filters.year && filters.subjectCode) {
+      paramsString = new URLSearchParams(
+        getSearchFiltersStrings(filters)
+      ).toString();
+    } else {
+      setFilteredCourses([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const baseUrl = "http://localhost:5184/api/Courses/course-search";
+      const response = await fetch(`${baseUrl}?${paramsString}`);
 
-			if (!response.ok) {
-				if (response.status === 404) {
-					setFilteredCourses([]);
-					return;
-				}
-				if (response.status >= 500) {
-					throw new Error("Server error, please try again later");
-				}
-				throw new Error("Failed to fetch courses data");
-			} 
+      if (!response.ok) {
+        if (response.status === 404) {
+          setFilteredCourses([]);
+          return;
+        }
+        if (response.status >= 500) {
+          throw new Error("Server error, please try again later");
+        }
+        throw new Error("Failed to fetch courses data");
+      }
 
-			const data = await response.json();
-			let courses: Course[] = [];
-			let curCourse: Course = {
-				name: "",
-				subjectCode: "",
-				catalogNumber: "",
-				sections: [],
-			};
-			data.forEach((container: CourseContainer) => {
-				const courseSection: CourseSection = container.courseWithOneMeeting
-					? (container.courseWithOneMeeting as CourseSection)
-					: (container.courseWithMultipleMeetings as CourseSection);
-				// Transform date strings to Date objects
-				if (courseSection.multipleMeetings) {
-					courseSection.timeStart = (courseSection.timeStart as Date[]).map(
-						(time) => new Date(time.toString())
-					);
-					courseSection.timeEnd = (courseSection.timeEnd as Date[]).map(
-						(time) => new Date(time.toString())
-					);
-					courseSection.startDate = (courseSection.startDate as Date[]).map(
-						(date) => new Date(date.toString())
-					);
-					courseSection.endDate = (courseSection.endDate as Date[]).map(
-						(date) => new Date(date.toString())
-					);
-				} else {
-					courseSection.timeStart = new Date(
-						courseSection.timeStart.toString()
-					);
-					courseSection.timeEnd = new Date(courseSection.timeEnd.toString());
-					courseSection.startDate = new Date(
-						courseSection.startDate.toString()
-					);
-					courseSection.endDate = new Date(courseSection.endDate.toString());
-				}
-				// List is sorted by catalog number, 
-				// so we can check if the current section is the start of a different course
-				if (curCourse.catalogNumber !== courseSection.catalogNumber) {
-					if (curCourse.catalogNumber !== "") {
-						courses.push(curCourse);
-					}
-					curCourse = {
-						name: courseSection.name,
-						subjectCode: courseSection.subjectCode,
-						catalogNumber: courseSection.catalogNumber,
-						sections: [],
-					};
-				}
-				curCourse.sections.push(courseSection);
-			});
-			// Push the last course
-			if (curCourse.catalogNumber !== "") {
-				courses.push(curCourse);
-			}
-			// Set the filtered courses
-			setFilteredCourses(courses);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Unknown error occurred");
-		} finally {
-			setLoading(false);
-		}
-	};
+      const data = await response.json();
+      let courses: Course[] = [];
+      let curCourse: Course = {
+        name: "",
+        subjectCode: "",
+        catalogNumber: "",
+        sections: [],
+      };
+      data.forEach((container: CourseContainer) => {
+        const courseSection: CourseSection = container.courseWithOneMeeting
+          ? (container.courseWithOneMeeting as CourseSection)
+          : (container.courseWithMultipleMeetings as CourseSection);
+        // Transform date strings to Date objects
+        if (courseSection.multipleMeetings) {
+          courseSection.timeStart = (courseSection.timeStart as Date[]).map(
+            (time) => new Date(time.toString())
+          );
+          courseSection.timeEnd = (courseSection.timeEnd as Date[]).map(
+            (time) => new Date(time.toString())
+          );
+          courseSection.startDate = (courseSection.startDate as Date[]).map(
+            (date) => new Date(date.toString())
+          );
+          courseSection.endDate = (courseSection.endDate as Date[]).map(
+            (date) => new Date(date.toString())
+          );
+        } else {
+          courseSection.timeStart = new Date(
+            courseSection.timeStart.toString()
+          );
+          courseSection.timeEnd = new Date(courseSection.timeEnd.toString());
+          courseSection.startDate = new Date(
+            courseSection.startDate.toString()
+          );
+          courseSection.endDate = new Date(courseSection.endDate.toString());
+        }
+        // List is sorted by catalog number,
+        // so we can check if the current section is the start of a different course
+        if (curCourse.catalogNumber !== courseSection.catalogNumber) {
+          if (curCourse.catalogNumber !== "") {
+            courses.push(curCourse);
+          }
+          curCourse = {
+            name: courseSection.name,
+            subjectCode: courseSection.subjectCode,
+            catalogNumber: courseSection.catalogNumber,
+            sections: [],
+          };
+        }
+        curCourse.sections.push(courseSection);
+      });
+      // Push the last course
+      if (curCourse.catalogNumber !== "") {
+        courses.push(curCourse);
+      }
+      // Set the filtered courses
+      setFilteredCourses(courses);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // --- Data Fetching useEffect ---
   useEffect(() => {
@@ -267,434 +282,448 @@ function SearchResults() {
 
   // --- Render Logic ---
   return (
-    <Container maxWidth="lg" sx={{ mb: 4 }}>
-      {" "}
-      {/* Use MUI Container */}
-      {/* Header Section */}
-      <Box sx={{ py: 4 }}>
-        <button
-          onClick={handleBackToHome}
-          className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          <span>Back to Home</span>
-        </button>
-        <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
-        </div>
-        <Paper elevation={2} sx={{ p: 3 }}>
-          {" "}
-          {/* Search Form Wrapper */}
-          <SearchForm onSearch={fetchCourses}/>
-        </Paper>
-      </Box>
-      {/* Results Section */}
-      <Box>
-        {loading ? (
-          // ... Loading indicator ...
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress size={60} />
-            <Typography sx={{ ml: 2, alignSelf: "center" }}>
-              Loading courses...
-            </Typography>
-          </Box>
-        ) : error ? (
-          // ... Error Alert ...
-          <>
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-            <button
-              onClick={handleBackToHome}
-              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              <span>Back to Home</span>
-            </button>
-          </>
-        ) : filteredCourses.length === 0 ? (
-          // ... No Results ...
-          <div className="text-center py-16">
-            <div className="flex justify-center">
-              <BookOpen className="h-16 w-16 text-gray-400" />
-            </div>
-            <h2 className="mt-4 text-2xl font-semibold text-gray-900">
-              No courses found
-            </h2>
-            <p className="mt-2 text-gray-600">
-              We couldn't find any courses matching your search criteria.
-            </p>
-            <div className="mt-6">
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="lg" sx={{ mb: 4 }}>
+        {" "}
+        {/* Use MUI Container */}
+        {/* Header Section */}
+        <Box sx={{ py: 4 }}>
+          <button
+            onClick={handleBackToHome}
+            className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            <span>Back to Home</span>
+          </button>
+          <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
+          </div>
+          <Paper elevation={2} sx={{ p: 3 }}>
+            {/* Search Form Wrapper */}
+            <SearchForm onSearch={fetchCourses} />
+          </Paper>
+        </Box>
+        {/* Results Section */}
+        <Box>
+          {loading ? (
+            // ... Loading indicator ...
+            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+              <CircularProgress size={60} />
+              <Typography sx={{ ml: 2, alignSelf: "center" }}>
+                Loading courses...
+              </Typography>
+            </Box>
+          ) : error ? (
+            // ... Error Alert ...
+            <>
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
               <button
                 onClick={handleBackToHome}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
               >
-                Return to Home
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                <span>Back to Home</span>
               </button>
-            </div>
-          </div>
-        ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {filteredCourses.map((course) => (
-              <Paper
-                key={`${course.subjectCode}-${course.catalogNumber}`}
-                elevation={1}
-              >
-                {/* ... Course Header ... */}
-                <Box
-                  sx={{
-                    p: 2,
-                    borderBottom: 1,
-                    borderColor: "divider",
-                    bgcolor: "grey.100",
-                  }}
+            </>
+          ) : filteredCourses.length === 0 ? (
+            // ... No Results ...
+            <div className="text-center py-16">
+              <div className="flex justify-center">
+                <BookOpen className="h-16 w-16 text-gray-400" />
+              </div>
+              <h2 className="mt-4 text-2xl font-semibold text-gray-900">
+                No courses found
+              </h2>
+              <p className="mt-2 text-gray-600">
+                We couldn't find any courses matching your search criteria.
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={handleBackToHome}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  <Typography variant="h6" component="h2">
-                    {course.name} |{" "}
-                    <Typography
-                      component="span"
-                      fontWeight="bold"
-                      color="primary"
-                    >
-                      {course.subjectCode} {course.catalogNumber}
-                    </Typography>
-                  </Typography>
-                </Box>
-
-                <Box>
-                  {/* Optional: Header Row for Sections */}
-                  <Grid
-                    container
-                    spacing={1}
+                  Return to Home
+                </button>
+              </div>
+            </div>
+          ) : (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              {filteredCourses.map((course) => (
+                <Paper
+                  key={`${course.subjectCode}-${course.catalogNumber}`}
+                  elevation={1}
+                >
+                  {/* ... Course Header ... */}
+                  <Box
                     sx={{
-                      p: 1,
+                      p: 2,
                       borderBottom: 1,
                       borderColor: "divider",
-                      display: { xs: "none", md: "flex" },
-                      color: "text.secondary",
-                      typography: "caption",
-                      textAlign: "center",
+                      bgcolor: "primary.main",
+                      color: "white",
                     }}
                   >
-                    <Grid size={{ md: 2 }}>SECTION</Grid>
-                    <Grid size={{ md: 2 }}>DAYS</Grid>
-                    <Grid size={{ md: 1.85 }}>TIME</Grid>
-                    <Grid size={{ md: 2 }}>ROOM</Grid>
-                    <Grid size={{ md: 1.85 }}>INSTRUCTOR</Grid>
-                    <Grid size={{ md: 2 }}>DATES</Grid>
-                  </Grid>
+                    <Typography variant="h6" component="h2">
+                      {course.name} |{" "}
+                      <Typography
+                        variant="h6"
+                        component="span"
+                        fontWeight="bold"
+                      >
+                        {course.subjectCode} {course.catalogNumber}
+                      </Typography>
+                    </Typography>
+                  </Box>
 
-                  {course.sections.map((section) => (
-                    <Accordion
-                      key={section.classNumber}
-                      disableGutters
-                      elevation={0}
-                      square
+                  <Box>
+                    {/* Optional: Header Row for Sections */}
+                    <Grid
+                      container
+                      spacing={1}
                       sx={{
-                        "&:not(:last-child)": {
-                          borderBottom: 1,
-                          borderColor: "divider",
-                        },
+                        p: 1,
+                        borderBottom: 1,
+                        borderColor: "divider",
+                        display: { xs: "none", md: "flex" },
+                        color: "text.secondary",
+                        typography: "caption",
+                        textAlign: "center",
                       }}
                     >
-                      {/* --- Accordion Summary --- */}
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`section-${section.classNumber}-content`}
-                        id={`section-${section.classNumber}-header`}
+                      <Grid size={{ md: 2 }}>SECTION</Grid>
+                      <Grid size={{ md: 2 }}>DAYS</Grid>
+                      <Grid size={{ md: 1.85 }}>TIME</Grid>
+                      <Grid size={{ md: 2 }}>ROOM</Grid>
+                      <Grid size={{ md: 1.85 }}>INSTRUCTOR</Grid>
+                      <Grid size={{ md: 2 }}>DATES</Grid>
+                    </Grid>
+
+                    {course.sections.map((section) => (
+                      <Accordion
+                        key={section.classNumber}
+                        disableGutters
+                        elevation={0}
+                        square
                         sx={{
-                          // Updated styling from temp.tsx
-                          bgcolor: "grey.50",
-                          "&.Mui-expanded": {
-                            bgcolor: "grey.100",
-                          },
-                          "&:hover": {
-                            bgcolor: "grey.200",
-                          },
-                          // Keep original alignment style
-                          "& .MuiAccordionSummary-content": {
-                            alignItems: "center",
+                          "&:not(:last-child)": {
+                            borderBottom: 1,
+                            borderColor: "divider",
                           },
                         }}
                       >
-                        <Grid
-                          container
-                          spacing={1}
+                        {/* --- Accordion Summary --- */}
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls={`section-${section.classNumber}-content`}
+                          id={`section-${section.classNumber}-header`}
                           sx={{
-                            display: { md: "flex" },
-                            typography: "body2",
-                            textAlign: "center",
-														flexGrow: 1,
+                            // Updated styling from temp.tsx
+                            bgcolor: "grey.50",
+                            "&.Mui-expanded": {
+                              bgcolor: "grey.100",
+                            },
+                            "&:hover": {
+                              bgcolor: "grey.200",
+                            },
+                            // Keep original alignment style
+                            "& .MuiAccordionSummary-content": {
+                              alignItems: "center",
+                            },
                           }}
                         >
-                          <Grid size={{ md: 2 }}>
-                            {section.sectionCode} - {section.sectionType}
-                          </Grid>
-                          <Grid size={{ md: 2 }}>
-                            {formatDays(section.days)}
-                          </Grid>
-                          <Grid size={{ md: 2 }}>
-                            {formatTimeRange(
-                              section.timeStart,
-                              section.timeEnd
-                            )}
-                          </Grid>
-                          <Grid size={{ md: 2 }}>
-                            {formatClassroom(section.classroom)}
-                          </Grid>
-                          <Grid size={{ md: 2 }}>
-                            {formatInstructors(section.instructor)}
-                          </Grid>
-                          <Grid size={{ md: 2 }}>
-                            {formatDateRange(
-                              section.startDate,
-                              section.endDate
-                            )}
-                          </Grid>
-                        </Grid>
-                      </AccordionSummary>
-
-                      {/* --- Accordion Details --- */}
-                      <AccordionDetails sx={{ bgcolor: "grey.50", p: 3 }}>
-                        {/* === Multiple Meeting Pattern Section (Conditional) === */}
-                        {section.multipleMeetings &&
-                          Array.isArray(section.startDate) && (
-                            <Box sx={{ mb: 3 }}>
-                              <Typography
-                                variant="subtitle2"
-                                gutterBottom
-                                color="text.secondary"
-                                sx={{ display: "flex", alignItems: "center" }}
-                              >
-                                <EventNoteIcon
-                                  fontSize="small"
-                                  sx={{ mr: 0.5 }}
-                                />{" "}
-                                MULTIPLE MEETING PATTERN
-                              </Typography>
-                              <Paper variant="outlined">
-                                {/* Header Row - Use size prop */}
-                                <Grid
-                                  container
-                                  spacing={1}
-                                  sx={{
-                                    p: 1,
-                                    bgcolor: "grey.200",
-                                    typography: "caption",
-                                    fontWeight: "medium",
-                                    textAlign: "left",
-                                  }}
-                                >
-                                  <Grid size={{ xs: 2 }}>DATES</Grid>
-                                  <Grid size={{ xs: 2 }}>INSTRUCTOR</Grid>
-                                  <Grid size={{ xs: 2 }}>DAYS</Grid>
-                                  <Grid size={{ xs: 2 }}>START</Grid>
-                                  <Grid size={{ xs: 2 }}>END</Grid>
-                                  <Grid size={{ xs: 2 }}>ROOM</Grid>
-                                </Grid>
-                                {/* Data Rows */}
-                                {(section.startDate as Date[]).map(
-                                  (_, index) => (
-                                    <Grid
-                                      container
-                                      spacing={1}
-                                      key={index}
-                                      sx={{
-                                        p: 1,
-                                        typography: "body2",
-                                        textAlign: "left",
-                                        borderTop: index > 0 ? 1 : 0,
-                                        borderColor: "divider",
-                                      }}
-                                    >
-                                      <Grid size={{ xs: 2 }}>
-                                        {formatSingleDateRange(
-                                          (section.startDate as Date[])?.[
-                                            index
-                                          ],
-                                          (section.endDate as Date[])?.[index]
-                                        )}
-                                      </Grid>
-                                      <Grid size={{ xs: 2 }}>
-                                        {Array.isArray(
-                                          section.instructor?.[index]
-                                        )
-                                          ? (
-                                              section.instructor?.[
-                                                index
-                                              ] as string[]
-                                            ).join(", ")
-                                          : section.instructor?.[index] ||
-                                            "Staff"}
-                                      </Grid>
-                                      <Grid size={{ xs: 2 }}>
-                                        {Array.isArray(section.days?.[index])
-                                          ? (section.days?.[index] as string[])
-                                              .map((d) => d.substring(0, 2))
-                                              .join("")
-                                          : "TBA"}
-                                      </Grid>
-                                      <Grid size={{ xs: 2 }}>
-                                        {formatSingleTime(
-                                          (section.timeStart as Date[])?.[index]
-                                        )}
-                                      </Grid>
-                                      <Grid size={{ xs: 2 }}>
-                                        {formatSingleTime(
-                                          (section.timeEnd as Date[])?.[index]
-                                        )}
-                                      </Grid>
-                                      <Grid size={{ xs: 2 }}>
-                                        {section.classroom?.[index] || "TBA"}
-                                      </Grid>
-                                    </Grid>
-                                  )
-                                )}
-                              </Paper>
-                            </Box>
-                          )}
-                        {/* === End Multiple Meeting Pattern Section === */}
-
-                        <Grid container spacing={3}>
-                          {/* Column 1: Information */}
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            <Typography
-                              variant="subtitle2"
-                              gutterBottom
-                              color="text.secondary"
-                            >
-                              INFORMATION
-                            </Typography>
-                            <Grid container spacing={1}>
-                              <Grid size={{ xs: 4 }}>
-                                <Typography variant="body2" fontWeight="medium">
-                                  Class Number:
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 8 }}>
-                                <Typography variant="body2">
-                                  {section.classNumber}
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 4 }}>
-                                <Typography variant="body2" fontWeight="medium">
-                                  Session:
-                                </Typography>
-                              </Grid>
-                              <Grid size={{ xs: 8 }}>
-                                <Typography variant="body2">
-                                  {section.session || "N/A"}
-                                </Typography>
-                              </Grid>
+                          <Grid
+                            container
+                            spacing={1}
+                            sx={{
+                              display: { md: "flex" },
+                              typography: "body2",
+                              textAlign: "center",
+                              flexGrow: 1,
+                            }}
+                          >
+                            <Grid size={{ md: 2 }}>
+                              {section.sectionCode} - {section.sectionType}
+                            </Grid>
+                            <Grid size={{ md: 2 }}>
+                              {formatDays(section.days)}
+                            </Grid>
+                            <Grid size={{ md: 2 }}>
+                              {formatTimeRange(
+                                section.timeStart,
+                                section.timeEnd
+                              )}
+                            </Grid>
+                            <Grid size={{ md: 2 }}>
+                              {formatClassroom(section.classroom)}
+                            </Grid>
+                            <Grid size={{ md: 2 }}>
+                              {formatInstructors(section.instructor)}
+                            </Grid>
+                            <Grid size={{ md: 2 }}>
+                              {formatDateRange(
+                                section.startDate,
+                                section.endDate
+                              )}
                             </Grid>
                           </Grid>
+                        </AccordionSummary>
 
-                          {/* Column 2: Details & Availability */}
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            {/* Conditionally hide fields if multiple meetings */}
-                            {!section.multipleMeetings && (
-                              <>
+                        {/* --- Accordion Details --- */}
+                        <AccordionDetails sx={{ bgcolor: "grey.50", p: 3 }}>
+                          {/* === Multiple Meeting Pattern Section (Conditional) === */}
+                          {section.multipleMeetings &&
+                            Array.isArray(section.startDate) && (
+                              <Box sx={{ mb: 3 }}>
                                 <Typography
                                   variant="subtitle2"
                                   gutterBottom
                                   color="text.secondary"
+                                  sx={{ display: "flex", alignItems: "center" }}
                                 >
-                                  DETAILS
+                                  <EventNoteIcon
+                                    fontSize="small"
+                                    sx={{ mr: 0.5 }}
+                                  />{" "}
+                                  MULTIPLE MEETING PATTERN
                                 </Typography>
-                                <Grid container spacing={1} sx={{ mb: 2 }}>
-                                  <Grid size={{ xs: 4 }}>
-                                    <Typography
-                                      variant="body2"
-                                      fontWeight="medium"
-                                    >
-                                      Instructor:
-                                    </Typography>
+                                <Paper variant="outlined">
+                                  {/* Header Row - Use size prop */}
+                                  <Grid
+                                    container
+                                    spacing={1}
+                                    sx={{
+                                      p: 1,
+                                      bgcolor: "grey.200",
+                                      typography: "caption",
+                                      fontWeight: "medium",
+                                      textAlign: "left",
+                                    }}
+                                  >
+                                    <Grid size={{ xs: 2 }}>DATES</Grid>
+                                    <Grid size={{ xs: 2 }}>INSTRUCTOR</Grid>
+                                    <Grid size={{ xs: 2 }}>DAYS</Grid>
+                                    <Grid size={{ xs: 2 }}>START</Grid>
+                                    <Grid size={{ xs: 2 }}>END</Grid>
+                                    <Grid size={{ xs: 2 }}>ROOM</Grid>
                                   </Grid>
-                                  <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
-                                      {formatInstructors(section.instructor)}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 4 }}>
-                                    <Typography
-                                      variant="body2"
-                                      fontWeight="medium"
-                                    >
-                                      Dates:
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
-                                      {formatDateRange(
-                                        section.startDate,
-                                        section.endDate
-                                      )}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 4 }}>
-                                    <Typography
-                                      variant="body2"
-                                      fontWeight="medium"
-                                    >
-                                      Meets:
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
-                                      {formatDays(section.days)}{" "}
-                                      {formatTime(section.timeStart)} -{" "}
-                                      {formatTime(section.timeEnd)}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 4 }}>
-                                    <Typography
-                                      variant="body2"
-                                      fontWeight="medium"
-                                    >
-                                      Room:
-                                    </Typography>
-                                  </Grid>
-                                  <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
-                                      {formatClassroom(section.classroom)}
-                                    </Typography>
-                                  </Grid>
-                                </Grid>
-                              </>
+                                  {/* Data Rows */}
+                                  {(section.startDate as Date[]).map(
+                                    (_, index) => (
+                                      <Grid
+                                        container
+                                        spacing={1}
+                                        key={index}
+                                        sx={{
+                                          p: 1,
+                                          typography: "body2",
+                                          textAlign: "left",
+                                          borderTop: index > 0 ? 1 : 0,
+                                          borderColor: "divider",
+                                        }}
+                                      >
+                                        <Grid size={{ xs: 2 }}>
+                                          {formatSingleDateRange(
+                                            (section.startDate as Date[])?.[
+                                              index
+                                            ],
+                                            (section.endDate as Date[])?.[index]
+                                          )}
+                                        </Grid>
+                                        <Grid size={{ xs: 2 }}>
+                                          {Array.isArray(
+                                            section.instructor?.[index]
+                                          )
+                                            ? (
+                                                section.instructor?.[
+                                                  index
+                                                ] as string[]
+                                              ).join(", ")
+                                            : section.instructor?.[index] ||
+                                              "Staff"}
+                                        </Grid>
+                                        <Grid size={{ xs: 2 }}>
+                                          {Array.isArray(section.days?.[index])
+                                            ? (
+                                                section.days?.[
+                                                  index
+                                                ] as string[]
+                                              )
+                                                .map((d) => d.substring(0, 2))
+                                                .join("")
+                                            : "TBA"}
+                                        </Grid>
+                                        <Grid size={{ xs: 2 }}>
+                                          {formatSingleTime(
+                                            (section.timeStart as Date[])?.[
+                                              index
+                                            ]
+                                          )}
+                                        </Grid>
+                                        <Grid size={{ xs: 2 }}>
+                                          {formatSingleTime(
+                                            (section.timeEnd as Date[])?.[index]
+                                          )}
+                                        </Grid>
+                                        <Grid size={{ xs: 2 }}>
+                                          {section.classroom?.[index] || "TBA"}
+                                        </Grid>
+                                      </Grid>
+                                    )
+                                  )}
+                                </Paper>
+                              </Box>
                             )}
+                          {/* === End Multiple Meeting Pattern Section === */}
 
-                            {/* Action Buttons */}
-                            <Box
-                              sx={{
-                                mt: 2,
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                gap: 1,
-                              }}
-                            >
-                              <Button variant="outlined" size="small">
-                                Past Instructors
-                              </Button>
-                              <Button
-                                variant="contained"
-                                size="small"
-																onClick={() => handleViewDetailsPage(section)}
+                          <Grid container spacing={3}>
+                            {/* Column 1: Information */}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              <Typography
+                                variant="subtitle2"
+                                gutterBottom
+                                color="text.secondary"
                               >
-                                View Enrollment Details
-                              </Button>
-                            </Box>
+                                INFORMATION
+                              </Typography>
+                              <Grid container spacing={1}>
+                                <Grid size={{ xs: 4 }}>
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                  >
+                                    Class Number:
+                                  </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 8 }}>
+                                  <Typography variant="body2">
+                                    {section.classNumber}
+                                  </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 4 }}>
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                  >
+                                    Session:
+                                  </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 8 }}>
+                                  <Typography variant="body2">
+                                    {section.session || "N/A"}
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </Grid>
+
+                            {/* Column 2: Details & Availability */}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                              {/* Conditionally hide fields if multiple meetings */}
+                              {!section.multipleMeetings && (
+                                <>
+                                  <Typography
+                                    variant="subtitle2"
+                                    gutterBottom
+                                    color="text.secondary"
+                                  >
+                                    DETAILS
+                                  </Typography>
+                                  <Grid container spacing={1} sx={{ mb: 2 }}>
+                                    <Grid size={{ xs: 4 }}>
+                                      <Typography
+                                        variant="body2"
+                                        fontWeight="medium"
+                                      >
+                                        Instructor:
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 8 }}>
+                                      <Typography variant="body2">
+                                        {formatInstructors(section.instructor)}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 4 }}>
+                                      <Typography
+                                        variant="body2"
+                                        fontWeight="medium"
+                                      >
+                                        Dates:
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 8 }}>
+                                      <Typography variant="body2">
+                                        {formatDateRange(
+                                          section.startDate,
+                                          section.endDate
+                                        )}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 4 }}>
+                                      <Typography
+                                        variant="body2"
+                                        fontWeight="medium"
+                                      >
+                                        Meets:
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 8 }}>
+                                      <Typography variant="body2">
+                                        {formatDays(section.days)}{" "}
+                                        {formatTime(section.timeStart)} -{" "}
+                                        {formatTime(section.timeEnd)}
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 4 }}>
+                                      <Typography
+                                        variant="body2"
+                                        fontWeight="medium"
+                                      >
+                                        Room:
+                                      </Typography>
+                                    </Grid>
+                                    <Grid size={{ xs: 8 }}>
+                                      <Typography variant="body2">
+                                        {formatClassroom(section.classroom)}
+                                      </Typography>
+                                    </Grid>
+                                  </Grid>
+                                </>
+                              )}
+
+                              {/* Action Buttons */}
+                              <Box
+                                sx={{
+                                  mt: 2,
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                  gap: 1,
+                                }}
+                              >
+                                <Button variant="outlined" size="small">
+                                  Past Instructors
+                                </Button>
+                                <Button
+                                  variant="contained"
+                                  size="small"
+                                  onClick={() => handleViewDetailsPage(section)}
+                                >
+                                  View Enrollment Details
+                                </Button>
+                              </Box>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </Box>
-              </Paper>
-            ))}
-          </Box>
-        )}
-      </Box>
-    </Container>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          )}
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 }
 
