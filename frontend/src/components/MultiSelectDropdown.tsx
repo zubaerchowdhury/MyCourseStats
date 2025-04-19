@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 interface DropdownMultipleSelectProps {
   onChange: (value: string) => void;
@@ -23,10 +23,14 @@ const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
 }) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-
+  const [isFocused, setIsFocused] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  
 
   const handleOptionClick = (value: string) => {
     if (selectedDays.includes(value)) {
@@ -46,8 +50,26 @@ const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
 
   const allDaysSelected = selectedDays.length === daysOfWeek.length;
 
+  // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+          if (
+            dropdownRef.current &&
+            !dropdownRef.current.contains(event.target as Node)
+          ) {
+            setIsOpen(false);
+            setIsFocused(false);
+          }
+        };
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }, []);
+  
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1" ref = {dropdownRef}>
       <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
         Days
       </label>
