@@ -7,19 +7,33 @@ namespace Backend.Services;
 public class StatsService
 {
 		/// <summary>
-		/// Calculate the enrollment daily percentage filled, percentage changed, and average percentage change
+		/// Calculate the enrollment daily percentage filled, percentage changed, and average weekly percentage change
 		/// </summary>
 		/// <param name="data"></param>
-		/// <returns>List of daily percentage filled, percentage changed, and the average percentage change</returns>
+		/// <returns>List of daily percentage filled, percentage changed, and the average weekly percentage change</returns>
 		public List<List<double>> CalculateEnrollmentRates(BsonDocument data, int numDays)
 		{
-				List<double> filledPercentages = new List<double>();
-				List<double> changedPercentages = new List<double>();
+				List<double> filledPercentages = [];
+				List<double> changedPercentages = [];
+				List<double> averageWeeklyPercentageChanges = [];
 
 				int capacity = data["capacity"].AsInt32;
 				List<BsonDocument> courseStats = data["courseStats"].AsBsonArray.Select(x => x.AsBsonDocument).ToList();
+				if (courseStats.Count == 0) 
+				{
+						return [];
+				}
 				
 				DateTime prevDay = new DateTime();
+				
+				void CalculateAverageWeeklyPercentageChange()
+				{
+						if (filledPercentages.Count % 7 == 0)
+						{
+								double weeklyAverage = filledPercentages.Skip(filledPercentages.Count - 7).Average();
+								averageWeeklyPercentageChanges.Add(weeklyAverage);
+						}
+				}
 
 				for (int i = 0; i < courseStats.Count; i++) 
 				{
@@ -50,6 +64,8 @@ public class StatsService
 								}
 								continue;
 						}
+						
+						// If the date is different, add a new entry
 						filledPercentages.Add(filled);
 
 						// Calculate changed percentage
@@ -58,9 +74,12 @@ public class StatsService
 								double change = filledPercentages[^1] - filledPercentages[^2];
 								changedPercentages.Add(change);
 						}
+						
+						CalculateAverageWeeklyPercentageChange();
 
 						prevDay = dateTimeRetrieved;
 				}
+				
 				// Fill in missing values if necessary
 				if (filledPercentages.Count != numDays)
 				{
@@ -69,9 +88,18 @@ public class StatsService
 						{
 								filledPercentages.Add(filledPercentages[^1]);
 								changedPercentages.Add(0);
+								CalculateAverageWeeklyPercentageChange();
 						}
 				}
 				
-				return [filledPercentages, changedPercentages, [changedPercentages.Average()]];
+				// Fill in final weekly average if necessary
+				if (filledPercentages.Count % 7 != 0)
+				{
+						int remainingDays = filledPercentages.Count % 7;
+						double weeklyAverage = filledPercentages.Skip(filledPercentages.Count - remainingDays).Average();
+						averageWeeklyPercentageChanges.Add(weeklyAverage);
+				}
+				
+				return [filledPercentages, changedPercentages, averageWeeklyPercentageChanges];
 		}
 }

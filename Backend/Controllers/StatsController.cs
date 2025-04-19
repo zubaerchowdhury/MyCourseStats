@@ -19,17 +19,17 @@ namespace Backend.Controllers
         }
 
         /// <summary>
-        /// API endpoint to get the enrollment rate for the dateTimeRetrieved date for a course based on semester, year, subject code, and catalog number
+        /// API endpoint to get the enrollment rate for a course based on semester, year, class number
         /// </summary>
         /// <param name="semester">Course semester</param>
         /// <param name="year">Course year</param>
         /// <param name="classNumber">Course class number</param>
-        /// <param name="startingDate">Date to start enrollment data from</param>
+        /// <param name="startingDate">Date to start enrollment data from (must be a Monday for weekly averages to work correctly)</param>
         /// <param name="numDays">Numbers of days to get enrollment data for</param>
-        /// <returns>List of lists [filled-percentage, changed-percentage, average percentage change (only one element)]</returns>
-				// TESTING: curl -X GET "http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273" -H  "accept: text/plain"
+        /// <returns>List of lists [ filledPercentages, changedPercentages, averageWeeklyPercentageChanges (averages exactly every 7 days without checking date) ]</returns>
+        // TESTING: http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273
         [HttpGet("enrollment-rate")]
-        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] DateTime startingDate, [FromQuery] int numDays = 7)
+        public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] DateTime startingDate, [FromQuery] int numDays)
         {
             if (string.IsNullOrEmpty(semester) || string.IsNullOrEmpty(year) || string.IsNullOrEmpty(classNumber))
             {
@@ -47,6 +47,10 @@ namespace Backend.Controllers
                     return NotFound("No data found for the given course.");
                 }
                 List<List<double>> enrollmentRates = _statsService.CalculateEnrollmentRates(data, numDays);
+                if (enrollmentRates.Count == 0)
+                {
+                    return NotFound("No enrollment data found for the given course and date range.");
+                }
                 return Ok(enrollmentRates);
             }
             catch (Exception ex)
