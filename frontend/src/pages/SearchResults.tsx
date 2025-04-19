@@ -137,7 +137,6 @@ const formatClassroom = (classroom: string | string[] | undefined): string => {
   return classroom;
 };
 
-// --- Component ---
 function SearchResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -162,23 +161,26 @@ function SearchResults() {
       searchParams.get("semester") || filters.semester || "",
       parseInt(searchParams.get("year") || filters.year?.toString() || "")
     );
-    let paramsString: string;
-    if (
-      searchParams.has("semester") &&
-      searchParams.has("year") &&
-      searchParams.has("subjectCode")
-    ) {
-      paramsString = searchParams.toString();
-    } else if (filters.semester && filters.year && filters.subjectCode) {
-      paramsString = new URLSearchParams(
-        getSearchFiltersStrings(filters)
-      ).toString();
-    } else {
-      setFilteredCourses([]);
-      setLoading(false);
-      return;
-    }
+
     try {
+      let paramsString: string;
+      if (
+        searchParams.has("semester") &&
+        searchParams.has("year") &&
+        searchParams.has("subjectCode")
+      ) {
+        paramsString = searchParams.toString();
+      } else if (filters.semester && filters.year && filters.subjectCode) {
+        paramsString = new URLSearchParams(
+          getSearchFiltersStrings(filters)
+        ).toString();
+      } else if (searchParams.size > 0) {
+        throw new Error("URL parameters are missing required fields");
+      } else {
+        setFilteredCourses([]);
+        setLoading(false);
+        return;
+      }
       const baseUrl = "http://localhost:5184/api/Courses/course-search";
       const response = await fetch(`${baseUrl}?${paramsString}`);
 
