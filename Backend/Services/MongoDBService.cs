@@ -28,6 +28,7 @@ public class MongoDBService
         {
             throw new InvalidOperationException("MongoDB_URI environment variable is not set.");
         }
+
         // Make the Timeout 10 seconds
         var mongoClientSettings = MongoClientSettings.FromConnectionString(connectionString);
         mongoClientSettings.ServerSelectionTimeout = TimeSpan.FromSeconds(10);
@@ -174,7 +175,7 @@ public class MongoDBService
         {
             filter = Builders<CourseSubject>.Filter.Eq("year", year);
         }
-        
+
         var sort = Builders<CourseSubject>.Sort.Ascending("name");
 
         return await _subjectsCollection.Find(filter).Sort(sort).ToListAsync();
@@ -183,7 +184,7 @@ public class MongoDBService
     public async Task<List<CourseContainer>> CourseSearch(string semester, int year, string subjectCode,
         string? catalogNumber = null, string? name = null,
         List<string>? days = null, DateTime? startDate = null,
-        DateTime? endDate = null, string? instructor = null
+        DateTime? endDate = null, string? instructor = null, int? classNumber = null
     )
     {
         var filterBuilder = Builders<BsonDocument>.Filter;
@@ -239,8 +240,14 @@ public class MongoDBService
             });
         }
 
+        if (classNumber != null)
+        {
+            filter &= filterBuilder.Eq("classNumber", classNumber);
+        }
+
         var projectionBuilder = Builders<BsonDocument>.Projection;
-        var projection = projectionBuilder.Exclude("_id").Include("subjectCode").Include("classNumber").Include("catalogNumber")
+        var projection = projectionBuilder.Exclude("_id").Include("subjectCode").Include("classNumber")
+            .Include("catalogNumber")
             .Include("sectionType").Include("sectionCode").Include("name").Include("capacity")
             .Include("multipleMeetings").Include("days").Include("instructor").Include("classroom").Include("startDate")
             .Include("endDate").Include("timeStart").Include("timeEnd").Include("session");

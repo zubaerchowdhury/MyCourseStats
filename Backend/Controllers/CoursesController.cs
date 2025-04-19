@@ -94,25 +94,24 @@ public class CoursesController : ControllerBase
         [FromQuery] string subjectCode,
         [FromQuery] string? catalogNumber = null, [FromQuery] string? name = null,
         [FromQuery] List<string>? days = null, [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null, [FromQuery] string? instructor = null
+        [FromQuery] DateTime? endDate = null, [FromQuery] string? instructor = null, [FromQuery] int? classNumber = null
     )
     {
         if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(semester) || year == 0)
         {
             return BadRequest("Please provide semester, year, and subject code.");
         }
- 
+
         try
         {
             List<CourseContainer> courses =
                 await _mongoDbService.CourseSearch(semester, year, subjectCode, catalogNumber, name, days, startDate,
-                    endDate,
-                    instructor);
+                    endDate, instructor, classNumber);
             if (courses.Count == 0)
             {
                 return NotFound("No courses found.");
             }
-            
+
             return Ok(courses);
         }
         catch (Exception ex)

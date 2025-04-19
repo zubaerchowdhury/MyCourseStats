@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { X, Search, Filter } from "lucide-react";
 import SearchableDropdown from "./SearchableDropdown";
 import {
@@ -30,7 +30,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
   showClearButton = true,
   className = "",
 }) => {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { filters, setFilters, setSubjectOptions } = useSearch();
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
@@ -51,29 +50,28 @@ const SearchForm: React.FC<SearchFormProps> = ({
     searchParams.forEach((value, key) => {
       // Get keyof SearchFilters from key
       const filterKey = key as keyof SearchFilters;
-      if (key === "year") {
+      if (filterKey === "year") {
         searchFilters = {
-          ...filters,
+          ...searchFilters,
           [filterKey]: parseInt(value),
         };
-      } else if (key === "days") {
+      } else if (filterKey === "days") {
         searchFilters = {
-          ...filters,
+          ...searchFilters,
           [filterKey]: value.split(","),
         };
-      } else if (key === "startDate" || key === "endDate") {
+      } else if (filterKey === "startDate" || filterKey === "endDate") {
         searchFilters = {
-          ...filters,
+          ...searchFilters,
           [filterKey]: new Date(value),
         };
       } else {
         searchFilters = {
-          ...filters,
+          ...searchFilters,
           [filterKey]: value,
         };
       }
     });
-
     // Set filters state variable
     setFilters(searchFilters);
   }, []);
@@ -94,19 +92,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
     const params = new URLSearchParams(getSearchFiltersStrings(filters));
     setSearchParams(params);
 
-    /*if (isAdvancedOpen) {
-      if (advancedFilters.days?.length) {
-        params.append        
-        return;
-      }
-
-    }
-    */
     if (onSearch) {
       onSearch(params);
-    } else {
-      navigate(`/search?${params.toString()}`);
-    }
+    } 
   };
 
   const clearFilters = () => {

@@ -20,39 +20,7 @@ import SearchForm from "../components/SearchForm";
 import EventNoteIcon from "@mui/icons-material/EventNote"; // Icon for meeting pattern
 import { createTheme } from '@mui/material/styles';
 import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
-
-// --- Interfaces ---
-interface Course {
-  name: string;
-  subjectCode: string;
-  catalogNumber: string;
-  sections: CourseSection[];
-}
-
-interface CourseSection {
-  // Existing fields
-  name: string;
-  subjectCode: string;
-  catalogNumber: string;
-  sectionType: string; // e.g., LEC, LAB
-  sectionCode: string; // e.g., D, 1T
-  session: string | null; // e.g., Regular Academic
-  classNumber: number; // Unique identifier for the section instance
-  capacity: number;
-  multipleMeetings: boolean;
-  classroom: string | string[];
-  instructor: string[] | string[][];
-  days: string[] | string[][];
-  timeStart: Date | Date[];
-  timeEnd: Date | Date[];
-  startDate: Date | Date[];
-  endDate: Date | Date[];
-}
-
-interface CourseContainer {
-  courseWithOneMeeting: CourseSection | null;
-  courseWithMultipleMeetings: CourseSection | null;
-}
+import { Course, CourseSection, CourseContainer } from "../types/CourseTypes";
 
 // --- Helper Functions ---
 // Add a helper for single time formatting (used in multiple meetings table)
@@ -176,103 +144,108 @@ function SearchResults() {
 
 	const { filters } = useSearch();
 
+	const fetchCourses = async () => {
+		setLoading(true);
+		setError(null);
+		setCurrentSearchVars(
+			searchParams.get("semester") || filters.semester || "",
+			parseInt(searchParams.get("year") || filters.year?.toString() || "")
+		);
+		let paramsString: string;
+		if (searchParams.has("semester") && searchParams.has("year") && searchParams.has("subjectCode")) {
+			paramsString = searchParams.toString();
+		}
+		else if (filters.semester && filters.year && filters.subjectCode) {
+			paramsString = new URLSearchParams(getSearchFiltersStrings(filters)).toString();
+		}
+		else {
+			setFilteredCourses([]);
+			setLoading(false);
+			return;
+		}
+		try {
+			const baseUrl = "http://localhost:5184/api/Courses/course-search";
+			const response = await fetch(`${baseUrl}?${paramsString}`);
+
+			if (!response.ok) {
+				if (response.status === 404) {
+					setFilteredCourses([]);
+					return;
+				}
+				if (response.status >= 500) {
+					throw new Error("Server error, please try again later");
+				}
+				throw new Error("Failed to fetch courses data");
+			} 
+
+			const data = await response.json();
+			let courses: Course[] = [];
+			let curCourse: Course = {
+				name: "",
+				subjectCode: "",
+				catalogNumber: "",
+				sections: [],
+			};
+			data.forEach((container: CourseContainer) => {
+				const courseSection: CourseSection = container.courseWithOneMeeting
+					? (container.courseWithOneMeeting as CourseSection)
+					: (container.courseWithMultipleMeetings as CourseSection);
+				// Transform date strings to Date objects
+				if (courseSection.multipleMeetings) {
+					courseSection.timeStart = (courseSection.timeStart as Date[]).map(
+						(time) => new Date(time.toString())
+					);
+					courseSection.timeEnd = (courseSection.timeEnd as Date[]).map(
+						(time) => new Date(time.toString())
+					);
+					courseSection.startDate = (courseSection.startDate as Date[]).map(
+						(date) => new Date(date.toString())
+					);
+					courseSection.endDate = (courseSection.endDate as Date[]).map(
+						(date) => new Date(date.toString())
+					);
+				} else {
+					courseSection.timeStart = new Date(
+						courseSection.timeStart.toString()
+					);
+					courseSection.timeEnd = new Date(courseSection.timeEnd.toString());
+					courseSection.startDate = new Date(
+						courseSection.startDate.toString()
+					);
+					courseSection.endDate = new Date(courseSection.endDate.toString());
+				}
+				// List is sorted by catalog number, 
+				// so we can check if the current section is the start of a different course
+				if (curCourse.catalogNumber !== courseSection.catalogNumber) {
+					if (curCourse.catalogNumber !== "") {
+						courses.push(curCourse);
+					}
+					curCourse = {
+						name: courseSection.name,
+						subjectCode: courseSection.subjectCode,
+						catalogNumber: courseSection.catalogNumber,
+						sections: [],
+					};
+				}
+				curCourse.sections.push(courseSection);
+			});
+			// Push the last course
+			if (curCourse.catalogNumber !== "") {
+				courses.push(curCourse);
+			}
+			// Set the filtered courses
+			setFilteredCourses(courses);
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Unknown error occurred");
+		} finally {
+			setLoading(false);
+		}
+	};
+
   // --- Data Fetching useEffect ---
   useEffect(() => {
-    const fetchCourses = async () => {
-      setLoading(true);
-      setError(null);
-      setCurrentSearchVars(
-        searchParams.get("semester") || filters.semester || "",
-        parseInt(searchParams.get("year") || filters.year?.toString() || "")
-      );
-			let paramsString: string;
-			if (searchParams.has("semester") && searchParams.has("year") && searchParams.has("subjectCode")) {
-				paramsString = searchParams.toString();
-			}
-			else if (filters.semester && filters.year && filters.subjectCode) {
-				paramsString = new URLSearchParams(getSearchFiltersStrings(filters)).toString();
-			}
-			else {
-				setFilteredCourses([]);
-				setLoading(false);
-				return;
-			}
-      try {
-        const baseUrl = "http://localhost:5184/api/Courses/course-search";
-        const response = await fetch(`${baseUrl}?${paramsString}`);
-
-        if (!response.ok) {
-					if (response.status === 404) {
-						setFilteredCourses([]);
-						return;
-					}
-          if (response.status >= 500) {
-            throw new Error("Server error, please try again later");
-          }
-          throw new Error("Failed to fetch courses data");
-        } 
-
-        const data = await response.json();
-        let courses: Course[] = [];
-        let curCourse: Course = {
-          name: "",
-          subjectCode: "",
-          catalogNumber: "",
-          sections: [],
-        };
-        data.forEach((container: CourseContainer) => {
-          const courseSection: CourseSection = container.courseWithOneMeeting
-            ? (container.courseWithOneMeeting as CourseSection)
-            : (container.courseWithMultipleMeetings as CourseSection);
-          // Transform date strings to Date objects
-          if (courseSection.multipleMeetings) {
-            courseSection.timeStart = (courseSection.timeStart as Date[]).map(
-              (time) => new Date(time.toString())
-            );
-            courseSection.timeEnd = (courseSection.timeEnd as Date[]).map(
-              (time) => new Date(time.toString())
-            );
-            courseSection.startDate = (courseSection.startDate as Date[]).map(
-              (date) => new Date(date.toString())
-            );
-            courseSection.endDate = (courseSection.endDate as Date[]).map(
-              (date) => new Date(date.toString())
-            );
-          } else {
-            courseSection.timeStart = new Date(
-              courseSection.timeStart.toString()
-            );
-            courseSection.timeEnd = new Date(courseSection.timeEnd.toString());
-            courseSection.startDate = new Date(
-              courseSection.startDate.toString()
-            );
-            courseSection.endDate = new Date(courseSection.endDate.toString());
-          }
-          // List is sorted by catalog number, 
-					// so we can check if the current section is the start of a different course
-          if (curCourse.catalogNumber !== courseSection.catalogNumber) {
-            if (curCourse.catalogNumber !== "") {
-              courses.push(curCourse);
-            }
-            curCourse = {
-              name: courseSection.name,
-              subjectCode: courseSection.subjectCode,
-              catalogNumber: courseSection.catalogNumber,
-              sections: [],
-            };
-          }
-          curCourse.sections.push(courseSection);
-        });
-        setFilteredCourses(courses);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCourses();
-  }, [searchParams]); // Dependency remains searchParams
+  }, []); // Run only once on first render
 
   // --- Navigation Handlers ---
   const handleBackToHome = () => {
@@ -312,7 +285,7 @@ function SearchResults() {
         <Paper elevation={2} sx={{ p: 3 }}>
           {" "}
           {/* Search Form Wrapper */}
-          <SearchForm />
+          <SearchForm onSearch={fetchCourses}/>
         </Paper>
       </Box>
       {/* Results Section */}
