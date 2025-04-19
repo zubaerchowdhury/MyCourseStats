@@ -2,27 +2,28 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Calendar from "../components/Calendar";
+import { CourseSection } from "../types/CourseTypes";
 
 function CourseDetails() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const [courseStats, setCourseStats] = useState<number[][]>([]);
   const location = useLocation();
-  const course = location.state?.course;
+  const section: CourseSection = location.state?.courseSection;
 
-  // TODO: Use fetch to get the enrollment probability from the backend
-  const [enrollmentProbability, setEnrollmentProbability] = useState<number>(0);
+	const searchParamsHasAllVars = (): boolean => {
+		return searchParams.has("semester") && searchParams.has("year") && searchParams.has("classNumber");
+	};
 
   useEffect(() => {
     const fetchEnrollmentRate = async () => {
-      if (!course) return;
+      if (!section && !searchParamsHasAllVars()) return;
 
       try {
         const params = new URLSearchParams({
-          semester: course.semester,
-          year: String(course.year),
-          classNumber: String(course.classNumber),
+          semester: searchParams.get("semester") || "",
+          year: searchParams.get("year") || "",
+          classNumber: section.classNumber.toString(),
           startingDate: new Date().toISOString(),
           numDays: "7",
         });
@@ -39,22 +40,16 @@ function CourseDetails() {
 
         // The response contains [filledPercentages, changedPercentages, averageChange]
         // We take the most recent filled percentage
-        const [filledPercentages] = data;
-        if (filledPercentages && filledPercentages.length > 0) {
-          setEnrollmentProbability(
-            filledPercentages[filledPercentages.length - 1]
-          );
-        } else {
-          setEnrollmentProbability(0); // Handle case where filledPercentages is empty
-        }
+        const stats: number[][] = data;
+        setCourseStats(stats);
       } catch (error) {
         console.error("Failed to fetch enrollment rate:", error);
-        setEnrollmentProbability(0);
+        setCourseStats([]);
       }
     };
 
     fetchEnrollmentRate();
-  }, [course]);
+  }, [section]);
 
   const getEnrollmentDescription = (enrollmentProbability: number) => {
     if (enrollmentProbability >= 80 && enrollmentProbability <= 100) {
@@ -70,7 +65,7 @@ function CourseDetails() {
     }
   };
 
-  if (!course) {
+  if (!section) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
