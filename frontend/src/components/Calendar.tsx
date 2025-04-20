@@ -9,6 +9,9 @@ import {
   getDay,
   addMonths,
   subMonths,
+  startOfWeek,
+  endOfWeek,
+  isSameMonth,
 } from "date-fns";
 
 // adjusted getDay function to convert Sunday (0) to 6
@@ -88,7 +91,9 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const monthStr = format(currentMonth, "yyyy-MM");
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
-  const allDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start from Monday
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End on Sunday
+  const allDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   useEffect(() => {
     if (courseStats && courseStats.length >= 2) {
@@ -111,13 +116,14 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   const [cumulativeWeekly, dailyPercent] = calendarData;
-  const paddingDays = Array(getAdjustedDay(monthStart)).fill(null);
+
+  //const paddingDays = Array(getAdjustedDay(monthStart)).fill(null);
 
   const weeks: Week[] = [];
   let currentWeek: (CalendarDay | null)[] = [];
   let cumulativeIndex = 0;
 
-  paddingDays.forEach(() => currentWeek.push(null));
+  //paddingDays.forEach(() => currentWeek.push(null));
 
   allDays.forEach((date, i) => {
     currentWeek.push({
@@ -127,11 +133,6 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 
     if (getAdjustedDay(date) === 6 || i === allDays.length - 1) {
       // Fill remaining days in last week
-      const remainingDays = 7 - currentWeek.length;
-      for (let j = 0; j < remainingDays; j++) {
-        currentWeek.push(null);
-      }
-
       weeks.push({
         days: currentWeek,
         cumulative: cumulativeWeekly[cumulativeIndex++] ?? null,
@@ -191,14 +192,14 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
                   <div
                     key={idx}
                     className={`
-                      h-16 flex flex-col items-center justify-center border rounded-lg
-                      ${
-                        !day
-                          ? "bg-gray-50"
-                          : getDateCellColor(day.date, semester, year)
-                      }
-                      transition-colors duration-200
-                `}
+                h-16 flex flex-col items-center justify-center border rounded-lg
+                ${
+                  !isSameMonth(day!.date, currentMonth)
+                    ? "bg-gray-100 text-gray-400"
+                    : getDateCellColor(day!.date, semester, year)
+                }
+                transition-colors duration-200
+              `}
                   >
                     {/* Display the date and percentage */}
                     {day && (
