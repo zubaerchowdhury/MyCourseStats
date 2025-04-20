@@ -33,12 +33,6 @@ function App() {
                   >
                     About
                   </Link>
-                  <img
-                    src={UMLogo}
-                    alt="UM Logo"
-                    className="h-6 w-auto mr-2"
-                    style={{ height: "40px" }}
-                  />
                 </div>
               </div>
             </div>
