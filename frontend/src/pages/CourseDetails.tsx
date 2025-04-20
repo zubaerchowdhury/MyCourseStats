@@ -3,33 +3,55 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Calendar from "../components/Calendar";
 import { CourseSection } from "../types/CourseTypes";
+import { getSemesterDates } from "../data/SemesterDates";
 
 function CourseDetails() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [courseStats, setCourseStats] = useState<number[][]>([]);
+	const [courseSection, setCourseSection] = useState<CourseSection | null>(null);
+	const [sectionError, setSectionError] = useState<string | null>(null);
+	const [sectionLoading, setSectionLoading] = useState<boolean>(false);
+	const [calendarError, setCalendarError] = useState<string | null>(null);
+	const [calendarLoading, setCalendarLoading] = useState<boolean>(false);
   const location = useLocation();
   const section: CourseSection = location.state?.courseSection;
 
-	const searchParamsHasAllVars = (): boolean => {
-		return searchParams.has("semester") && searchParams.has("year") && searchParams.has("classNumber");
-	};
+  const searchParamsHasAllVars = (): boolean => {
+    return (
+      searchParams.has("semester") &&
+      searchParams.has("year") &&
+      searchParams.has("classNumber")
+    );
+  };
 
+	// Fetch the course section data
   useEffect(() => {
     const fetchEnrollmentRate = async () => {
-      if (!section && !searchParamsHasAllVars()) return;
+      if (!searchParamsHasAllVars()) return;
 
+			setCalendarLoading(true);
       try {
+				const semester = searchParams.get("semester");
+				const year = searchParams.get("year");
+				const classNumber = searchParams.get("classNumber");
+
+				// Fetch the enrollment rate data
+				// Use the semester and year to get the correct dates
+				const semesterDates = getSemesterDates(semester!, year!);
+				if (!semesterDates) {
+					throw new Error("Enrollment data not available for the selected semester and year.");
+				}
         const params = new URLSearchParams({
-          semester: searchParams.get("semester") || "",
-          year: searchParams.get("year") || "",
-          classNumber: section.classNumber.toString(),
-          startingDate: new Date().toISOString(),
-          numDays: "7",
+          semester: semester!,
+          year: year!,
+          classNumber: classNumber!,
+          startingDate: semesterDates!.enrollmentStartDate.toISOString(),
+          numDays: "30",
         });
 
         const response = await fetch(
-          `/api/stats/enrollment-rate?${params.toString()}`
+          `http://localhost:5184/api/stats/enrollment-rate?${params.toString()}`
         );
 
         if (!response.ok) {
@@ -45,11 +67,46 @@ function CourseDetails() {
       } catch (error) {
         console.error("Failed to fetch enrollment rate:", error);
         setCourseStats([]);
+				setCalendarError(error instanceof Error ? error.message : "Unknown error occurred");
       }
+			finally {
+				setCalendarLoading(false);
+			}
     };
 
     fetchEnrollmentRate();
-  }, [section]);
+  }, [searchParams]);
+
+	// Fetch the course section data if it is not already set
+	useEffect(() => {
+		const fetchCourseSection = async () => {
+			if (section) {
+				// If the section is already set, no need to fetch it again
+				setCourseSection(section);
+				return;
+			}
+
+			setSectionLoading(true);
+			try {
+				const response = await fetch(
+					`http://localhost:5184/api/Courses/course-search?${section.id}`
+				);
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+				setCourseSection(data);
+			} catch (error) {
+				console.error("Failed to fetch course section:", error);
+				setSectionError(error instanceof Error ? error.message : "Unknown error occurred");
+			} finally {
+				setSectionLoading(false);
+			}
+		};
+		fetchCourseSection();
+	}, [section]);
 
   const getEnrollmentDescription = (enrollmentProbability: number) => {
     if (enrollmentProbability >= 80 && enrollmentProbability <= 100) {
@@ -65,38 +122,37 @@ function CourseDetails() {
     }
   };
 
-  if (!section) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Course not found</h2>
-          <button
-            onClick={() => navigate("/search")}
-            className="mt-4 text-indigo-600 hover:text-indigo-800"
-          >
-            Return to search
-          </button>
-        </div>
+        {/*!section*/false ? (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Course not found
+            </h2>
+            <button
+              onClick={() => navigate("/search")}
+              className="mt-4 text-indigo-600 hover:text-indigo-800"
+            >
+              Return to search
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate("/search")}
+              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors mb-8"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              <span>Back to Search</span>
+            </button>
+
+            <div className="mt-8">
+              <Calendar courseStats={courseStats} />
+            </div>
+          </>
+        )}
       </div>
     );
-  }
-
-  // TODO: Remove mock UI components and render course section from transformedCourse
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors mb-8"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        <span>Back to Search</span>
-      </button>
-
-      <div className="mt-8">
-        <Calendar courseStats={courseStats} />
-      </div>
-    </div>
-  );
 }
 
 export default CourseDetails;

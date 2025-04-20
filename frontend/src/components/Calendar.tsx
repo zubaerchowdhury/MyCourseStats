@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import { getSemesterDates } from "../data/SemesterDates";
 import {
   format,
   startOfMonth,
@@ -37,17 +38,20 @@ interface CalendarProps {
 /* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
 const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   const [searchParams] = useSearchParams();
-  const semester = searchParams.get("semester");
-  const year = searchParams.get("year");
+  const semester = searchParams.get("semester") || "";
+  const year = searchParams.get("year") || "";
+  const semesterDates = getSemesterDates(semester, year);
 
   // Initialize currentMonth (0 index) based on searchParams
   const getInitialMonth = () => {
-    if (semester === "Spring" && year === "2025") {
-      return new Date(2024, 10);
-    } else if (semester === "Fall" && year === "2025") {
-      return new Date(2025, 2);
-    }
-    return new Date();
+    if (!semesterDates) return new Date();
+    return semesterDates.enrollmentStartDate;
+  };
+
+  const getColor = (value: number) => {
+    //value from 0 to 1
+    let hue = ((1 - value) * 120).toString(10);
+    return `hsl(${hue},100%,43%)`;
   };
 
   // Color the calendar cells based on the semester and year
@@ -83,9 +87,10 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   };
 
   const [currentMonth, setCurrentMonth] = useState(getInitialMonth());
-  const [calendarData, setCalendarData] = useState<[number[], number[]]>([
+  const [calendarData, setCalendarData] = useState<[number[], number[], number[]]>([
     [],
     [],
+		[],
   ]);
 
   const monthStr = format(currentMonth, "yyyy-MM");
@@ -97,7 +102,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 
   useEffect(() => {
     if (courseStats && courseStats.length >= 2) {
-      const [filledPercentages, changedPercentages] = courseStats;
+      const [filledPercentages, changedPercentages, averageWeeklyPercentageChanges] = courseStats;
 
       // For Spring 2025, start from November 4, 2024
       // For Fall 2025, start from March 31, 2025
@@ -108,14 +113,14 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
         startDate = new Date(2025, 2, 31); // March 31, 2025
       }
 
-      setCalendarData([filledPercentages, changedPercentages]);
+      setCalendarData([filledPercentages, changedPercentages, averageWeeklyPercentageChanges]);
     }
   }, [monthStr, courseStats, semester, year]);
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  const [cumulativeWeekly, dailyPercent] = calendarData;
+  const [dailyPercent, dailyChangePercent, cumulativeWeekly ] = calendarData;
 
   //const paddingDays = Array(getAdjustedDay(monthStart)).fill(null);
 
@@ -207,21 +212,16 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
                         <span className="font-semibold text-sm">
                           {format(day.date, "d")}
                         </span>
+                        {day.daily !== null ? (
                         <span
-                          className={`text-xs ${
-                            day.daily !== null
-                              ? day.daily > 70
-                                ? "text-green-600"
-                                : day.daily > 40
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                              : "text-gray-400"
-                          }`}
+                          className="text-xs font-medium" // Added font-medium for better visibility
+                          style={{ color: getColor(day.daily / 100) }} // Apply color via inline style
                         >
-                          {day.daily !== null
-                            ? `${day.daily.toFixed(1)}%`
-                            : "--"}
+                          {`${day.daily.toFixed(1)}%`}
                         </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">--</span>
+                      )}
                       </>
                     )}
                   </div>

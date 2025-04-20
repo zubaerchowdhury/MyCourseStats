@@ -1,4 +1,4 @@
-export interface SemesterDates {
+interface SemesterDates {
 	enrollmentStartDate: Date;
 	classesBeginDate: Date;
 	deadlineAddCourseDate: Date;
@@ -7,7 +7,7 @@ export interface SemesterDates {
 	classesEndDate: Date;
 }
 
-export const semesterDates: Record<string, SemesterDates> = {
+const semesterDates: Record<string, SemesterDates> = {
 	Spring2025: {
 		enrollmentStartDate: new Date("2024-11-04"),
 		classesBeginDate: new Date("2025-01-13"),
@@ -25,3 +25,8 @@ export const semesterDates: Record<string, SemesterDates> = {
 		classesEndDate: new Date("2025-12-02"),
 	},
 }
+
+export const getSemesterDates = (semester: string, year: string): SemesterDates | null => {
+	const semesterKey = `${semester}${year}`;
+	return semesterDates[semesterKey] || null;
+};
