@@ -31,6 +31,10 @@ export const theme = createTheme({
       main: "#5ce6e7",
     },
   },
+  typography: {
+    fontFamily:
+      'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
+  },
 });
 
 // --- Helper Functions ---
@@ -589,48 +593,66 @@ function SearchResults() {
                           <Grid container spacing={3}>
                             {/* Column 1: Information */}
                             <Grid size={{ xs: 12, md: 6 }}>
-                              <Typography
-                                variant="subtitle2"
-                                gutterBottom
-                                color="text.secondary"
+                              <Paper
+                                elevation={0}
+                                sx={{
+                                  p: 2,
+                                  bgcolor: "grey.195",
+                                  borderRadius: 2,
+                                  height: "100%",
+                                }}
                               >
-                                INFORMATION
-                              </Typography>
-                              <Grid container spacing={1}>
-                                <Grid size={{ xs: 4 }}>
-                                  <Typography
-                                    variant="body2"
-                                    fontWeight="medium"
-                                  >
-                                    Class Number:
-                                  </Typography>
+                                <Typography
+                                  variant="subtitle2"
+                                  gutterBottom
+                                  color="text.secondary"
+                                >
+                                  INFORMATION
+                                </Typography>
+                                <Grid container spacing={1}>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Class Number:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {section.classNumber}
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                    >
+                                      Session:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography variant="body2">
+                                      {section.session || "N/A"}
+                                    </Typography>
+                                  </Grid>
                                 </Grid>
-                                <Grid size={{ xs: 8 }}>
-                                  <Typography variant="body2">
-                                    {section.classNumber}
-                                  </Typography>
-                                </Grid>
-                                <Grid size={{ xs: 4 }}>
-                                  <Typography
-                                    variant="body2"
-                                    fontWeight="medium"
-                                  >
-                                    Session:
-                                  </Typography>
-                                </Grid>
-                                <Grid size={{ xs: 8 }}>
-                                  <Typography variant="body2">
-                                    {section.session || "N/A"}
-                                  </Typography>
-                                </Grid>
-                              </Grid>
+                              </Paper>
                             </Grid>
 
                             {/* Column 2: Details & Availability */}
                             <Grid size={{ xs: 12, md: 6 }}>
                               {/* Conditionally hide fields if multiple meetings */}
                               {!section.multipleMeetings && (
-                                <>
+                                <Paper
+                                elevation={0}
+                                sx={{
+                                  p: 2,
+                                  bgcolor: "grey.195",
+                                  borderRadius: 2,
+                                  height: "80%",
+                                }}
+                              >
                                   <Typography
                                     variant="subtitle2"
                                     gutterBottom
@@ -697,7 +719,7 @@ function SearchResults() {
                                       </Typography>
                                     </Grid>
                                   </Grid>
-                                </>
+                                  </Paper>
                               )}
 
                               {/* Action Buttons */}
@@ -709,7 +731,19 @@ function SearchResults() {
                                   gap: 1,
                                 }}
                               >
-                                <Button variant="outlined" size="small">
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  sx={{
+                                    height: 40,
+                                    px: 2,
+                                    py: 1,
+                                    borderRadius: "5px",
+                                    fontSize: "1.25 rem", // 18px
+                                    fontWeight: 450,
+                                    textTransform: "none",
+                                  }}
+                                >
                                   Past Instructors
                                 </Button>
                                 <Link
