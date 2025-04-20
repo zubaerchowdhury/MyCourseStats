@@ -752,8 +752,22 @@ function SearchResults() {
                                   target="_blank"
                                 >
                                   <Button
+                                    type="submit"
                                     variant="contained"
-                                    size="small"
+                                    sx={{
+                                      height: 40,
+                                      px: 2,
+                                      py: 1,
+                                      backgroundColor: "indigo.600",
+                                      color: "white",
+                                      borderRadius: "5px",
+                                      fontSize: "1.25 rem", // 18px
+                                      fontWeight: 450, // Thinner look
+                                      "&:hover": {
+                                        backgroundColor: "indigo.700",
+                                      },
+                                      textTransform: "none",
+                                    }}
                                   >
                                     View Enrollment Details
                                   </Button>
