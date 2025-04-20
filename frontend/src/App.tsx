@@ -5,7 +5,6 @@ import About from "./pages/About";
 import SearchResults from "./pages/SearchResults";
 import CourseDetails from "./pages/CourseDetails";
 import MCS_logo2 from "/Assets/MCS_logo2.png";
-import UMLogo from "/Assets/UM-Logo.png";
 
 function App() {
   return (
