@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, BookOpen } from "lucide-react"; // Keep lucide for specific icons if needed
 // MUI Imports
 import {
@@ -26,7 +26,6 @@ export const theme = createTheme({
   palette: {
     primary: {
       main: "#4F46E5",
-
     },
     secondary: {
       main: "#5ce6e7",
@@ -270,17 +269,14 @@ function SearchResults() {
     navigate("/");
   };
 
-  // Navigate to course details page with search params
-  // and pass the selected section as state
-  const handleViewDetailsPage = (section: CourseSection) => {
-    const params = new URLSearchParams();
-    params.append("semester", searchSemester);
-    params.append("year", searchYear?.toString() || "");
-    params.append("classNumber", section.classNumber.toString());
-    // Pass necessary state if the target page needs it immediately
-    navigate(`/course?${params.toString()}`, {
-      state: { courseSection: section },
+  // Function to get the course URL with search params
+  const getCourseURL = (section: CourseSection) => {
+    const params = new URLSearchParams({
+      semester: searchSemester,
+      year: searchYear?.toString() || "",
+      classNumber: section.classNumber.toString(),
     });
+    return `/course?${params.toString()}`;
   };
 
   // --- Render Logic ---
@@ -352,7 +348,14 @@ function SearchResults() {
               </div>
             </div>
           ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3, borderRadius: '16px' }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+                borderRadius: "16px",
+              }}
+            >
               {filteredCourses.map((course) => (
                 <Paper
                   key={`${course.subjectCode}-${course.catalogNumber}`}
@@ -367,7 +370,7 @@ function SearchResults() {
                       bgcolor: "white",
                       color: "grey.900",
                       borderTopLeftRadius: "4px",
-                      borderTopRightRadius: "4px"
+                      borderTopRightRadius: "4px",
                     }}
                   >
                     <Typography variant="h6" component="h2">
@@ -376,8 +379,7 @@ function SearchResults() {
                         variant="h6"
                         component="span"
                         //fontWeight="bold"
-                        color= "grey.700"
-                        
+                        color="grey.700"
                       >
                         {course.subjectCode} {course.catalogNumber}
                       </Typography>
@@ -710,13 +712,18 @@ function SearchResults() {
                                 <Button variant="outlined" size="small">
                                   Past Instructors
                                 </Button>
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() => handleViewDetailsPage(section)}
+                                <Link
+                                  to={getCourseURL(section)}
+                                  state={{ course: section }}
+                                  target="_blank"
                                 >
-                                  View Enrollment Details
-                                </Button>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                  >
+                                    View Enrollment Details
+                                  </Button>
+                                </Link>
                               </Box>
                             </Grid>
                           </Grid>
