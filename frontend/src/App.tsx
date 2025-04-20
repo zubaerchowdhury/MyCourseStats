@@ -5,6 +5,7 @@ import About from "./pages/About";
 import SearchResults from "./pages/SearchResults";
 import CourseDetails from "./pages/CourseDetails";
 import MCS_logo2 from "/Assets/MCS_logo2.png";
+import UMLogo from "/Assets/UM-Logo.png";
 
 function App() {
   return (
@@ -16,8 +17,12 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between h-16 items-center">
                 <div className="flex items-center">
-                <img src={MCS_logo2} alt="My Logo" style={{ height: '40px' }} />
-                <span className="ml-2 text-xl font-bold text-gray-900">
+                  <img
+                    src={MCS_logo2}
+                    alt="My Logo"
+                    style={{ height: "40px" }}
+                  />
+                  <span className="ml-2 text-xl font-bold text-gray-900">
                     MyCourseStats
                   </span>
                 </div>
@@ -28,6 +33,12 @@ function App() {
                   >
                     About
                   </Link>
+                  <img
+                    src={UMLogo}
+                    alt="UM Logo"
+                    className="h-6 w-auto mr-2"
+                    style={{ height: "40px" }}
+                  />
                 </div>
               </div>
             </div>
