@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 
 interface DropdownMultipleSelectProps {
-  onChange: (value: string) => void;
+  value?: string[];
+  onChange: (value: string[]) => void;
 }
 interface Option {
   value: string;
@@ -19,57 +20,67 @@ const daysOfWeek: Option[] = [
 ];
 
 const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
-  onChange
+  value = [],
+  onChange,
 }) => {
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>(value);
   const [isOpen, setIsOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  
+  useEffect(() => {
+    setSelectedDays(value);
+  }, [value]);
 
-  const handleOptionClick = (value: string) => {
-    if (selectedDays.includes(value)) {
-      setSelectedDays(selectedDays.filter((day) => day !== value));
+  const handleOptionClick = (day: string) => {
+    let newSelectedDays: string[];
+    if (selectedDays.includes(day)) {
+      newSelectedDays = selectedDays.filter((d) => d !== day);
     } else {
-      setSelectedDays([...selectedDays, value]);
+      newSelectedDays = [...selectedDays, day];
     }
+    setSelectedDays(newSelectedDays);
+    onChange(newSelectedDays); // Call onChange with full array
   };
 
+  // Update handleSelectAll too
   const handleSelectAll = () => {
+    let newSelectedDays: string[];
     if (selectedDays.length === daysOfWeek.length) {
-      setSelectedDays([]);
+      newSelectedDays = [];
     } else {
-      setSelectedDays(daysOfWeek.map((day) => day.value));
+      newSelectedDays = daysOfWeek.map((day) => day.value);
     }
+    setSelectedDays(newSelectedDays);
+    onChange(newSelectedDays); // Call onChange with full array
   };
 
   const allDaysSelected = selectedDays.length === daysOfWeek.length;
 
   // Handle click outside to close dropdown
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-          if (
-            dropdownRef.current &&
-            !dropdownRef.current.contains(event.target as Node)
-          ) {
-            setIsOpen(false);
-            setIsFocused(false);
-          }
-        };
-    
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
-        };
-      }, []);
-  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative flex-1" ref = {dropdownRef}>
+    <div className="relative flex-1" ref={dropdownRef}>
       <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
         Days
       </label>
@@ -87,7 +98,11 @@ const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
             : selectedDays.length === daysOfWeek.length
             ? "All days selected"
             : selectedDays
-                .map((day) => daysOfWeek.find((option) => option.value === day)?.label.substring(0, 3))
+                .map((day) =>
+                  daysOfWeek
+                    .find((option) => option.value === day)
+                    ?.label.substring(0, 3)
+                )
                 .join(", ")}
         </span>
         <svg
@@ -121,8 +136,7 @@ const DropdownMultipleSelect: React.FC<DropdownMultipleSelectProps> = ({
                   selectedDays.includes(day.value) ? "selected" : ""
                 }`}
                 onClick={() => {
-                  handleOptionClick(day.value)
-                  onChange(day.value);
+                  handleOptionClick(day.value);
                 }}
               >
                 <input

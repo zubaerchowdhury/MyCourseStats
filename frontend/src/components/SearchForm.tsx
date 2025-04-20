@@ -248,9 +248,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <div className="bg-gray-50 p-4 rounded-lg space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <MultiSelectDropdown
-                  onChange={(value) => setField("days", value)}
-                ></MultiSelectDropdown>
+              <MultiSelectDropdown
+                value={filters.days || []} // Pass the days array from filters
+                onChange={(values) => setField("days", values)} // Receive the full array
+              />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 pl-1">
