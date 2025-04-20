@@ -25,7 +25,8 @@ import { Course, CourseSection, CourseContainer } from "../types/CourseTypes";
 export const theme = createTheme({
   palette: {
     primary: {
-      main: "#3949ab",
+      main: "#4F46E5",
+
     },
     secondary: {
       main: "#5ce6e7",
@@ -351,11 +352,11 @@ function SearchResults() {
               </div>
             </div>
           ) : (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3, borderRadius: '16px' }}>
               {filteredCourses.map((course) => (
                 <Paper
                   key={`${course.subjectCode}-${course.catalogNumber}`}
-                  elevation={1}
+                  elevation={3}
                 >
                   {/* ... Course Header ... */}
                   <Box
@@ -363,8 +364,10 @@ function SearchResults() {
                       p: 2,
                       borderBottom: 1,
                       borderColor: "divider",
-                      bgcolor: "primary.main",
-                      color: "white",
+                      bgcolor: "white",
+                      color: "grey.900",
+                      borderTopLeftRadius: "4px",
+                      borderTopRightRadius: "4px"
                     }}
                   >
                     <Typography variant="h6" component="h2">
@@ -372,7 +375,9 @@ function SearchResults() {
                       <Typography
                         variant="h6"
                         component="span"
-                        fontWeight="bold"
+                        //fontWeight="bold"
+                        color= "grey.700"
+                        
                       >
                         {course.subjectCode} {course.catalogNumber}
                       </Typography>
