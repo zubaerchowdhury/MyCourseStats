@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import Calendar from "../components/Calendar";
-import { CourseSection } from "../types/CourseTypes";
+import { CourseSection, CourseContainer } from "../types/CourseTypes";
 import { getSemesterDates } from "../data/SemesterDates";
+import { differenceInCalendarDays } from "date-fns";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import { BookOpen } from "lucide-react";
 
 function CourseDetails() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [courseStats, setCourseStats] = useState<number[][]>([]);
   const [courseSection, setCourseSection] = useState<CourseSection | null>(
     null
@@ -50,7 +52,12 @@ function CourseDetails() {
           year: year!,
           classNumber: classNumber!,
           startingDate: semesterDates!.enrollmentStartDate.toISOString(),
-          numDays: "100",
+          numDays: (
+            differenceInCalendarDays(
+              semesterDates!.classesEndDate,
+              semesterDates!.enrollmentStartDate
+            ) + 1
+          ).toString(),
         });
 
         const response = await fetch(
@@ -90,18 +97,22 @@ function CourseDetails() {
         return;
       }
 
+      if (!searchParamsHasAllVars()) return;
+
       setSectionLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:5184/api/Courses/course-search?${section.id}`
+          `http://localhost:5184/api/Courses/course-search?${searchParams.toString()}`
         );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        setCourseSection(data);
+        const data: CourseContainer[] = await response.json();
+        const resultSection: CourseSection = (data[0].courseWithOneMeeting ||
+          data[0].courseWithMultipleMeetings)!;
+        setCourseSection(resultSection); // Assuming the first result is the desired course section
       } catch (error) {
         console.error("Failed to fetch course section:", error);
         setSectionError(
@@ -130,19 +141,64 @@ function CourseDetails() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {
-        /*!section*/ false ? (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Course not found
-            </h2>
+      {sectionLoading || calendarLoading ? (
+        // ... Loading indicator ...
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress size={60} />
+          <Typography sx={{ ml: 2, alignSelf: "center" }}>
+            Loading data...
+          </Typography>
+        </Box>
+      ) : !courseSection ? (
+        <div className="text-center py-16">
+          <div className="flex justify-center">
+            <BookOpen className="h-16 w-16 text-gray-400" />
           </div>
-        ) : (
-          <div className="mt-8">
-            <Calendar courseStats={courseStats} />
-          </div>
-        )
-      }
+          <h2 className="mt-4 text-2xl font-semibold text-gray-900">
+            No courses found
+          </h2>
+          <p className="mt-2 text-gray-600">
+            We couldn't find any courses matching your search criteria.
+          </p>
+        </div>
+      ) : (
+        <>
+          {sectionError ? (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {sectionError}
+            </Alert>
+          ) : (
+            <Box
+              sx={{
+                p: 2,
+                borderBottom: 1,
+                borderColor: "divider",
+                bgcolor: "white",
+                color: "grey.900",
+                borderTopLeftRadius: "4px",
+                borderTopRightRadius: "4px",
+              }}
+            >
+              <Typography variant="h6" component="h2">
+                {courseSection.name} |{" "}
+                <Typography variant="h6" component="span" color="grey.700">
+                  {courseSection.subjectCode} {courseSection.catalogNumber} -{" "}
+                  {courseSection.sectionCode} ({courseSection.classNumber})
+                </Typography>
+              </Typography>
+            </Box>
+          )}
+          {calendarError ? (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {calendarError}
+            </Alert>
+          ) : (
+            <div className="mt-8">
+              <Calendar courseStats={courseStats} />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
