@@ -10,7 +10,7 @@ function App() {
   return (
     <SearchProvider>
       <Router>
-        <div className="flex flex-col min-h-screen bg-white">
+        <div className="flex flex-col min-h-screen bg-gray-100">
           {/* Navigation */}
           <nav className="bg-white border-b">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

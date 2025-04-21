@@ -198,7 +198,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
             value={filters.subjectCode || ""}
             onChange={(value) => setField("subjectCode", value)}
             placeholder="Select or search for a subject"
-            className="flex-1"
           />
 
           <div className="relative flex-1">

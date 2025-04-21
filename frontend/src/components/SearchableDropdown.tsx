@@ -24,7 +24,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   placeholder = "Search...",
   label,
   required = false,
-  className = "",
   disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -136,7 +135,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         </label>
       )}
 
-      <div className={`relative ${className}`}>
+      <div className="relative">
         <input
           type="text"
           value={getDisplayValue()}
@@ -151,7 +150,6 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
             setSearchTerm("");
           }}
           onBlur={() => {
-            // Don't set isFocused to false immediately to allow click on dropdown items
             if (!isOpen) {
               setIsFocused(false);
               // If user didn't select anything, restore original value

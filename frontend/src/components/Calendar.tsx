@@ -167,24 +167,14 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
                     className="h-16 flex flex-col items-center justify-center border rounded-lg transition-colors duration-200"
                     style={{
                       backgroundColor: !isSameMonth(day!.date, currentMonth)
-                        ? "rgb(243,244,246)" // gray-100 for out-of-month
+                        ? "rgb(229,231,235)" // gray-200 for out-of-month
                         : isDateInSemester(semester, year, day!.date)
                         ? getSemesterColorByDate(semester, year, day!.date)
                         : "white",
                       color: !isSameMonth(day!.date, currentMonth)
-                        ? "rgb(156,163,175)" // gray-400 for out-of-month text
+                        ? "rgb(107,114,128)" // gray-500 for out-of-month text
                         : "black",
                     }}
-                    /*style={{ // Apply conditional styles directly
-											backgroundColor: day
-											? !isSameMonth(day.date, currentMonth)
-												? getSemesterColorByDate(semester, year, day.date) || 'rgb(243 244 246)' // gray-100 for out-of-month, unless specific semester color exists
-												: getSemesterColorByDate(semester, year, day.date) || 'white' // Specific semester color or white for in-month days
-											: undefined, // Handle null case if necessary
-											color: day && !isSameMonth(day.date, currentMonth)
-											? 'rgb(156 163 175)' // gray-400 for out-of-month text
-											: undefined, // Default text color otherwise
-										}}*/
                   >
                     {/* Display the date and percentage */}
                     {day && (
@@ -208,8 +198,8 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
                     )}
                   </div>
                 ))}
-                <div className="h-16 flex flex-col items-center justify-center border rounded-lg bg-blue-50">
-                  <span className="text-blue-600 text-xs font-bold">
+                <div className="h-16 flex flex-col items-center justify-center border rounded-lg bg-blue-100">
+                  <span className="text-blue-700 text-xs font-bold">
                     {week.cumulative !== null
                       ? week.cumulative >= 0
                         ? `+${week.cumulative.toFixed(1)}%`

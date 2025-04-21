@@ -28,7 +28,7 @@ export const theme = createTheme({
       main: "#4F46E5",
     },
     secondary: {
-      main: "#5ce6e7",
+      main: "#E1ECFB",
     },
   },
   typography: {
@@ -301,7 +301,7 @@ function SearchResults() {
           <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
           </div>
-          <Paper elevation={2} sx={{ p: 3 }}>
+          <Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
             {/* Search Form Wrapper */}
             <SearchForm onSearch={fetchCourses} />
           </Paper>
@@ -371,7 +371,7 @@ function SearchResults() {
                       p: 2,
                       borderBottom: 1,
                       borderColor: "divider",
-                      bgcolor: "white",
+                      bgcolor: "secondary.main",
                       color: "grey.900",
                       borderTopLeftRadius: "4px",
                       borderTopRightRadius: "4px",
@@ -382,7 +382,6 @@ function SearchResults() {
                       <Typography
                         variant="h6"
                         component="span"
-                        //fontWeight="bold"
                         color="grey.700"
                       >
                         {course.subjectCode} {course.catalogNumber}
@@ -391,7 +390,7 @@ function SearchResults() {
                   </Box>
 
                   <Box>
-                    {/* Optional: Header Row for Sections */}
+                    {/* Header Row for Sections */}
                     <Grid
                       container
                       spacing={1}
@@ -484,7 +483,7 @@ function SearchResults() {
                         </AccordionSummary>
 
                         {/* --- Accordion Details --- */}
-                        <AccordionDetails sx={{ bgcolor: "grey.50", p: 3 }}>
+                        <AccordionDetails sx={{ bgcolor: "grey.100", p: 3 }}>
                           {/* === Multiple Meeting Pattern Section (Conditional) === */}
                           {section.multipleMeetings &&
                             Array.isArray(section.startDate) && (
@@ -597,7 +596,7 @@ function SearchResults() {
                                 elevation={0}
                                 sx={{
                                   p: 2,
-                                  bgcolor: "grey.195",
+                                  bgcolor: "grey.200",
                                   borderRadius: 2,
                                   height: "100%",
                                 }}
@@ -645,14 +644,14 @@ function SearchResults() {
                               {/* Conditionally hide fields if multiple meetings */}
                               {!section.multipleMeetings && (
                                 <Paper
-                                elevation={0}
-                                sx={{
-                                  p: 2,
-                                  bgcolor: "grey.195",
-                                  borderRadius: 2,
-                                  height: "80%",
-                                }}
-                              >
+                                  elevation={0}
+                                  sx={{
+                                    p: 2,
+                                    bgcolor: "grey.200",
+                                    borderRadius: 2,
+                                    height: "100%",
+                                  }}
+                                >
                                   <Typography
                                     variant="subtitle2"
                                     gutterBottom
@@ -719,60 +718,44 @@ function SearchResults() {
                                       </Typography>
                                     </Grid>
                                   </Grid>
-                                  </Paper>
-                              )}
-
-                              {/* Action Buttons */}
-                              <Box
-                                sx={{
-                                  mt: 2,
-                                  display: "flex",
-                                  justifyContent: "flex-end",
-                                  gap: 1,
-                                }}
-                              >
-                                <Button
-                                  variant="outlined"
-                                  size="small"
-                                  sx={{
-                                    height: 40,
-                                    px: 2,
-                                    py: 1,
-                                    borderRadius: "5px",
-                                    fontSize: "1.25 rem", // 18px
-                                    fontWeight: 450,
-                                    textTransform: "none",
-                                  }}
-                                >
-                                  Past Instructors
-                                </Button>
-                                <Link
-                                  to={getCourseURL(section)}
-                                  state={{ course: section }}
-                                  target="_blank"
-                                >
-                                  <Button
-                                    type="submit"
-                                    variant="contained"
+                                  {/* Action Buttons */}
+                                  <Box
                                     sx={{
-                                      height: 40,
-                                      px: 2,
-                                      py: 1,
-                                      backgroundColor: "indigo.600",
-                                      color: "white",
-                                      borderRadius: "5px",
-                                      fontSize: "1.25 rem", // 18px
-                                      fontWeight: 450, // Thinner look
-                                      "&:hover": {
-                                        backgroundColor: "indigo.700",
-                                      },
-                                      textTransform: "none",
+                                      mt: 2,
+                                      display: "flex",
+                                      justifyContent: "flex-end",
+                                      gap: 1,
                                     }}
                                   >
-                                    View Enrollment Details
-                                  </Button>
-                                </Link>
-                              </Box>
+                                    <Link
+                                      to={getCourseURL(section)}
+                                      state={{ course: section }}
+                                      target="_blank"
+                                    >
+                                      <Button
+                                        type="submit"
+                                        variant="contained"
+                                        sx={{
+                                          height: 40,
+                                          px: 2,
+                                          py: 1,
+                                          backgroundColor: "indigo.600",
+                                          color: "white",
+                                          borderRadius: "5px",
+                                          fontSize: "1.25 rem", // 18px
+                                          fontWeight: 450, // Thinner look
+                                          "&:hover": {
+                                            backgroundColor: "indigo.700",
+                                          },
+                                          textTransform: "none",
+                                        }}
+                                      >
+                                        View Enrollment Details
+                                      </Button>
+                                    </Link>
+                                  </Box>
+                                </Paper>
+                              )}
                             </Grid>
                           </Grid>
                         </AccordionDetails>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import Calendar from "../components/Calendar";
 import { CourseSection, CourseContainer } from "../types/CourseTypes";
 import { getSemesterDates } from "../data/SemesterDates";
