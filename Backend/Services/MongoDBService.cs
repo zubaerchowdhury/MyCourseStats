@@ -181,7 +181,7 @@ public class MongoDBService
         return await _subjectsCollection.Find(filter).Sort(sort).ToListAsync();
     }
 
-    public async Task<List<CourseContainer>> CourseSearch(string semester, int year, string subjectCode,
+    public async Task<List<CourseContainer>> CourseSearch(string semester, int year, string? subjectCode = null,
         string? catalogNumber = null, string? name = null,
         List<string>? days = null, DateTime? startDate = null,
         DateTime? endDate = null, string? instructor = null, int? classNumber = null
@@ -189,7 +189,11 @@ public class MongoDBService
     {
         var filterBuilder = Builders<BsonDocument>.Filter;
         var filter = filterBuilder.And(filterBuilder.Eq("semester", semester), filterBuilder.Eq("year", year));
-        filter &= filterBuilder.Eq("subjectCode", subjectCode);
+        
+        if (!string.IsNullOrEmpty(subjectCode))
+        {
+            filter &= filterBuilder.Eq("subjectCode", subjectCode);
+        }
 
         if (!string.IsNullOrEmpty(catalogNumber))
         {

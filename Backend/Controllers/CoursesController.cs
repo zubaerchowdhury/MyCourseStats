@@ -88,18 +88,24 @@ public class CoursesController : ControllerBase
     /// <param name="startDate">start date greater than or equal to</param>
     /// <param name="endDate">end date less than or equal to</param>
     /// <param name="instructor">instructor full name</param>
+    /// <param name="classNumber"></param>
     /// <returns>A list of courses containers in which it will either be a course with one or multiple meetings</returns>
     [HttpGet("course-search")]
     public async Task<IActionResult> CourseSearch([FromQuery] string semester, [FromQuery] int year,
-        [FromQuery] string subjectCode,
+        [FromQuery] string? subjectCode = null, [FromQuery] int? classNumber = null,
         [FromQuery] string? catalogNumber = null, [FromQuery] string? name = null,
         [FromQuery] List<string>? days = null, [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null, [FromQuery] string? instructor = null, [FromQuery] int? classNumber = null
+        [FromQuery] DateTime? endDate = null, [FromQuery] string? instructor = null
     )
     {
-        if (string.IsNullOrEmpty(subjectCode) || string.IsNullOrEmpty(semester) || year == 0)
+        if (string.IsNullOrEmpty(semester) || year == 0)
         {
-            return BadRequest("Please provide semester, year, and subject code.");
+            return BadRequest("Please provide a semester and year.");
+        }
+
+        if (string.IsNullOrEmpty(subjectCode) && classNumber is null or <= 0)
+        {
+            return BadRequest("Please provide a subject code or class number.");
         }
 
         try
