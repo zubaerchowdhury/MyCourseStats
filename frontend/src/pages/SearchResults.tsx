@@ -162,22 +162,22 @@ function SearchResults() {
     setLoading(true);
     setError(null);
     setCurrentSearchVars(
-      searchParams.get("semester") || filters.semester || "",
-      parseInt(searchParams.get("year") || filters.year?.toString() || "")
+      filters.semester || searchParams.get("semester") || "",
+      filters.year || parseInt(searchParams.get("year") || "")
     );
 
     try {
       let paramsString: string;
-      if (
+      if (filters.semester && filters.year && filters.subjectCode) {
+        paramsString = new URLSearchParams(
+          getSearchFiltersStrings(filters)
+        ).toString();
+      } else if (
         searchParams.has("semester") &&
         searchParams.has("year") &&
         searchParams.has("subjectCode")
       ) {
         paramsString = searchParams.toString();
-      } else if (filters.semester && filters.year && filters.subjectCode) {
-        paramsString = new URLSearchParams(
-          getSearchFiltersStrings(filters)
-        ).toString();
       } else if (searchParams.size > 0) {
         throw new Error("URL parameters are missing required fields");
       } else {
