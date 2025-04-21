@@ -26,13 +26,13 @@ public class StatsService
 				
 				DateTime prevDay = new DateTime();
 				
-				void CalculateAverageWeeklyPercentageChange()
+				void CalculateAverageWeeklyPercentageChange(int numDaysInCalulation)
 				{
-						if (filledPercentages.Count % 7 == 0)
-						{
-								double weeklyAverage = filledPercentages.Skip(filledPercentages.Count - 7).Average();
-								averageWeeklyPercentageChanges.Add(weeklyAverage);
-						}
+						if (filledPercentages.Count % numDaysInCalulation != 0) return;
+
+						// Calculate the average of the last 7 days
+						double weeklyAverage = changedPercentages.Skip(changedPercentages.Count - numDaysInCalulation).Average();
+						averageWeeklyPercentageChanges.Add(weeklyAverage);
 				}
 
 				for (int i = 0; i < courseStats.Count; i++) 
@@ -75,7 +75,7 @@ public class StatsService
 								changedPercentages.Add(change);
 						}
 						
-						CalculateAverageWeeklyPercentageChange();
+						CalculateAverageWeeklyPercentageChange(changedPercentages.Count < 7 ? 6 : 7);
 
 						prevDay = dateTimeRetrieved;
 				}
@@ -88,15 +88,16 @@ public class StatsService
 						{
 								filledPercentages.Add(filledPercentages[^1]);
 								changedPercentages.Add(0);
-								CalculateAverageWeeklyPercentageChange();
+								CalculateAverageWeeklyPercentageChange(changedPercentages.Count < 7 ? 6 : 7);
 						}
 				}
 				
 				// Fill in final weekly average if necessary
-				if (filledPercentages.Count % 7 != 0)
+				int numDaysInCalulation = changedPercentages.Count < 7 ? 6 : 7;
+				if (changedPercentages.Count % numDaysInCalulation != 0)
 				{
-						int remainingDays = filledPercentages.Count % 7;
-						double weeklyAverage = filledPercentages.Skip(filledPercentages.Count - remainingDays).Average();
+						int remainingDays = changedPercentages.Count % numDaysInCalulation;
+						double weeklyAverage = changedPercentages.Skip(changedPercentages.Count - remainingDays).Average();
 						averageWeeklyPercentageChanges.Add(weeklyAverage);
 				}
 				
