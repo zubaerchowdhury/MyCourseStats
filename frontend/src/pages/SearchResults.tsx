@@ -38,61 +38,60 @@ export const theme = createTheme({
 });
 
 // --- Helper Functions ---
+const timeFormatOptions: Intl.DateTimeFormatOptions = {
+	hour: "numeric",
+	minute: "2-digit",
+	timeZone: "UTC",
+};
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
+	month: "2-digit",
+	day: "2-digit",
+	timeZone: "UTC",
+};
 // Add a helper for single time formatting (used in multiple meetings table)
 const formatSingleTime = (date: Date | undefined): string => {
-  if (!date) return "TBA";
-  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+	if (!date) return "TBA";
+	return date.toLocaleTimeString([], timeFormatOptions);
 };
 // Add a helper for single date range formatting (used in multiple meetings table)
 const formatSingleDateRange = (
-  start: Date | undefined,
-  end: Date | undefined
+	start: Date | undefined,
+	end: Date | undefined
 ): string => {
-  if (!start || !end) return "TBA";
-  const options: Intl.DateTimeFormatOptions = {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  };
-  return `${start.toLocaleDateString(
-    undefined,
-    options
-  )} - ${end.toLocaleDateString(undefined, options)}`;
+	if (!start || !end) return "TBA";
+	
+	return `${start.toLocaleDateString(
+		undefined,
+		dateFormatOptions
+	)} - ${end.toLocaleDateString(undefined, dateFormatOptions)}`;
 };
 // Modify formatTime to handle array case differently if needed in summary
 const formatTime = (date: Date | Date[] | undefined): string => {
-  if (!date) return "TBA";
-  if (Array.isArray(date)) return "Multiple"; // Keep summary simple
-  return (date as Date).toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+	if (!date) return "TBA";
+	if (Array.isArray(date)) return "Multiple"; // Keep summary simple
+	return (date as Date).toLocaleTimeString([], timeFormatOptions);
 };
 // Modify formatTimeRange for summary
 // This function is used to format the time range for the summary
 const formatTimeRange = (
-  start: Date | Date[] | undefined,
-  end: Date | Date[] | undefined
+	start: Date | Date[] | undefined,
+	end: Date | Date[] | undefined
 ): string => {
-  if (!start || !end) return "TBA";
-  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
-  return `${formatTime(start)} - ${formatTime(end)}`;
+	if (!start || !end) return "TBA";
+	if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+	
+	return `${formatTime(start)} - ${formatTime(end)}`;
 };
 // Modify formatDateRange for summary
 const formatDateRange = (
-  start: Date | Date[] | undefined,
-  end: Date | Date[] | undefined
+	start: Date | Date[] | undefined,
+	end: Date | Date[] | undefined
 ): string => {
-  if (!start || !end) return "TBA";
-  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
-  const options: Intl.DateTimeFormatOptions = {
-    month: "2-digit",
-    day: "2-digit",
-    year: "numeric",
-  };
-  return `${(start as Date).toLocaleDateString(undefined, options)} - ${(
-    end as Date
-  ).toLocaleDateString(undefined, options)}`;
+	if (!start || !end) return "TBA";
+	if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+	return `${(start as Date).toLocaleDateString(undefined, dateFormatOptions)} - ${(
+		end as Date
+	).toLocaleDateString(undefined, dateFormatOptions)}`;
 };
 // Modify formatInstructors for summary
 const formatInstructors = (
