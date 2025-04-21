@@ -4,7 +4,7 @@ import Calendar from "../components/Calendar";
 import { CourseSection, CourseContainer } from "../types/CourseTypes";
 import { getSemesterDates } from "../data/SemesterDates";
 import { differenceInCalendarDays } from "date-fns";
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { BookOpen } from "lucide-react";
 
 function CourseDetails() {
@@ -13,10 +13,13 @@ function CourseDetails() {
   const [courseSection, setCourseSection] = useState<CourseSection | null>(
     null
   );
+  const [pastInstructors, setPastInstructors] = useState<string[]>([]);
   const [sectionError, setSectionError] = useState<string | null>(null);
   const [sectionLoading, setSectionLoading] = useState<boolean>(false);
   const [calendarError, setCalendarError] = useState<string | null>(null);
   const [calendarLoading, setCalendarLoading] = useState<boolean>(false);
+  const [instructorsError, setInstructorsError] = useState<string | null>(null);
+  const [instructorsLoading, setInstructorsLoading] = useState<boolean>(false);
   const location = useLocation();
   const section: CourseSection = location.state?.courseSection;
 
@@ -65,7 +68,15 @@ function CourseDetails() {
         );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          if (response.status >= 500) {
+            throw new Error(
+              "Server error when fetching enrollment rate. Please try again later."
+            );
+          }
+          if (response.status === 404) {
+            return;
+          }
+          throw new Error("Failed to fetch enrollment rate data.");
         }
 
         const data = await response.json();
@@ -75,7 +86,6 @@ function CourseDetails() {
         const stats: number[][] = data;
         setCourseStats(stats);
       } catch (error) {
-        console.error("Failed to fetch enrollment rate:", error);
         setCourseStats([]);
         setCalendarError(
           error instanceof Error ? error.message : "Unknown error occurred"
@@ -106,7 +116,15 @@ function CourseDetails() {
         );
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          if (response.status >= 500) {
+            throw new Error(
+              "Server error when fetching course section. Please try again later."
+            );
+          }
+          if (response.status === 404) {
+            return;
+          }
+          throw new Error("Failed to fetch course section data.");
         }
 
         const data: CourseContainer[] = await response.json();
@@ -114,7 +132,6 @@ function CourseDetails() {
           data[0].courseWithMultipleMeetings)!;
         setCourseSection(resultSection); // Assuming the first result is the desired course section
       } catch (error) {
-        console.error("Failed to fetch course section:", error);
         setSectionError(
           error instanceof Error ? error.message : "Unknown error occurred"
         );
@@ -124,6 +141,43 @@ function CourseDetails() {
     };
     fetchCourseSection();
   }, [section]);
+
+  // Fetch the past instructors data
+  useEffect(() => {
+    const fetchPastInstructors = async () => {
+      if (!courseSection) return;
+      setInstructorsLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5184/api/Courses/historical-instructors?${new URLSearchParams(
+            {
+              subjectCode: courseSection.subjectCode,
+              catalogNumber: courseSection.catalogNumber,
+            }
+          ).toString()}`
+        );
+
+        if (!response.ok) {
+          if (response.status >= 500) {
+            throw new Error(
+              "Server error when fetching past instructors. Please try again later."
+            );
+          }
+          throw new Error("Failed to fetch past instructors data.");
+        }
+
+        const data: string[] = await response.json();
+        setPastInstructors(data);
+      } catch (error) {
+        setInstructorsError(
+          error instanceof Error ? error.message : "Unknown error occurred"
+        );
+      } finally {
+        setInstructorsLoading(false);
+      }
+    };
+    fetchPastInstructors();
+  }, [courseSection]);
 
   const getEnrollmentDescription = (enrollmentProbability: number) => {
     if (enrollmentProbability >= 80 && enrollmentProbability <= 100) {
@@ -141,7 +195,7 @@ function CourseDetails() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {sectionLoading || calendarLoading ? (
+      {sectionLoading || calendarLoading || instructorsLoading ? (
         // ... Loading indicator ...
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress size={60} />
@@ -149,7 +203,7 @@ function CourseDetails() {
             Loading data...
           </Typography>
         </Box>
-      ) : !courseSection ? (
+      ) : !courseSection && !sectionError && !calendarError ? (
         <div className="text-center py-16">
           <div className="flex justify-center">
             <BookOpen className="h-16 w-16 text-gray-400" />
@@ -168,25 +222,27 @@ function CourseDetails() {
               {sectionError}
             </Alert>
           ) : (
-            <Box
-              sx={{
-                p: 2,
-                borderBottom: 1,
-                borderColor: "divider",
-                bgcolor: "white",
-                color: "grey.900",
-                borderTopLeftRadius: "4px",
-                borderTopRightRadius: "4px",
-              }}
-            >
-              <Typography variant="h6" component="h2">
-                {courseSection.name} |{" "}
-                <Typography variant="h6" component="span" color="grey.700">
-                  {courseSection.subjectCode} {courseSection.catalogNumber} -{" "}
-                  {courseSection.sectionCode} ({courseSection.classNumber})
+            courseSection && (
+              <Box
+                sx={{
+                  p: 2,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  bgcolor: "white",
+                  color: "grey.900",
+                  borderTopLeftRadius: "4px",
+                  borderTopRightRadius: "4px",
+                }}
+              >
+                <Typography variant="h6" component="h2">
+                  {courseSection.name} |{" "}
+                  <Typography variant="h6" component="span" color="grey.700">
+                    {courseSection.subjectCode} {courseSection.catalogNumber} -{" "}
+                    {courseSection.sectionCode} ({courseSection.classNumber})
+                  </Typography>
                 </Typography>
-              </Typography>
-            </Box>
+              </Box>
+            )
           )}
           {calendarError ? (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -196,6 +252,34 @@ function CourseDetails() {
             <div className="mt-8">
               <Calendar courseStats={courseStats} />
             </div>
+          )}
+          {instructorsError ? (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {instructorsError}
+            </Alert>
+          ) : (
+            <>
+              <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Past Instructors
+                </h1>
+              </div>
+								<Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
+								{pastInstructors.length > 0 ? (
+									<ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-2 list-none p-0 m-0">
+									{pastInstructors.map((instructor, index) => (
+										<li key={index} className="text-gray-700">
+										{instructor}
+										</li>
+									))}
+									</ul>
+								) : (
+									<Typography variant="body1" color="text.secondary">
+									No past instructors available for this course.
+									</Typography>
+								)}
+								</Paper>
+            </>
           )}
         </>
       )}
