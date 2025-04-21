@@ -51,6 +51,7 @@ public class StatsService
 						double filled = isNextDay ? 
 								(double)(capacity - seatsAvailable) / capacity * 100 :
 								filledPercentages[^1];
+						filled = Math.Max(filled, 0); // Ensure filled percentage is not negative
 
 						// Check for duplicate entries
 						// If the date is the same as the previous entry, update the last entry
