@@ -181,7 +181,6 @@ function SearchResults() {
         throw new Error("URL parameters are missing required fields");
       } else {
         setFilteredCourses([]);
-        setLoading(false);
         return;
       }
       const baseUrl = "http://localhost:5184/api/Courses/course-search";
