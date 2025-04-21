@@ -13,11 +13,14 @@ import {
   endOfMonth,
   eachDayOfInterval,
   getDay,
+	addDays,
   addMonths,
   subMonths,
   startOfWeek,
   endOfWeek,
   isSameMonth,
+	differenceInCalendarDays, 
+	differenceInCalendarWeeks,
 } from "date-fns";
 
 // adjusted getDay function to convert Sunday (0) to 6
@@ -42,77 +45,121 @@ interface CalendarProps {
 
 /* Calendar for displaying enrollment percetages for a month with a added column rightmost for cumulative enrollment for the week */
 const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
-  const [searchParams] = useSearchParams();
-  const semester = searchParams.get("semester") || "";
-  const year = searchParams.get("year") || "";
-  const semesterDates = getSemesterDates(semester, year);
+	const [searchParams] = useSearchParams();
+	const semester = searchParams.get("semester") || "";
+	const year = searchParams.get("year") || "";
+	const semesterDates = getSemesterDates(semester, year);
 
-  // Initialize currentMonth (0 index) based on searchParams
-  const getInitialMonth = () => {
-    if (!semesterDates) return new Date();
-    return semesterDates.enrollmentStartDate;
-  };
+	// Initialize currentMonth (0 index) based on searchParams or default
+	const getInitialMonth = () => {
+		if (!semesterDates) return new Date(); // Default to current date if no semester info
+		// Start view from the month of the enrollment start date
+		return startOfMonth(semesterDates.enrollmentStartDate);
+	};
 
-  const getColorForPercentage = (value: number) => {
-    //value from 0 to 1
-    let hue = ((1 - value) * 120).toString(10);
-    return `hsl(${hue},100%,32%)`;
-  };
+	const getColorForPercentage = (value: number) => {
+		//value from 0 to 1
+		let hue = ((1 - value) * 120).toString(10);
+		return `hsl(${hue},100%,32%)`;
+	};
 
-  const [currentMonth, setCurrentMonth] = useState(getInitialMonth());
-  const [calendarData, setCalendarData] = useState<
-    [number[], number[], number[]]
-  >([[], [], []]);
+	const [currentMonth, setCurrentMonth] = useState(getInitialMonth());
+	// Keep the raw courseStats data
+	const [rawCourseStats, setRawCourseStats] = useState<number[][] | null>(null);
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start from Monday
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End on Sunday
-  const allDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+	// Date helpers from date-fns
 
-  useEffect(() => {
-    if (courseStats && courseStats.length >= 2) {
-      const [
-        filledPercentages,
-        changedPercentages,
-        averageWeeklyPercentageChanges,
-      ] = courseStats;
-      setCalendarData([
-        filledPercentages,
-        changedPercentages,
-        averageWeeklyPercentageChanges,
-      ]);
-    }
-  }, [currentMonth, courseStats]);
+	useEffect(() => {
+		// Update rawCourseStats when courseStats prop changes
+		if (courseStats && courseStats.length >= 3) {
+				setRawCourseStats(courseStats);
+		} else {
+				setRawCourseStats(null); // Reset if data is invalid
+		}
+		// Recalculate initial month if semester/year changes (via searchParams)
+		setCurrentMonth(getInitialMonth());
+	}, [courseStats, semester, year]); // Depend on courseStats and params
 
-  const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+	const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+	const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  const [dailyPercent, dailyChangePercent, cumulativeWeekly] = calendarData;
+	// Prepare calendar grid data within the component body, reacting to state changes
+	const monthStart = startOfMonth(currentMonth);
+	const monthEnd = endOfMonth(currentMonth);
+	const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start grid on Monday
+	const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 }); // End grid on Sunday
+	const allDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
-  //const paddingDays = Array(getAdjustedDay(monthStart)).fill(null);
+	const weeks: Week[] = [];
+	if (rawCourseStats && semesterDates) {
+		const [
+			filledPercentages, // Daily data
+			_dailyChangePercent, // Not used in this logic directly for daily display. Assuming filledPercentages is needed.
+			averageWeeklyPercentageChanges, // Weekly cumulative data
+		] = rawCourseStats;
 
-  const weeks: Week[] = [];
-  let currentWeek: (CalendarDay | null)[] = [];
-  let cumulativeIndex = 0;
+		const { enrollmentStartDate, classesEndDate } = semesterDates;
+		const endDatePlusOne = addDays(classesEndDate, 1); // Include the last day of classes
+		const startWeekOfSemester = startOfWeek(enrollmentStartDate, { weekStartsOn: 1 });
 
-  //paddingDays.forEach(() => currentWeek.push(null));
+		let currentWeekDays: (CalendarDay | null)[] = [];
 
-  allDays.forEach((date, i) => {
-    currentWeek.push({
-      date,
-      daily: dailyPercent[i] ?? null,
-    });
+		allDays.forEach((date, index) => {
+			let dailyValue: number | null = null;
 
-    if (getAdjustedDay(date) === 6 || i === allDays.length - 1) {
-      // Fill remaining days in last week
-      weeks.push({
-        days: currentWeek,
-        cumulative: cumulativeWeekly[cumulativeIndex++] ?? null,
-      });
-      currentWeek = [];
-    }
-  });
+			// Check if the date is within the valid semester range
+			if (date >= enrollmentStartDate && date <= endDatePlusOne) {
+				const dayIndex = differenceInCalendarDays(date, enrollmentStartDate)-1;
+				if (dayIndex >= 0 && dayIndex < filledPercentages.length) {
+					dailyValue = filledPercentages[dayIndex];
+				}
+			}
+
+			currentWeekDays.push({
+				date,
+				daily: dailyValue,
+			});
+
+			// If it's Sunday (end of the week in our grid) or the last day overall
+			if (getAdjustedDay(date) === 6 || index === allDays.length - 1) {
+				let cumulativeValue: number | null = null;
+				const startOfWeekForCalc = startOfWeek(date, { weekStartsOn: 1 });
+
+				// Check if this week overlaps with the semester's active weeks
+				// A week is relevant if its start is on or after the semester's start week
+				// and it contains days within the enrollment-to-class-end period.
+				const isWeekRelevant = currentWeekDays.some(d => d && d.date >= enrollmentStartDate && d.date <= classesEndDate);
+
+				if (isWeekRelevant && startOfWeekForCalc >= startWeekOfSemester) {
+					 const weekIndex = differenceInCalendarWeeks(
+								startOfWeekForCalc,
+								startWeekOfSemester,
+								{ weekStartsOn: 1 }
+						);
+
+						if (weekIndex >= 0 && weekIndex < averageWeeklyPercentageChanges.length) {
+								cumulativeValue = averageWeeklyPercentageChanges[weekIndex];
+						}
+				}
+
+				weeks.push({
+					days: [...currentWeekDays], // Push a copy
+					cumulative: cumulativeValue,
+				});
+				currentWeekDays = []; // Reset for the next week
+			}
+		});
+	} else {
+		 // Handle case where data is not available - generate empty weeks structure
+		 let currentWeekDays: (CalendarDay | null)[] = [];
+		 allDays.forEach((date, index) => {
+				currentWeekDays.push({ date, daily: null });
+				if (getAdjustedDay(date) === 6 || index === allDays.length - 1) {
+						weeks.push({ days: [...currentWeekDays], cumulative: null });
+						currentWeekDays = [];
+				}
+		 });
+	}
 
   return (
     <div className="w-full max-w-3xl mx-auto p-4">
