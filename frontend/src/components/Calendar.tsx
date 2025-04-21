@@ -95,7 +95,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 		const [
 			filledPercentages, // Daily data
 			_dailyChangePercent, // Not used in this logic directly for daily display. Assuming filledPercentages is needed.
-			averageWeeklyPercentageChanges, // Weekly cumulative data
+			totalWeeklyPercentageChanges, // Weekly cumulative data
 		] = rawCourseStats;
 
 		const { enrollmentStartDate, classesEndDate } = semesterDates;
@@ -135,10 +135,10 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 								startOfWeekForCalc,
 								startWeekOfSemester,
 								{ weekStartsOn: 1 }
-						);
+						)-1;
 
-						if (weekIndex >= 0 && weekIndex < averageWeeklyPercentageChanges.length) {
-								cumulativeValue = averageWeeklyPercentageChanges[weekIndex];
+						if (weekIndex >= 0 && weekIndex < totalWeeklyPercentageChanges.length) {
+								cumulativeValue = totalWeeklyPercentageChanges[weekIndex];
 						}
 				}
 
@@ -186,7 +186,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
           </div>
 
           <div className="grid grid-cols-8 text-center text-sm font-semibold mb-2">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Average %/Day"].map(
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Weekly Change"].map(
               (day) => (
                 <div
                   key={day}

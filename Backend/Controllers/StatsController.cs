@@ -26,7 +26,7 @@ namespace Backend.Controllers
         /// <param name="classNumber">Course class number</param>
         /// <param name="startingDate">Date to start enrollment data from (must be a Monday for weekly averages to work correctly)</param>
         /// <param name="numDays">Numbers of days to get enrollment data for</param>
-        /// <returns>List of lists [ filledPercentages, changedPercentages, averageWeeklyPercentageChanges (averages exactly every 7 days without checking date) ]</returns>
+        /// <returns>List of lists [ filledPercentages, changedPercentages, totalWeeklyPercentageChanges (averages exactly every 7 days without checking date) ]</returns>
         // TESTING: http://localhost:5184/api/stats/enrollment-rate?semester=Spring&year=2025&classNumber=6273
         [HttpGet("enrollment-rate")]
         public async Task<IActionResult> GetEnrollmentRate([FromQuery] string semester, [FromQuery] string year, [FromQuery] string classNumber, [FromQuery] DateTime startingDate, [FromQuery] int numDays)
