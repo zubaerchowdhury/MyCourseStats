@@ -39,59 +39,60 @@ export const theme = createTheme({
 
 // --- Helper Functions ---
 const timeFormatOptions: Intl.DateTimeFormatOptions = {
-	hour: "numeric",
-	minute: "2-digit",
-	timeZone: "UTC",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
 };
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
-	month: "2-digit",
-	day: "2-digit",
-	timeZone: "UTC",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: "UTC",
 };
 // Add a helper for single time formatting (used in multiple meetings table)
 const formatSingleTime = (date: Date | undefined): string => {
-	if (!date) return "TBA";
-	return date.toLocaleTimeString([], timeFormatOptions);
+  if (!date) return "TBA";
+  return date.toLocaleTimeString([], timeFormatOptions);
 };
 // Add a helper for single date range formatting (used in multiple meetings table)
 const formatSingleDateRange = (
-	start: Date | undefined,
-	end: Date | undefined
+  start: Date | undefined,
+  end: Date | undefined
 ): string => {
-	if (!start || !end) return "TBA";
-	
-	return `${start.toLocaleDateString(
-		undefined,
-		dateFormatOptions
-	)} - ${end.toLocaleDateString(undefined, dateFormatOptions)}`;
+  if (!start || !end) return "TBA";
+
+  return `${start.toLocaleDateString(
+    undefined,
+    dateFormatOptions
+  )} - ${end.toLocaleDateString(undefined, dateFormatOptions)}`;
 };
 // Modify formatTime to handle array case differently if needed in summary
 const formatTime = (date: Date | Date[] | undefined): string => {
-	if (!date) return "TBA";
-	if (Array.isArray(date)) return "Multiple"; // Keep summary simple
-	return (date as Date).toLocaleTimeString([], timeFormatOptions);
+  if (!date) return "TBA";
+  if (Array.isArray(date)) return "Multiple"; // Keep summary simple
+  return (date as Date).toLocaleTimeString([], timeFormatOptions);
 };
 // Modify formatTimeRange for summary
 // This function is used to format the time range for the summary
 const formatTimeRange = (
-	start: Date | Date[] | undefined,
-	end: Date | Date[] | undefined
+  start: Date | Date[] | undefined,
+  end: Date | Date[] | undefined
 ): string => {
-	if (!start || !end) return "TBA";
-	if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
-	
-	return `${formatTime(start)} - ${formatTime(end)}`;
+  if (!start || !end) return "TBA";
+  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+
+  return `${formatTime(start)} - ${formatTime(end)}`;
 };
 // Modify formatDateRange for summary
 const formatDateRange = (
-	start: Date | Date[] | undefined,
-	end: Date | Date[] | undefined
+  start: Date | Date[] | undefined,
+  end: Date | Date[] | undefined
 ): string => {
-	if (!start || !end) return "TBA";
-	if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
-	return `${(start as Date).toLocaleDateString(undefined, dateFormatOptions)} - ${(
-		end as Date
-	).toLocaleDateString(undefined, dateFormatOptions)}`;
+  if (!start || !end) return "TBA";
+  if (Array.isArray(start) || Array.isArray(end)) return "Multiple"; // Keep summary simple
+  return `${(start as Date).toLocaleDateString(
+    undefined,
+    dateFormatOptions
+  )} - ${(end as Date).toLocaleDateString(undefined, dateFormatOptions)}`;
 };
 // Modify formatInstructors for summary
 const formatInstructors = (
@@ -279,6 +280,46 @@ function SearchResults() {
       classNumber: section.classNumber.toString(),
     });
     return `/course?${params.toString()}`;
+  };
+
+  const actionButtons = (section: CourseSection) => {
+    return (
+      <Box
+        sx={{
+          mt: 2,
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 1,
+        }}
+      >
+        <Link
+          to={getCourseURL(section)}
+          state={{ course: section }}
+          target="_blank"
+        >
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              height: 40,
+              px: 2,
+              py: 1,
+              backgroundColor: "indigo.600",
+              color: "white",
+              borderRadius: "5px",
+              fontSize: "1.25 rem", // 18px
+              fontWeight: 450, // Thinner look
+              "&:hover": {
+                backgroundColor: "indigo.700",
+              },
+              textTransform: "none",
+            }}
+          >
+            View Enrollment Details
+          </Button>
+        </Link>
+      </Box>
+    );
   };
 
   // --- Render Logic ---
@@ -587,7 +628,7 @@ function SearchResults() {
                             )}
                           {/* === End Multiple Meeting Pattern Section === */}
 
-                          <Grid container spacing={3}>
+                          <Grid container spacing={section.multipleMeetings ? 0 : 3}>
                             {/* Column 1: Information */}
                             <Grid size={{ xs: 12, md: 6 }}>
                               <Paper
@@ -640,7 +681,7 @@ function SearchResults() {
                             {/* Column 2: Details & Availability */}
                             <Grid size={{ xs: 12, md: 6 }}>
                               {/* Conditionally hide fields if multiple meetings */}
-                              {!section.multipleMeetings && (
+                              {!section.multipleMeetings ? (
                                 <Paper
                                   elevation={0}
                                   sx={{
@@ -716,42 +757,19 @@ function SearchResults() {
                                       </Typography>
                                     </Grid>
                                   </Grid>
-                                  {/* Action Buttons */}
-                                  <Box
-                                    sx={{
-                                      mt: 2,
-                                      display: "flex",
-                                      justifyContent: "flex-end",
-                                      gap: 1,
-                                    }}
-                                  >
-                                    <Link
-                                      to={getCourseURL(section)}
-                                      state={{ course: section }}
-                                      target="_blank"
-                                    >
-                                      <Button
-                                        type="submit"
-                                        variant="contained"
-                                        sx={{
-                                          height: 40,
-                                          px: 2,
-                                          py: 1,
-                                          backgroundColor: "indigo.600",
-                                          color: "white",
-                                          borderRadius: "5px",
-                                          fontSize: "1.25 rem", // 18px
-                                          fontWeight: 450, // Thinner look
-                                          "&:hover": {
-                                            backgroundColor: "indigo.700",
-                                          },
-                                          textTransform: "none",
-                                        }}
-                                      >
-                                        View Enrollment Details
-                                      </Button>
-                                    </Link>
-                                  </Box>
+                                  {actionButtons(section)}
+                                </Paper>
+                              ) : (
+                                <Paper
+                                  elevation={0}
+                                  sx={{
+                                    p: 2,
+                                    bgcolor: "grey.200",
+                                    height: "100%",
+                                  }}
+                                >
+																	<Grid container spacing={1} sx={{ mb: 10 }}></Grid>
+                                  {actionButtons(section)}
                                 </Paper>
                               )}
                             </Grid>
