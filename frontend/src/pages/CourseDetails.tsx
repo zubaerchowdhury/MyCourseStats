@@ -2,17 +2,23 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import Calendar from "../components/Calendar";
 import { CourseSection, CourseContainer } from "../types/CourseTypes";
-import { getSemesterDates } from "../data/SemesterDates";
+import { SemesterDates, getSemesterDates } from "../data/SemesterDates";
 import { differenceInCalendarDays } from "date-fns";
-import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
+import { Alert, AlertColor, Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { BookOpen } from "lucide-react";
 
 function CourseDetails() {
+  const location = useLocation();
+  const section: CourseSection = location.state?.courseSection;
   const [searchParams] = useSearchParams();
   const [courseStats, setCourseStats] = useState<number[][]>([]);
   const [courseSection, setCourseSection] = useState<CourseSection | null>(
     null
   );
+  const [semesterDates, setSemesterDates] = useState<SemesterDates | null>(
+    null
+  );
+
   const [pastInstructors, setPastInstructors] = useState<string[]>([]);
   const [sectionError, setSectionError] = useState<string | null>(null);
   const [sectionLoading, setSectionLoading] = useState<boolean>(false);
@@ -20,8 +26,9 @@ function CourseDetails() {
   const [calendarLoading, setCalendarLoading] = useState<boolean>(false);
   const [instructorsError, setInstructorsError] = useState<string | null>(null);
   const [instructorsLoading, setInstructorsLoading] = useState<boolean>(false);
-  const location = useLocation();
-  const section: CourseSection = location.state?.courseSection;
+
+  // This variable is used to determine how many days it took to fill the course
+  const [numDaysToFillCourse, setNumDaysToFillCourse] = useState<number>(0);
 
   const searchParamsHasAllVars = (): boolean => {
     return (
@@ -44,8 +51,9 @@ function CourseDetails() {
 
         // Fetch the enrollment rate data
         // Use the semester and year to get the correct dates
-        const semesterDates = getSemesterDates(semester!, year!);
-        if (!semesterDates) {
+        const dates = getSemesterDates(semester!, year!);
+        setSemesterDates(dates);
+        if (!dates) {
           throw new Error(
             "Enrollment data not available for the selected semester and year."
           );
@@ -54,11 +62,11 @@ function CourseDetails() {
           semester: semester!,
           year: year!,
           classNumber: classNumber!,
-          startingDate: semesterDates!.enrollmentStartDate.toISOString(),
+          startingDate: dates!.enrollmentStartDate.toISOString(),
           numDays: (
             differenceInCalendarDays(
-              semesterDates!.classesEndDate,
-              semesterDates!.enrollmentStartDate
+              dates!.classesEndDate,
+              dates!.enrollmentStartDate
             ) + 1
           ).toString(),
         });
@@ -140,7 +148,7 @@ function CourseDetails() {
       }
     };
     fetchCourseSection();
-  }, [section]);
+  }, [section, searchParams]);
 
   // Fetch the past instructors data
   useEffect(() => {
@@ -179,18 +187,46 @@ function CourseDetails() {
     fetchPastInstructors();
   }, [courseSection]);
 
-  const getEnrollmentDescription = (enrollmentProbability: number) => {
-    if (enrollmentProbability >= 80 && enrollmentProbability <= 100) {
-      return "Very High Chance: This course typically fills up quickly. Immediate registration is recommended.";
-    } else if (enrollmentProbability >= 50) {
-      return "Good Chance: The course has moderate demand. Registration within the next week is advised.";
-    } else if (enrollmentProbability >= 20) {
-      return "Poor Chance: You have little chance of securing a spot. Monitor the enrollment status.";
-    } else if (enrollmentProbability >= 0) {
-      return "Very Low Chance: The course is nearly full. Please consider waitlist options or alternative courses.";
-    } else {
-      return "Error: Invalid probability score.";
+  // Calculate the number of days it took to fill the course
+  useEffect(() => {
+    if (!courseStats || courseStats.length === 0 || !semesterDates) {
+      setNumDaysToFillCourse(-1); // No data available
+      return;
     }
+
+    const filledPercentages = courseStats[0];
+    const filledDays = filledPercentages.findIndex(
+      (percentage) => percentage >= 100
+    );
+		
+		setNumDaysToFillCourse(filledDays+1);
+  }, [courseStats, semesterDates]);
+
+  const getEnrollmentSummary = (numDaysToFillCourse: number) => {
+    const fillString = <>This course filled up in <b>{numDaysToFillCourse}</b> days.</>;
+		let innerElement = null;
+		let color = ""
+    if (numDaysToFillCourse >= 31) {
+      innerElement = <>Low Demand: {fillString} You should be able to register without any issues.</>;
+			color = "success";
+    }
+    else if (numDaysToFillCourse >= 8) {
+      innerElement = <>Moderate Demand: {fillString} Registration within the first week is advised.</>;
+			color = "warning";
+    }
+    else if (numDaysToFillCourse >= 1) {
+      innerElement = <>High Demand: {fillString} Enroll immediately or check the calendar to see if more spots opened up.</>;
+			color = "error";
+    }
+		else {
+    	innerElement = <>Course never filled! You should be able to register without any issues.</>;
+			color = "success";
+		}
+		return (
+			<Alert severity={color as AlertColor} sx={{ mt: 2 }}>
+				{innerElement}
+			</Alert>
+		);
   };
 
   return (
@@ -250,6 +286,7 @@ function CourseDetails() {
             </Alert>
           ) : (
             <div className="mt-8">
+							{getEnrollmentSummary(numDaysToFillCourse)}
               <Calendar courseStats={courseStats} />
             </div>
           )}
@@ -264,21 +301,21 @@ function CourseDetails() {
                   Past Instructors
                 </h1>
               </div>
-								<Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
-								{pastInstructors.length > 0 ? (
-									<ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-2 list-none p-0 m-0">
-									{pastInstructors.map((instructor, index) => (
-										<li key={index} className="text-gray-700">
-										{instructor}
-										</li>
-									))}
-									</ul>
-								) : (
-									<Typography variant="body1" color="text.secondary">
-									No past instructors available for this course.
-									</Typography>
-								)}
-								</Paper>
+              <Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
+                {pastInstructors.length > 0 ? (
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-2 list-none p-0 m-0">
+                    {pastInstructors.map((instructor, index) => (
+                      <li key={index} className="text-gray-700">
+                        {instructor}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Typography variant="body1" color="text.secondary">
+                    No past instructors available for this course.
+                  </Typography>
+                )}
+              </Paper>
             </>
           )}
         </>

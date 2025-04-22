@@ -275,7 +275,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
         {/* Legend section */}
         <div className="mt-28 flex flex-col gap-4 min-w-[200px]">
           <div className="flex items-center">
-					<span className="text-sm mr-1">x%</span>
+					<span className="text-xs mr-1 italic">𝐗%</span>
             <span className="text-sm text-gray-600"> {" "}Seats filled</span>
           </div>
           <div className="flex items-center">

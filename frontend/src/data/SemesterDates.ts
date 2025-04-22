@@ -1,4 +1,4 @@
-interface SemesterDates {
+export interface SemesterDates {
 	enrollmentStartDate: Date;
 	classesBeginDate: Date;
 	deadlineAddCourseDate: Date;
