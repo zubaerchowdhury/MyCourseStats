@@ -4,7 +4,7 @@ const About: React.FC = () => {
   return (
     <div className="about-container p-5">
       <div className="flex justify-around gap-5">
-        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
             src={"/Assets/Marcos.png"}
             alt="Marcos Morales"
@@ -20,7 +20,7 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
             src={"/Assets/Zubaer.png"}
             alt="Zubaer Chowdhury"
@@ -36,7 +36,7 @@ const About: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex-1 flex flex-col items-center p-4 rounded-lg bg-[#f5f5f5]">
+        <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
             src={"/Assets/Hannah.png"}
             alt="Hannah Penano"
