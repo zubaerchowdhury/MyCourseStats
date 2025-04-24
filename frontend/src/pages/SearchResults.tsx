@@ -800,6 +800,33 @@ function SearchResults() {
                                       {section.session || "N/A"}
                                     </Typography>
                                   </Grid>
+                                  <Grid size={{ xs: 4 }}>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
+                                    >
+                                      Capacity:
+                                    </Typography>
+                                  </Grid>
+                                  <Grid size={{ xs: 8 }}>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
+                                    >
+                                      {section.capacity || "N/A"} Total Seats
+                                    </Typography>
+                                  </Grid>
                                 </Grid>
 
                                 {/* For xs screens: stacked layout */}
@@ -839,9 +866,28 @@ function SearchResults() {
                                     variant="body2"
                                     sx={{
                                       fontSize: "0.75rem",
+                                      mb: 1,
                                     }}
                                   >
                                     {section.session || "N/A"}
+                                  </Typography>
+
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    Capacity:
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    {section.capacity || "N/A"} Total Seats
                                   </Typography>
                                 </Box>
                               </Paper>

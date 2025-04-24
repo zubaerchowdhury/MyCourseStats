@@ -336,6 +336,18 @@ function CourseDetails() {
                     {courseSection.subjectCode} {courseSection.catalogNumber} -{" "}
                     {courseSection.sectionCode} ({courseSection.classNumber})
                   </Typography>
+									<Typography
+                    variant="h6"
+                    component="div"
+                    color="grey.700"
+                    sx={{
+                      fontSize: { xs: "0.875rem", sm: "1.25rem" },
+                      display: "block",
+                      mt: { xs: 1, sm: 0 },
+                    }}
+                  >
+                    {courseSection.capacity} Total Seats Available
+                  </Typography>
                 </Typography>
               </Box>
             )
