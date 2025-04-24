@@ -108,6 +108,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
   };
 
   const setField = (field: keyof SearchFilters, value: any) => {
+		if (value === "") {
+			return;
+		}
     if (field === "semester") {
       setSubjectOptions([]);
       const [semester, year] = value.split("-");
