@@ -67,8 +67,25 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   // Keep the raw courseStats data
   const [rawCourseStats, setRawCourseStats] = useState<number[][] | null>(null);
 
-  // Date helpers from date-fns
+  // Add custom text size CSS
+  useEffect(() => {
+    // Add this once when component mounts
+    const style = document.createElement("style");
+    style.innerHTML = `
+    .text-2xs {
+      font-size: 0.65rem;
+      line-height: 0.75rem;
+    }
+  `;
+    document.head.appendChild(style);
 
+    // Clean up when component unmounts
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  // Effect to update rawCourseStats when courseStats prop changes
   useEffect(() => {
     // Update rawCourseStats when courseStats prop changes
     if (courseStats && courseStats.length >= 3) {
@@ -169,179 +186,183 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-4">
-      <div className="flex items-start gap-8">
-        <div className="flex-1">
-          <div className="flex items-center justify-center gap-8 mb-4">
-            <button
-              onClick={handlePrevMonth}
-              className="p-2 hover:bg-gray-100 rounded-full"
-              aria-label="Previous month"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <h2 className="text-lg font-bold min-w-[160px] text-center">
-              {format(currentMonth, "MMMM yyyy")}
-            </h2>
-            <button
-              onClick={handleNextMonth}
-              className="p-2 hover:bg-gray-100 rounded-full"
-              aria-label="Next month"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-8 text-center text-sm font-semibold mb-2">
-            {[
-              "Mon",
-              "Tue",
-              "Wed",
-              "Thu",
-              "Fri",
-              "Sat",
-              "Sun",
-              "Weekly Change",
-            ].map((day) => (
-              <div
-                key={day}
-                className={`py-2 ${
-                  day === "Sat"
-                    ? "text-[#1E90FF]"
-                    : day === "Sun"
-                    ? "text-[#FF0800]"
-                    : "text-gray-600"
-                }`}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {weeks.map((week, weekIdx) => (
-              <div key={weekIdx} className="grid grid-cols-8 gap-2">
-                {week.days.map((day, idx) => (
-                  // Highlight the cell based on the semester and year
-                  <div
-                    key={idx}
-                    className="h-16 flex flex-col items-center justify-center border rounded-lg transition-colors duration-200"
-                    style={{
-                      backgroundColor: !isSameMonth(day!.date, currentMonth)
-                        ? "rgb(229,231,235)" // gray-200 for out-of-month
-                        : isDateInSemester(semester, year, day!.date)
-                        ? getSemesterColorByDate(semester, year, day!.date)
-                        : "white",
-                      color: !isSameMonth(day!.date, currentMonth)
-                        ? "rgb(107,114,128)" // gray-500 for out-of-month text
-                        : "black",
-                    }}
-                  >
-                    {/* Display the date and percentage */}
-                    {day && (
-                      <>
-                        <span className="font-semibold text-sm">
-                          {format(day.date, "d")}
-                        </span>
-                        {day.daily !== null ? (
-                          <span
-                            className="text-xs font-medium" // Added font-medium for better visibility
-                            style={{
-                              color: getColorForPercentage(day.daily / 100),
-                            }} // Apply color via inline style
-                          >
-                            {`${day.daily.toFixed(1)}%`}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-gray-400">--</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-                <div className="h-16 flex flex-col items-center justify-center border rounded-lg bg-blue-100">
-                  <span className="text-blue-700 text-xs font-bold">
-                    {week.cumulative !== null
-                      ? week.cumulative >= 0
-                        ? `+${week.cumulative.toFixed(1)}%`
-                        : `${week.cumulative.toFixed(1)}%`
-                      : "--"}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Legend section */}
-        <div className="mt-28 flex flex-col gap-4 min-w-[200px]">
-          <div className="flex items-center">
-					<span className="text-xs mr-1 italic">𝐗%</span>
-            <span className="text-sm text-gray-600"> {" "}Seats filled</span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{
-                backgroundColor: getSemesterColor("enrollmentStartDate"),
-              }}
-            ></div>
-            <span className="text-sm text-gray-600">Enrollment Start Date</span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{ backgroundColor: getSemesterColor("classesBeginDate") }}
-            ></div>
-            <span className="text-sm text-gray-600">Classes begin</span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{
-                backgroundColor: getSemesterColor("deadlineAddCourseDate"),
-              }}
-            ></div>
-            <span className="text-sm text-gray-600">
-              Deadline to Add a Course
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{
-                backgroundColor: getSemesterColor(
-                  "deadlineDropCourseWithoutWDate"
-                ),
-              }}
-            ></div>
-            <span className="text-sm text-gray-600">
-              Deadline to Drop a Course without a 'W'
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{
-                backgroundColor: getSemesterColor(
-                  "deadlineDropCourseWithWDate"
-                ),
-              }}
-            ></div>
-            <span className="text-sm text-gray-600">
-              Deadline to Drop a Course with a 'W'
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div
-              className="w-4 h-4 rounded mr-2"
-              style={{ backgroundColor: getSemesterColor("classesEndDate") }}
-            ></div>
-            <span className="text-sm text-gray-600">Classes end @ 11:00PM</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+		<div className="w-full mx-auto p-2 sm:p-4">
+			<div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+				<div className="flex-1 overflow-x-auto">
+					<div className="flex items-center justify-center gap-4 sm:gap-8 mb-4">
+						<button
+							onClick={handlePrevMonth}
+							className="p-1 sm:p-2 hover:bg-gray-100 rounded-full"
+							aria-label="Previous month"
+						>
+							<ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+						</button>
+						<h2 className="text-base sm:text-lg font-bold min-w-[120px] sm:min-w-[160px] text-center">
+							{format(currentMonth, "MMMM yyyy")}
+						</h2>
+						<button
+							onClick={handleNextMonth}
+							className="p-1 sm:p-2 hover:bg-gray-100 rounded-full"
+							aria-label="Next month"
+						>
+							<ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+						</button>
+					</div>
+	
+					<div className="min-w-[600px] md:min-w-0"> {/* Allow horizontal scroll on mobile */}
+						<div className="grid grid-cols-8 text-center text-xs sm:text-sm font-semibold mb-2">
+							{[
+								"Mon",
+								"Tue",
+								"Wed",
+								"Thu",
+								"Fri",
+								"Sat",
+								"Sun",
+								"Weekly Change",
+							].map((day) => (
+								<div
+									key={day}
+									className={`py-1 sm:py-2 ${
+										day === "Sat"
+											? "text-[#1E90FF]"
+											: day === "Sun"
+											? "text-[#FF0800]"
+											: "text-gray-600"
+									}`}
+								>
+									{day}
+								</div>
+							))}
+						</div>
+	
+						<div className="flex flex-col gap-1 sm:gap-2">
+							{weeks.map((week, weekIdx) => (
+								<div key={weekIdx} className="grid grid-cols-8 gap-1 sm:gap-2">
+									{week.days.map((day, idx) => (
+										<div
+											key={idx}
+											className="h-12 sm:h-16 flex flex-col items-center justify-center border rounded-lg transition-colors duration-200"
+											style={{
+												backgroundColor: !isSameMonth(day!.date, currentMonth)
+													? "rgb(229,231,235)"
+													: isDateInSemester(semester, year, day!.date)
+													? getSemesterColorByDate(semester, year, day!.date)
+													: "white",
+												color: !isSameMonth(day!.date, currentMonth)
+													? "rgb(107,114,128)"
+													: "black",
+											}}
+										>
+											{day && (
+												<>
+													<span className="font-semibold text-xs sm:text-sm">
+														{format(day.date, "d")}
+													</span>
+													{day.daily !== null ? (
+														<span
+															className="text-3xs sm:text-sm font-medium"
+															style={{
+																color: getColorForPercentage(day.daily / 100),
+															}}
+														>
+															{`${day.daily.toFixed(1)}%`}
+														</span>
+													) : (
+														<span className="text-2xs sm:text-xs text-gray-400">--</span>
+													)}
+												</>
+											)}
+										</div>
+									))}
+									<div className="h-12 sm:h-16 flex flex-col items-center justify-center border rounded-lg bg-blue-100">
+										<span className="text-blue-700 text-3xs sm:text-xs font-bold">
+											{week.cumulative !== null
+												? week.cumulative >= 0
+													? `+${week.cumulative.toFixed(1)}%`
+													: `${week.cumulative.toFixed(1)}%`
+												: "--"}
+										</span>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+				
+				{/* Legend section - stacks vertically on mobile */}
+				<div className="mt-6 md:mt-28 flex flex-col gap-3 md:gap-4 md:min-w-[200px]">
+					<div className="text-sm font-medium mb-1">Legend</div>
+					<div className="flex items-center">
+						<span className="text-xs mr-1 italic">𝐗%</span>
+						<span className="text-xs sm:text-sm text-gray-600"> Seats filled</span>
+					</div>
+					<div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-3">
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{
+									backgroundColor: getSemesterColor("enrollmentStartDate"),
+								}}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">Enrollment Start</span>
+						</div>
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{ backgroundColor: getSemesterColor("classesBeginDate") }}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">Classes Begin</span>
+						</div>
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{
+									backgroundColor: getSemesterColor("deadlineAddCourseDate"),
+								}}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">
+								Add Deadline
+							</span>
+						</div>
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{
+									backgroundColor: getSemesterColor(
+										"deadlineDropCourseWithoutWDate"
+									),
+								}}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">
+								Drop Without 'W'
+							</span>
+						</div>
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{
+									backgroundColor: getSemesterColor(
+										"deadlineDropCourseWithWDate"
+									),
+								}}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">
+								Drop With 'W'
+							</span>
+						</div>
+						<div className="flex items-center">
+							<div
+								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
+								style={{ backgroundColor: getSemesterColor("classesEndDate") }}
+							></div>
+							<span className="text-xs sm:text-sm text-gray-600">Classes End</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default Calendar;

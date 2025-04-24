@@ -4,7 +4,14 @@ import Calendar from "../components/Calendar";
 import { CourseSection, CourseContainer } from "../types/CourseTypes";
 import { SemesterDates, getSemesterDates } from "../data/SemesterDates";
 import { differenceInCalendarDays } from "date-fns";
-import { Alert, AlertColor, Box, CircularProgress, Paper, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertColor,
+  Box,
+  CircularProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { BookOpen } from "lucide-react";
 
 function CourseDetails() {
@@ -198,39 +205,71 @@ function CourseDetails() {
     const filledDays = filledPercentages.findIndex(
       (percentage) => percentage >= 100
     );
-		
-		setNumDaysToFillCourse(filledDays+1);
+
+    setNumDaysToFillCourse(filledDays + 1);
   }, [courseStats, semesterDates]);
 
   const getEnrollmentSummary = (numDaysToFillCourse: number) => {
-    const fillString = <>This course filled up in <b>{numDaysToFillCourse}</b> days.</>;
-		let innerElement = null;
-		let color = ""
+    const fillString = (
+      <>
+        This course filled up in <b>{numDaysToFillCourse}</b> days.
+      </>
+    );
+    let innerElement = null;
+    let color = "";
     if (numDaysToFillCourse >= 31) {
-      innerElement = <>Low Demand: {fillString} You should be able to register without any issues.</>;
-			color = "success";
+      innerElement = (
+        <>
+          Low Demand: {fillString} You should be able to register without any
+          issues.
+        </>
+      );
+      color = "success";
+    } else if (numDaysToFillCourse >= 8) {
+      innerElement = (
+        <>
+          Moderate Demand: {fillString} Registration within the first week is
+          advised.
+        </>
+      );
+      color = "warning";
+    } else if (numDaysToFillCourse >= 1) {
+      innerElement = (
+        <>
+          High Demand: {fillString} Enroll immediately or check the calendar to
+          see if more spots opened up.
+        </>
+      );
+      color = "error";
+    } else {
+      innerElement = (
+        <>
+          Course never filled! You should be able to register without any
+          issues.
+        </>
+      );
+      color = "success";
     }
-    else if (numDaysToFillCourse >= 8) {
-      innerElement = <>Moderate Demand: {fillString} Registration within the first week is advised.</>;
-			color = "warning";
-    }
-    else if (numDaysToFillCourse >= 1) {
-      innerElement = <>High Demand: {fillString} Enroll immediately or check the calendar to see if more spots opened up.</>;
-			color = "error";
-    }
-		else {
-    	innerElement = <>Course never filled! You should be able to register without any issues.</>;
-			color = "success";
-		}
-		return (
-			<Alert severity={color as AlertColor} sx={{ mt: 2 }}>
-				{innerElement}
-			</Alert>
-		);
+    return (
+      <Alert severity={color as AlertColor} sx={{ mt: 2 }}>
+        {innerElement}
+      </Alert>
+    );
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Box
+      className="mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8"
+      sx={{
+        maxWidth: {
+          xs: "100%",
+          sm: "540px",
+          md: "720px",
+          lg: "960px",
+          xl: "1140px",
+        },
+      }}
+    >
       {sectionLoading || calendarLoading || instructorsLoading ? (
         // ... Loading indicator ...
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -240,17 +279,21 @@ function CourseDetails() {
           </Typography>
         </Box>
       ) : !courseSection && !sectionError && !calendarError ? (
-        <div className="text-center py-16">
-          <div className="flex justify-center">
-            <BookOpen className="h-16 w-16 text-gray-400" />
-          </div>
-          <h2 className="mt-4 text-2xl font-semibold text-gray-900">
+        <Box className="text-center py-8 sm:py-12 md:py-16">
+          <Box className="flex justify-center">
+            <BookOpen className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400" />
+          </Box>
+          <Typography
+            variant="h4"
+            component="h2"
+            className="mt-4 font-semibold text-gray-900"
+          >
             No courses found
-          </h2>
-          <p className="mt-2 text-gray-600">
+          </Typography>
+          <Typography variant="body1" className="mt-2 text-gray-600">
             We couldn't find any courses matching your search criteria.
-          </p>
-        </div>
+          </Typography>
+        </Box>
       ) : (
         <>
           {sectionError ? (
@@ -261,7 +304,7 @@ function CourseDetails() {
             courseSection && (
               <Box
                 sx={{
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   borderBottom: 1,
                   borderColor: "divider",
                   bgcolor: "white",
@@ -270,9 +313,26 @@ function CourseDetails() {
                   borderTopRightRadius: "4px",
                 }}
               >
-                <Typography variant="h6" component="h2">
-                  {courseSection.name} |{" "}
-                  <Typography variant="h6" component="span" color="grey.700">
+                <Typography
+                  variant="h6"
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: "1rem", sm: "1.25rem" },
+                    display: { xs: "block", sm: "inline" },
+                    mb: { xs: 1, sm: 0 },
+                  }}
+                >
+                  {courseSection.name}
+                  <Typography
+                    variant="h6"
+                    component="div"
+                    color="grey.700"
+                    sx={{
+                      fontSize: { xs: "0.875rem", sm: "1.25rem" },
+                      display: "block",
+                      mt: { xs: 1, sm: 0 },
+                    }}
+                  >
                     {courseSection.subjectCode} {courseSection.catalogNumber} -{" "}
                     {courseSection.sectionCode} ({courseSection.classNumber})
                   </Typography>
@@ -286,7 +346,7 @@ function CourseDetails() {
             </Alert>
           ) : (
             <div className="mt-8">
-							{getEnrollmentSummary(numDaysToFillCourse)}
+              {getEnrollmentSummary(numDaysToFillCourse)}
               <Calendar courseStats={courseStats} />
             </div>
           )}
@@ -296,20 +356,50 @@ function CourseDetails() {
             </Alert>
           ) : (
             <>
-              <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-2xl font-bold text-gray-900">
+              <div className="mt-4 mb-4">
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  className="font-bold text-gray-900"
+                  sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" }, mb: 2 }}
+                >
                   Past Instructors
-                </h1>
+                </Typography>
               </div>
-              <Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
+              <Paper
+                elevation={2}
+                sx={{ p: { xs: 2, sm: 3 }, bgcolor: "grey.50" }}
+              >
                 {pastInstructors.length > 0 ? (
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-2 list-none p-0 m-0">
+                  <Box
+                    component="ul"
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      },
+                      gap: 2,
+                      p: 0,
+                      m: 0,
+                      listStyle: "none",
+                    }}
+                  >
                     {pastInstructors.map((instructor, index) => (
-                      <li key={index} className="text-gray-700">
+                      <Typography
+                        component="li"
+                        key={index}
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
+                        }}
+                      >
                         {instructor}
-                      </li>
+                      </Typography>
                     ))}
-                  </ul>
+                  </Box>
                 ) : (
                   <Typography variant="body1" color="text.secondary">
                     No past instructors available for this course.
@@ -320,7 +410,7 @@ function CourseDetails() {
           )}
         </>
       )}
-    </div>
+    </Box>
   );
 }
 
