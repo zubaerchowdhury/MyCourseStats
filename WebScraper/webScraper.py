@@ -22,7 +22,7 @@ def eraseTerminalLine(showProgress=True):
 				if showProgress:
 						print('\033[1A', '\033[K', end='', sep='')
 
-with keep.presenting(), webdriver.Firefox(options=options) as driver:
+with keep.presenting(), webdriver.Firefox(options=None) as driver:
 
 		driver.get("https://canelink.miami.edu/psp/UMIACP1D/EMPLOYEE/SA/s/WEBLIB_HCX_CM.H_CLASS_SEARCH.FieldFormula.IScript_Main")
 		wait = WebDriverWait(driver, 20)
@@ -329,17 +329,19 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 									 
 		def getAllClasses(DEBUG=False):
 				global courses
-				parentDiv = driver.find_element(By.XPATH, "//form/..")
-				while True:
-						try:
-								scrollToBottomOfElement(parentDiv)
-								shortWait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
-								break
-						except TimeoutException:
-								continue  
-				classesDivs = parentDiv.find_elements(By.XPATH, "./child::div")
+				parentDiv = driver.find_elements(By.XPATH, "//div[@class='cx-MuiGrid-root cx-MuiGrid-container cx-MuiGrid-spacing-xs-1 cx-MuiGrid-direction-xs-column']/child::div")[2]
+				# while True:
+				# 		try:
+				# 				scrollToBottomOfElement(parentDiv)
+				# 				shortWait.until(presence_of_element_located((By.XPATH, "//form/../child::p")))
+				# 				break
+				# 		except TimeoutException:
+				# 				continue  
+				classesDivs = parentDiv.find_elements(By.XPATH, "./div/child::div")
 				for classesDiv in classesDivs:
-						classes = classesDiv.find_elements(By.XPATH, "./div[@class='MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12']")
+						classes = classesDiv.find_elements(By.XPATH, "./div[@class='cx-MuiGrid-root cx-MuiGrid-item cx-MuiGrid-grid-xs-12']")
+						if len(classes) == 0:
+								continue
 						classes.pop(0) # Remove first element because it is the header
 						for c in classes:
 								className = c.find_element(By.TAG_NAME, 'h2').text
@@ -368,21 +370,21 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 				searchButton = driver.find_element(By.XPATH, "//button[@type='submit']")
 				searchButton.click()
 				try:
-						wait.until(presence_of_element_located((By.XPATH, "//main/div/div//hr")))
+						wait.until(presence_of_element_located((By.XPATH, "//div[2]//nav")))
 				except TimeoutException:
 						print("Timed out at:", currentTerm, currentAcademicCareer, currentSubject)
 
 		def getAllSubjects(DEBUG=False, showProgress=True):
 				# Go through all subjects and get all classes
-				subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
+				subjectDropdown = driver.find_elements(By.XPATH, "//form//div[2]//button[@class='cx-MuiButtonBase-root cx-MuiIconButton-root cx-MuiAutocomplete-popupIndicator']")[2]
 				subjectDropdown.click()
-				subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
+				subjectDropdownList = driver.find_element(By.XPATH, "//form//ul")
 				subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
 				subjectListLength = len(subjectDropdownListItems)
 				clickAcademicCareerDropdown() # Close subject dropdown by clicking on academic career dropdown
 				for i in range(subjectListLength):
 						subjectDropdown.click()
-						subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
+						subjectDropdownList = driver.find_element(By.XPATH, "//form//ul")
 						subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
 						item = subjectDropdownListItems[i]
 						global currentSubject 
@@ -397,8 +399,8 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 		def setSubject(subject: str, DEBUG=False):
 				subjectDropdown = driver.find_element(By.XPATH, "//form//div[4]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
 				subjectDropdown.click()
-				wait.until(presence_of_element_located((By.XPATH, "//form//div[4]//ul")))
-				subjectDropdownList = driver.find_element(By.XPATH, "//form//div[4]//ul")
+				wait.until(presence_of_element_located((By.XPATH, "//form//ul")))
+				subjectDropdownList = driver.find_element(By.XPATH, "//form//ul")
 				subjectDropdownListItems = subjectDropdownList.find_elements(By.TAG_NAME, 'li')
 				for item in subjectDropdownListItems:
 						if item.text == subject:
@@ -411,19 +413,20 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								break
 
 		def clickAcademicCareerDropdown():
-				academicCareerDropdown = driver.find_element(By.XPATH, "//form//div//div[3]//button[@class='MuiButtonBase-root MuiIconButton-root MuiAutocomplete-popupIndicator']")
-				academicCareerDropdown.click()
+				formButtons = driver.find_elements(By.XPATH, "//form//div[2]//button[@class='cx-MuiButtonBase-root cx-MuiIconButton-root cx-MuiAutocomplete-popupIndicator']")
+				formButtons[1].click()
 
 		def setAcademicCareer(academicCareer: str):
 				global currentAcademicCareer
-				currentAcademicCareer = academicCareer
 				clickAcademicCareerDropdown()
-				wait.until(presence_of_element_located((By.XPATH, "//form//div[3]//ul")))
-				academicCareerDropdownList = driver.find_element(By.XPATH, "//form//div[3]//ul")
+				# wait.until(presence_of_element_located((By.XPATH, "//form//ul")))
+				time.sleep(1) # Wait for the dropdown to appear and list to load
+				academicCareerDropdownList = driver.find_element(By.XPATH, "//form//ul")
 				academicCareerDropdownListItems = academicCareerDropdownList.find_elements(By.TAG_NAME, 'li')
 				for item in academicCareerDropdownListItems:
 						if item.text == academicCareer:
 								item.click()
+								currentAcademicCareer = academicCareer
 								break
 
 		def setTerm(term: str):
@@ -436,7 +439,7 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 								global currentTerm
 								currentTerm = item.text
 								item.click()
-								wait.until(presence_of_element_located((By.TAG_NAME, 'form')))
+								time.sleep(2)
 								break
 
 		def getNextTerm(item: WebElement):
@@ -564,9 +567,9 @@ with keep.presenting(), webdriver.Firefox(options=options) as driver:
 						client.close()
 						raise e
 
-		main(DEBUG=False, Term="Spring 2025", Career="", Subject="",
-				 filename=None, saveData=True, showProgress=sys.stdout.isatty(),
-				 checkIfRan=True)
+		main(DEBUG=True, Term="Spring 2025", Career="", Subject="",
+				 filename=None, saveData=False, showProgress=False,
+				 checkIfRan=False)
 
 executed_time = time.time() - start_time
 minutes = executed_time // 60
