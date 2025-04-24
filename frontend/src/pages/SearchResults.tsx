@@ -286,7 +286,7 @@ function SearchResults() {
     return (
       <Box
         sx={{
-          mt: 2,
+          mt: { xs: 1, sm: 2 },
           display: "flex",
           justifyContent: "flex-end",
           gap: 1,
@@ -300,15 +300,20 @@ function SearchResults() {
           <Button
             type="submit"
             variant="contained"
+            fullWidth={true}
             sx={{
-              height: 40,
-              px: 2,
-              py: 1,
+              width: { xs: "100%", sm: "auto" },
+              height: { xs: 36, sm: 40 },
+              px: { xs: 1, sm: 2 },
+              py: { xs: 0.5, sm: 1 },
               backgroundColor: "indigo.600",
               color: "white",
               borderRadius: "5px",
-              fontSize: "1.25 rem", // 18px
-              fontWeight: 450, // Thinner look
+              fontSize: {
+                xs: "0.75rem",
+                sm: "0.875rem",
+              },
+              fontWeight: 450,
               "&:hover": {
                 backgroundColor: "indigo.700",
               },
@@ -325,11 +330,15 @@ function SearchResults() {
   // --- Render Logic ---
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="lg" sx={{ mb: 4 }}>
-        {" "}
-        {/* Use MUI Container */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          mb: 4,
+          px: { xs: 2, sm: 3 }, // Responsive padding
+        }}
+      >
         {/* Header Section */}
-        <Box sx={{ py: 4 }}>
+        <Box sx={{ py: { xs: 2, sm: 4 } }}>
           <button
             onClick={handleBackToHome}
             className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -338,9 +347,11 @@ function SearchResults() {
             <span>Back to Home</span>
           </button>
           <div className="mt-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Search Results</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Search Results
+            </h1>
           </div>
-          <Paper elevation={2} sx={{ p: 3, bgcolor: "grey.50" }}>
+          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, bgcolor: "grey.50" }}>
             {/* Search Form Wrapper */}
             <SearchForm onSearch={fetchCourses} />
           </Paper>
@@ -404,10 +415,10 @@ function SearchResults() {
                   key={`${course.subjectCode}-${course.catalogNumber}`}
                   elevation={3}
                 >
-                  {/* ... Course Header ... */}
+                  {/* Course Header */}
                   <Box
                     sx={{
-                      p: 2,
+                      p: { xs: 1.5, sm: 2 },
                       borderBottom: 1,
                       borderColor: "divider",
                       bgcolor: "secondary.main",
@@ -416,14 +427,28 @@ function SearchResults() {
                       borderTopRightRadius: "4px",
                     }}
                   >
-                    <Typography variant="h6" component="h2">
-                      {course.name} |{" "}
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      sx={{
+                        fontSize: { xs: "0.9rem", sm: "1.25rem" },
+                        lineHeight: { xs: 1.4, sm: 1.6 },
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "flex-start", sm: "center" },
+                      }}
+                    >
+                      <span className="mr-1">{course.name}</span>
                       <Typography
                         variant="h6"
                         component="span"
                         color="grey.700"
+                        sx={{
+                          fontSize: { xs: "0.8rem", sm: "1.25rem" },
+                          ml: { xs: 0, sm: 1 },
+                        }}
                       >
-                        {course.subjectCode} {course.catalogNumber}
+                        | {course.subjectCode} {course.catalogNumber}
                       </Typography>
                     </Typography>
                   </Box>
@@ -470,7 +495,6 @@ function SearchResults() {
                           aria-controls={`section-${section.classNumber}-content`}
                           id={`section-${section.classNumber}-header`}
                           sx={{
-                            // Updated styling from temp.tsx
                             bgcolor: "grey.50",
                             "&.Mui-expanded": {
                               bgcolor: "grey.100",
@@ -478,17 +502,55 @@ function SearchResults() {
                             "&:hover": {
                               bgcolor: "grey.200",
                             },
-                            // Keep original alignment style
                             "& .MuiAccordionSummary-content": {
                               alignItems: "center",
+                              margin: { xs: "4px 0", sm: "12px 0" },
                             },
                           }}
                         >
+                          {/* Mobile view */}
+                          <Box
+                            sx={{
+                              display: { xs: "flex", md: "none" },
+                              width: "100%",
+                              flexDirection: "column",
+                              gap: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: "medium",
+                                fontSize: "0.875rem",
+                              }}
+                            >
+                              {section.sectionCode} - {section.sectionType}
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                fontSize: "0.75rem",
+                              }}
+                            >
+                              <Typography variant="caption">
+                                {formatDays(section.days)}
+                              </Typography>
+                              <Typography variant="caption">
+                                {formatTimeRange(
+                                  section.timeStart,
+                                  section.timeEnd
+                                )}
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Desktop view */}
                           <Grid
                             container
                             spacing={1}
                             sx={{
-                              display: { md: "flex" },
+                              display: { xs: "none", md: "flex" },
                               typography: "body2",
                               textAlign: "center",
                               flexGrow: 1,
@@ -523,10 +585,10 @@ function SearchResults() {
 
                         {/* --- Accordion Details --- */}
                         <AccordionDetails sx={{ bgcolor: "grey.100", p: 3 }}>
-                          {/* === Multiple Meeting Pattern Section (Conditional) === */}
+                          {/* === Multiple Meeting Pattern Section */}
                           {section.multipleMeetings &&
                             Array.isArray(section.startDate) && (
-                              <Box sx={{ mb: 3 }}>
+                              <Box sx={{ mb: 3, overflowX: "auto" }}>
                                 <Typography
                                   variant="subtitle2"
                                   gutterBottom
@@ -539,13 +601,18 @@ function SearchResults() {
                                   />{" "}
                                   MULTIPLE MEETING PATTERN
                                 </Typography>
-                                <Paper variant="outlined">
-                                  {/* Header Row - Use size prop */}
+                                <Paper
+                                  variant="outlined"
+                                  sx={{
+                                    minWidth: { xs: "600px", md: "100%" }, // Allow horizontal scroll on mobile
+                                  }}
+                                >
+                                  {/* Header Row */}
                                   <Grid
                                     container
                                     spacing={1}
                                     sx={{
-                                      p: 1,
+                                      p: { xs: 0.5, sm: 1 },
                                       bgcolor: "grey.200",
                                       typography: "caption",
                                       fontWeight: "medium",
@@ -559,82 +626,105 @@ function SearchResults() {
                                     <Grid size={{ xs: 2 }}>END</Grid>
                                     <Grid size={{ xs: 2 }}>ROOM</Grid>
                                   </Grid>
-                                  {/* Data Rows */}
-                                  {(section.startDate as Date[]).map(
-                                    (_, index) => (
-                                      <Grid
-                                        container
-                                        spacing={1}
-                                        key={index}
-                                        sx={{
-                                          p: 1,
-                                          typography: "body2",
-                                          textAlign: "left",
-                                          borderTop: index > 0 ? 1 : 0,
-                                          borderColor: "divider",
-                                        }}
-                                      >
-                                        <Grid size={{ xs: 2 }}>
-                                          {formatSingleDateRange(
-                                            (section.startDate as Date[])?.[
-                                              index
-                                            ],
-                                            (section.endDate as Date[])?.[index]
-                                          )}
+
+                                  {/* Data Rows - Wrap in scrollable container */}
+                                  <Box
+                                    sx={{
+                                      overflowX: "auto",
+                                      minWidth: { xs: "600px", md: "100%" },
+                                    }}
+                                  >
+                                    {(section.startDate as Date[]).map(
+                                      (_, index) => (
+                                        <Grid
+                                          container
+                                          spacing={1}
+                                          key={index}
+                                          sx={{
+                                            p: { xs: 0.5, sm: 1 },
+                                            typography: {
+                                              xs: "caption",
+                                              sm: "body2",
+                                            },
+                                            textAlign: "left",
+                                            borderTop: index > 0 ? 1 : 0,
+                                            borderColor: "divider",
+                                          }}
+                                        >
+                                          <Grid size={{ xs: 2 }}>
+                                            {formatSingleDateRange(
+                                              (section.startDate as Date[])?.[
+                                                index
+                                              ],
+                                              (section.endDate as Date[])?.[
+                                                index
+                                              ]
+                                            )}
+                                          </Grid>
+                                          <Grid size={{ xs: 2 }}>
+                                            {Array.isArray(
+                                              section.instructor?.[index]
+                                            )
+                                              ? (
+                                                  section.instructor?.[
+                                                    index
+                                                  ] as string[]
+                                                ).join(", ")
+                                              : section.instructor?.[index] ||
+                                                "Staff"}
+                                          </Grid>
+                                          <Grid size={{ xs: 2 }}>
+                                            {Array.isArray(
+                                              section.days?.[index]
+                                            )
+                                              ? (
+                                                  section.days?.[
+                                                    index
+                                                  ] as string[]
+                                                )
+                                                  .map((d) => d.substring(0, 2))
+                                                  .join("")
+                                              : "TBA"}
+                                          </Grid>
+                                          <Grid size={{ xs: 2 }}>
+                                            {formatSingleTime(
+                                              (section.timeStart as Date[])?.[
+                                                index
+                                              ]
+                                            )}
+                                          </Grid>
+                                          <Grid size={{ xs: 2 }}>
+                                            {formatSingleTime(
+                                              (section.timeEnd as Date[])?.[
+                                                index
+                                              ]
+                                            )}
+                                          </Grid>
+                                          <Grid size={{ xs: 2 }}>
+                                            {section.classroom?.[index] ||
+                                              "TBA"}
+                                          </Grid>
                                         </Grid>
-                                        <Grid size={{ xs: 2 }}>
-                                          {Array.isArray(
-                                            section.instructor?.[index]
-                                          )
-                                            ? (
-                                                section.instructor?.[
-                                                  index
-                                                ] as string[]
-                                              ).join(", ")
-                                            : section.instructor?.[index] ||
-                                              "Staff"}
-                                        </Grid>
-                                        <Grid size={{ xs: 2 }}>
-                                          {Array.isArray(section.days?.[index])
-                                            ? (
-                                                section.days?.[
-                                                  index
-                                                ] as string[]
-                                              )
-                                                .map((d) => d.substring(0, 2))
-                                                .join("")
-                                            : "TBA"}
-                                        </Grid>
-                                        <Grid size={{ xs: 2 }}>
-                                          {formatSingleTime(
-                                            (section.timeStart as Date[])?.[
-                                              index
-                                            ]
-                                          )}
-                                        </Grid>
-                                        <Grid size={{ xs: 2 }}>
-                                          {formatSingleTime(
-                                            (section.timeEnd as Date[])?.[index]
-                                          )}
-                                        </Grid>
-                                        <Grid size={{ xs: 2 }}>
-                                          {section.classroom?.[index] || "TBA"}
-                                        </Grid>
-                                      </Grid>
-                                    )
-                                  )}
+                                      )
+                                    )}
+                                  </Box>
                                 </Paper>
                               </Box>
                             )}
                           {/* === End Multiple Meeting Pattern Section === */}
 
-                          <Grid container spacing={section.multipleMeetings ? 0 : 3}>
+                          <Grid
+                            container
+                            spacing={
+                              section.multipleMeetings ? 0 : { xs: 2, md: 3 }
+                            }
+                          >
                             {/* Column 1: Information */}
                             <Grid size={{ xs: 12, md: 6 }}>
                               <Paper
                                 elevation={0}
                                 sx={{
-                                  p: 2,
+                                  p: { xs: 1.5, sm: 2 },
                                   bgcolor: "grey.200",
                                   borderRadius: 2,
                                   height: "100%",
@@ -644,20 +734,42 @@ function SearchResults() {
                                   variant="subtitle2"
                                   gutterBottom
                                   color="text.secondary"
+                                  sx={{
+                                    fontSize: { xs: "0.7rem", sm: "0.875rem" },
+                                  }}
                                 >
                                   INFORMATION
                                 </Typography>
-                                <Grid container spacing={1}>
+                                {/* For larger screens: two column layout */}
+                                <Grid
+                                  container
+                                  spacing={1}
+                                  sx={{ display: { xs: "none", sm: "flex" } }}
+                                >
                                   <Grid size={{ xs: 4 }}>
                                     <Typography
                                       variant="body2"
                                       fontWeight="medium"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
                                     >
                                       Class Number:
                                     </Typography>
                                   </Grid>
                                   <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
+                                    >
                                       {section.classNumber}
                                     </Typography>
                                   </Grid>
@@ -665,16 +777,73 @@ function SearchResults() {
                                     <Typography
                                       variant="body2"
                                       fontWeight="medium"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
                                     >
                                       Session:
                                     </Typography>
                                   </Grid>
                                   <Grid size={{ xs: 8 }}>
-                                    <Typography variant="body2">
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontSize: {
+                                          xs: "0.75rem",
+                                          sm: "0.875rem",
+                                        },
+                                      }}
+                                    >
                                       {section.session || "N/A"}
                                     </Typography>
                                   </Grid>
                                 </Grid>
+
+                                {/* For xs screens: stacked layout */}
+                                <Box
+                                  sx={{ display: { xs: "block", sm: "none" } }}
+                                >
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      mt: 1,
+                                    }}
+                                  >
+                                    Class Number:
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      mb: 1,
+                                    }}
+                                  >
+                                    {section.classNumber}
+                                  </Typography>
+
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    Session:
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    {section.session || "N/A"}
+                                  </Typography>
+                                </Box>
                               </Paper>
                             </Grid>
 
@@ -685,7 +854,7 @@ function SearchResults() {
                                 <Paper
                                   elevation={0}
                                   sx={{
-                                    p: 2,
+                                    p: { xs: 1.5, sm: 2 },
                                     bgcolor: "grey.200",
                                     borderRadius: 2,
                                     height: "100%",
@@ -695,20 +864,49 @@ function SearchResults() {
                                     variant="subtitle2"
                                     gutterBottom
                                     color="text.secondary"
+                                    sx={{
+                                      fontSize: {
+                                        xs: "0.7rem",
+                                        sm: "0.875rem",
+                                      },
+                                    }}
                                   >
                                     DETAILS
                                   </Typography>
-                                  <Grid container spacing={1} sx={{ mb: 2 }}>
+
+                                  {/* For larger screens: two column layout */}
+                                  <Grid
+                                    container
+                                    spacing={1}
+                                    sx={{
+                                      mb: 2,
+                                      display: { xs: "none", sm: "flex" },
+                                    }}
+                                  >
                                     <Grid size={{ xs: 4 }}>
                                       <Typography
                                         variant="body2"
                                         fontWeight="medium"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
                                       >
                                         Instructor:
                                       </Typography>
                                     </Grid>
                                     <Grid size={{ xs: 8 }}>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
+                                      >
                                         {formatInstructors(section.instructor)}
                                       </Typography>
                                     </Grid>
@@ -716,12 +914,26 @@ function SearchResults() {
                                       <Typography
                                         variant="body2"
                                         fontWeight="medium"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
                                       >
                                         Dates:
                                       </Typography>
                                     </Grid>
                                     <Grid size={{ xs: 8 }}>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
+                                      >
                                         {formatDateRange(
                                           section.startDate,
                                           section.endDate
@@ -732,12 +944,26 @@ function SearchResults() {
                                       <Typography
                                         variant="body2"
                                         fontWeight="medium"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
                                       >
                                         Meets:
                                       </Typography>
                                     </Grid>
                                     <Grid size={{ xs: 8 }}>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
+                                      >
                                         {formatDays(section.days)}{" "}
                                         {formatTime(section.timeStart)} -{" "}
                                         {formatTime(section.timeEnd)}
@@ -747,28 +973,114 @@ function SearchResults() {
                                       <Typography
                                         variant="body2"
                                         fontWeight="medium"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
                                       >
                                         Room:
                                       </Typography>
                                     </Grid>
                                     <Grid size={{ xs: 8 }}>
-                                      <Typography variant="body2">
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          fontSize: {
+                                            xs: "0.75rem",
+                                            sm: "0.875rem",
+                                          },
+                                        }}
+                                      >
                                         {formatClassroom(section.classroom)}
                                       </Typography>
                                     </Grid>
                                   </Grid>
+                                  {/* For xs screens: stacked layout */}
+                                  <Box
+                                    sx={{
+                                      display: { xs: "block", sm: "none" },
+                                      mb: 2,
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                      sx={{ fontSize: "0.75rem", mt: 1 }}
+                                    >
+                                      Instructor:
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontSize: "0.75rem", mb: 1 }}
+                                    >
+                                      {formatInstructors(section.instructor)}
+                                    </Typography>
+
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                      sx={{ fontSize: "0.75rem" }}
+                                    >
+                                      Dates:
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontSize: "0.75rem", mb: 1 }}
+                                    >
+                                      {formatDateRange(
+                                        section.startDate,
+                                        section.endDate
+                                      )}
+                                    </Typography>
+
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                      sx={{ fontSize: "0.75rem" }}
+                                    >
+                                      Meets:
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontSize: "0.75rem", mb: 1 }}
+                                    >
+                                      {formatDays(section.days)}{" "}
+                                      {formatTime(section.timeStart)} -{" "}
+                                      {formatTime(section.timeEnd)}
+                                    </Typography>
+
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight="medium"
+                                      sx={{ fontSize: "0.75rem" }}
+                                    >
+                                      Room:
+                                    </Typography>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontSize: "0.75rem" }}
+                                    >
+                                      {formatClassroom(section.classroom)}
+                                    </Typography>
+                                  </Box>
                                   {actionButtons(section)}
                                 </Paper>
                               ) : (
                                 <Paper
                                   elevation={0}
                                   sx={{
-                                    p: 2,
+                                    p: { xs: 1.5, sm: 2 },
                                     bgcolor: "grey.200",
                                     height: "100%",
                                   }}
                                 >
-																	<Grid container spacing={1} sx={{ mb: 10 }}></Grid>
+                                  <Grid
+                                    container
+                                    spacing={1}
+                                    sx={{ mb: { xs: 4, sm: 10 } }}
+                                  ></Grid>
                                   {actionButtons(section)}
                                 </Paper>
                               )}
