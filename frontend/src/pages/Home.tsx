@@ -4,8 +4,8 @@ import SearchForm from "../components/SearchForm";
 function Home() {
   const navigate = useNavigate();
   return (
-    <div className="flex-grow relative overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex flex-col h-full flex-grow relative overflow-hidden">
+      <div className="max-w-7xl mr-auto">
         <div className="relative z-10 pb-8 bg-gray-100 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-100 lg:pb-28 xl:pb-32">
           <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
             <div className="sm:text-center lg:text-left">
@@ -29,13 +29,13 @@ function Home() {
           </main>
         </div>
       </div>
-			<div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-[45%]">
-				<img
-					className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-					src="/Assets/windows-SwHvzwEzCfA-unsplash.jpg"
-					alt="Course planning"
-				/>
-			</div>
+      <div className="flex-grow lg:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-[45%]">
+        <img
+          className="h-full w-full object-cover lg:w-full lg:h-full"
+          src="/Assets/windows-SwHvzwEzCfA-unsplash.jpg"
+          alt="Course planning"
+        />
+      </div>
     </div>
   );
 }

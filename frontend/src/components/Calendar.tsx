@@ -276,7 +276,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 										</div>
 									))}
 									<div className="h-12 sm:h-16 flex flex-col items-center justify-center border rounded-lg bg-blue-100">
-										<span className="text-blue-700 text-3xs sm:text-xs font-bold">
+										<span className="text-blue-700 text-3xs sm:text-sm font-bold">
 											{week.cumulative !== null
 												? week.cumulative >= 0
 													? `+${week.cumulative.toFixed(1)}%`
