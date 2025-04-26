@@ -56,3 +56,12 @@ yarn-debug.log
 *.iml
 *.ipr
 *.iws
+
+# Visual Studio 2022
+.vs/
+Backup/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.htm
