@@ -24,7 +24,7 @@ builder.Services.AddCors(options =>
 
 		options.AddPolicy("AllowGitHubPages", policy =>
 		{
-			policy.WithOrigins("https://marcosm412.github.io")
+			policy.WithOrigins("https://zubaerchowdhury.github.io", "https://marcosm412.github.io")
 				.AllowAnyHeader()
 				.AllowAnyMethod();
 		});
