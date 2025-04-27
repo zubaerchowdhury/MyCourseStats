@@ -21,7 +21,10 @@ public class MongoDBService
     public MongoDBService(MongoDBConfig configuration)
     {
         _configuration = configuration;
-        EnvReader.Load(".env"); // Load environment variables from .env file
+				if (Environment.GetEnvironmentVariable("MONGODB_URI") == null) 
+				{
+        		EnvReader.Load(".env"); // Load environment variables from .env file
+				}
         var connectionString =
             Environment.GetEnvironmentVariable("MONGODB_URI"); // Retrieve MongoDB URI from environment variable
         if (string.IsNullOrEmpty(connectionString))
