@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import SearchForm from "../components/SearchForm";
+import HomePageImage from "/Assets/HomePageImage.jpg";
 
 function Home() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ function Home() {
       <div className="flex-grow lg:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-[45%]">
         <img
           className="h-full w-full object-cover lg:w-full lg:h-full"
-          src="/Assets/windows-SwHvzwEzCfA-unsplash.jpg"
+          src={HomePageImage}
           alt="Course planning"
         />
       </div>
