@@ -21,6 +21,13 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+
+		options.AddPolicy("AllowGitHubPages", policy =>
+		{
+			policy.WithOrigins("https://marcosm412.github.io")
+				.AllowAnyHeader()
+				.AllowAnyMethod();
+		});
 });
 
 var app = builder.Build();
@@ -33,6 +40,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseCors("AllowLocalhost");
+}
+else
+{
+		app.UseCors("AllowGitHubPages");
 }
 
 app.UseHttpsRedirection();
