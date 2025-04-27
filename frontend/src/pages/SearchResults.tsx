@@ -184,7 +184,7 @@ function SearchResults() {
         setFilteredCourses([]);
         return;
       }
-			const HOST = process.env.REACT_APP_API_URL || "/proxy";
+			const HOST = import.meta.env.VITE_API_URL || "/proxy";
       const response = await fetch(`${HOST}/api/Courses/course-search?${paramsString}`);
 
       if (!response.ok) {

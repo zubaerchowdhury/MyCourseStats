@@ -1,4 +1,7 @@
 import React from "react";
+import Zubaer from "/Assets/Zubaer.png"; 
+import Hannah from "/Assets/Hannah.png";
+import Marcos from "/Assets/Marcos.png";
 
 const About: React.FC = () => {
   return (
@@ -6,7 +9,7 @@ const About: React.FC = () => {
       <div className="flex justify-around gap-5">
         <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
-            src={"/Assets/Marcos.png"}
+            src={Marcos}
             alt="Marcos Morales"
             className="w-48 h-auto object-contain"
           />
@@ -22,7 +25,7 @@ const About: React.FC = () => {
 
         <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
-            src={"/Assets/Zubaer.png"}
+            src={Zubaer}
             alt="Zubaer Chowdhury"
             className="w-48 h-auto object-contain"
           />
@@ -38,7 +41,7 @@ const About: React.FC = () => {
 
         <div className="flex-1 flex flex-col items-center p-4 rounded-lg">
           <img
-            src={"/Assets/Hannah.png"}
+            src={Hannah}
             alt="Hannah Penano"
             className="w-48 h-auto object-contain"
           />
