@@ -184,8 +184,8 @@ function SearchResults() {
         setFilteredCourses([]);
         return;
       }
-      const baseUrl = "http://localhost:5184/api/Courses/course-search";
-      const response = await fetch(`${baseUrl}?${paramsString}`);
+			const HOST = process.env.REACT_APP_API_URL || "/proxy";
+      const response = await fetch(`${HOST}/api/Courses/course-search?${paramsString}`);
 
       if (!response.ok) {
         if (response.status === 404) {
