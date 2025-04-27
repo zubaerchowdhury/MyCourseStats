@@ -295,7 +295,6 @@ function SearchResults() {
         <Link
           to={getCourseURL(section)}
           state={{ course: section }}
-          target="_blank"
         >
           <Button
             type="submit"

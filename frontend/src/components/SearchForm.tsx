@@ -37,12 +37,18 @@ const SearchForm: React.FC<SearchFormProps> = ({
     {}
   );
 
+	let searchFilters: SearchFilters = {
+		semester: "",
+		year: undefined,
+		subjectCode: "",
+	}
+
   // Initialize filters from URL params if they exist
   useEffect(() => {
     if (searchParams.size === 0) return;
 
     // Map URL parameters to filters
-    let searchFilters: SearchFilters = {
+    let tempFilters: SearchFilters = {
       semester: "",
       year: undefined,
       subjectCode: "",
@@ -51,29 +57,29 @@ const SearchForm: React.FC<SearchFormProps> = ({
       // Get keyof SearchFilters from key
       const filterKey = key as keyof SearchFilters;
       if (filterKey === "year") {
-        searchFilters = {
-          ...searchFilters,
+        tempFilters = {
+          ...tempFilters,
           [filterKey]: parseInt(value),
         };
       } else if (filterKey === "days") {
-        searchFilters = {
-          ...searchFilters,
+        tempFilters = {
+          ...tempFilters,
           [filterKey]: value.split(","),
         };
       } else if (filterKey === "startDate" || filterKey === "endDate") {
-        searchFilters = {
-          ...searchFilters,
+        tempFilters = {
+          ...tempFilters,
           [filterKey]: new Date(value),
         };
       } else {
-        searchFilters = {
-          ...searchFilters,
+        tempFilters = {
+          ...tempFilters,
           [filterKey]: value,
         };
       }
     });
     // Set filters state variable
-    setFilters(searchFilters);
+    setFilters(tempFilters);
   }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -102,15 +108,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
       semester: "",
       year: undefined,
       subjectCode: "",
-      days: []
     });
     setSubjectOptions([]);
   };
 
   const setField = (field: keyof SearchFilters, value: any) => {
-		if (value === "") {
-			return;
-		}
     if (field === "semester") {
       setSubjectOptions([]);
       const [semester, year] = value.split("-");

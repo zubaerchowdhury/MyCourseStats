@@ -17,7 +17,7 @@ export interface SearchFilters {
 export const getSearchFiltersStrings = (filters: SearchFilters) => {
 	let result = {}
 	Object.entries(filters).forEach(([key, value]) => {
-		if (value) {
+		if (value && value.toString() !== "") {
 			result = {
 				...result,
 				[key]: value.toString()};
