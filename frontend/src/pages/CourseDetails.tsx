@@ -77,9 +77,9 @@ function CourseDetails() {
             ) + 1
           ).toString(),
         });
-
+				const HOST = process.env.REACT_APP_API_URL || "/proxy";
         const response = await fetch(
-          `http://localhost:5184/api/stats/enrollment-rate?${params.toString()}`
+          `${HOST}/api/stats/enrollment-rate?${params.toString()}`
         );
 
         if (!response.ok) {
@@ -126,8 +126,9 @@ function CourseDetails() {
 
       setSectionLoading(true);
       try {
+				const HOST = process.env.REACT_APP_API_URL || "/proxy";
         const response = await fetch(
-          `http://localhost:5184/api/Courses/course-search?${searchParams.toString()}`
+          `${HOST}/api/Courses/course-search?${searchParams.toString()}`
         );
 
         if (!response.ok) {
@@ -163,8 +164,9 @@ function CourseDetails() {
       if (!courseSection) return;
       setInstructorsLoading(true);
       try {
+				const HOST = process.env.REACT_APP_API_URL || "/proxy";
         const response = await fetch(
-          `http://localhost:5184/api/Courses/historical-instructors?${new URLSearchParams(
+          `${HOST}/api/Courses/historical-instructors?${new URLSearchParams(
             {
               subjectCode: courseSection.subjectCode,
               catalogNumber: courseSection.catalogNumber,

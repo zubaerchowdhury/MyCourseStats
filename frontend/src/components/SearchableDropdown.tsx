@@ -55,8 +55,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
       setError(null);
       const params = new URLSearchParams(getSearchFiltersStrings(filters));
       try {
+				const HOST = process.env.REACT_APP_API_URL || "/proxy";
         const response = await fetch(
-          `http://localhost:5184/api/Courses/subjects?${params.toString()}`
+          `${HOST}/api/Courses/subjects?${params.toString()}`
         );
         if (!response.ok) {
           if (response.status === 404) {
