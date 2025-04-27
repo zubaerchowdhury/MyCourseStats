@@ -77,7 +77,7 @@ function CourseDetails() {
             ) + 1
           ).toString(),
         });
-				const HOST = process.env.REACT_APP_API_URL || "/proxy";
+				const HOST = import.meta.env.VITE_API_URL || "/proxy";
         const response = await fetch(
           `${HOST}/api/stats/enrollment-rate?${params.toString()}`
         );
@@ -126,7 +126,7 @@ function CourseDetails() {
 
       setSectionLoading(true);
       try {
-				const HOST = process.env.REACT_APP_API_URL || "/proxy";
+				const HOST = import.meta.env.VITE_API_URL || "/proxy";
         const response = await fetch(
           `${HOST}/api/Courses/course-search?${searchParams.toString()}`
         );
@@ -164,7 +164,7 @@ function CourseDetails() {
       if (!courseSection) return;
       setInstructorsLoading(true);
       try {
-				const HOST = process.env.REACT_APP_API_URL || "/proxy";
+				const HOST = import.meta.env.VITE_API_URL || "/proxy";
         const response = await fetch(
           `${HOST}/api/Courses/historical-instructors?${new URLSearchParams(
             {
