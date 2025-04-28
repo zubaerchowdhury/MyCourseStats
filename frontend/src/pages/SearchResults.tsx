@@ -115,6 +115,14 @@ const formatDays = (days: string[] | string[][] | undefined): string => {
   if (Array.isArray(days)) {
     // Combine all unique days, sort them (optional), and format
     const uniqueDays = [...new Set(days.flat())];
+		if (uniqueDays.length === 1 && uniqueDays[0] === "TBA") {
+			return "TBA"; // Handle case where all are TBA
+		}
+		// Remove TBA from the list if present
+		const tbaIndex = uniqueDays.indexOf("TBA");
+		if (tbaIndex !== -1) {
+			uniqueDays.splice(tbaIndex, 1);
+		}
     // Basic sort order (e.g., Mo, Tu, We, Th, Fr, Sa, Su) - adjust if needed
     const dayOrder = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
     uniqueDays.sort(
@@ -682,7 +690,12 @@ function SearchResults() {
                                                     index
                                                   ] as string[]
                                                 )
-                                                  .map((d) => d.substring(0, 2))
+                                                  .map((d) => {
+																										if (d === "TBA") {
+																											return d;
+																										}
+																										return d.substring(0, 2);
+																									})
                                                   .join("")
                                               : "TBA"}
                                           </Grid>
