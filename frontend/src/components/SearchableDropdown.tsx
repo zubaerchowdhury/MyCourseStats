@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
+import { useSearch, getSearchFiltersStrings, SearchFilters } from "../context/SearchContext";
 
 interface SearchableDropdownProps {
   value: string;
   onChange: (value: string) => void;
+	searchFilters: SearchFilters;
   placeholder?: string;
   label?: string;
   required?: boolean;
@@ -21,6 +22,7 @@ interface subject {
 const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   value,
   onChange,
+	searchFilters,
   placeholder = "Search...",
   label,
   required = false,
@@ -31,13 +33,11 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+	const [isSubjectLoading, setIsSubjectLoading] = useState(false);
 
   const {
-    filters,
     subjectOptions,
     setSubjectOptions,
-    isSubjectLoading,
-    setIsSubjectLoading,
   } = useSearch();
 
   // Fetch options from API or use prop options
@@ -48,12 +48,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     }
 
     // If semester is not selected, don't fetch options
-    if (!filters.semester) return;
+    if (!searchFilters.semester) return;
 
     const fetchOptions = async () => {
       setIsSubjectLoading(true);
       setError(null);
-      const params = new URLSearchParams(getSearchFiltersStrings(filters));
+      const params = new URLSearchParams(getSearchFiltersStrings(searchFilters));
       try {
 				const HOST = import.meta.env.VITE_API_URL || "/proxy";
         const response = await fetch(
@@ -85,7 +85,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
     };
 
     fetchOptions();
-  }, [filters.semester]);
+  }, [searchFilters.semester]);
 
   // Handle click outside to close dropdown
   useEffect(() => {

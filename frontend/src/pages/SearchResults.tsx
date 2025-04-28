@@ -19,10 +19,9 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchForm from "../components/SearchForm";
 import EventNoteIcon from "@mui/icons-material/EventNote"; // Icon for meeting pattern
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useSearch, getSearchFiltersStrings } from "../context/SearchContext";
 import { Course, CourseSection, CourseContainer } from "../types/CourseTypes";
 
-export const theme = createTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: "#4F46E5",
@@ -156,27 +155,29 @@ function SearchResults() {
     setSearchYear(year);
   };
 
-  const { filters } = useSearch();
+	const paramsHasAllVars = (params?: URLSearchParams): boolean => {
 
-  const fetchCourses = async () => {
+    return (
+			params &&
+      params.has("semester") &&
+      params.has("year") &&
+      params.has("subjectCode")
+    ) as boolean;
+  };
+
+  const fetchCourses = async (params?: URLSearchParams) => {
     setLoading(true);
     setError(null);
     setCurrentSearchVars(
-      filters.semester || searchParams.get("semester") || "",
-      filters.year || parseInt(searchParams.get("year") || "")
+      params?.get("semester") || searchParams.get("semester") || "",
+      parseInt(params?.get("year") || "") || parseInt(searchParams.get("year") || "")
     );
 
     try {
       let paramsString: string;
-      if (filters.semester && filters.year && filters.subjectCode) {
-        paramsString = new URLSearchParams(
-          getSearchFiltersStrings(filters)
-        ).toString();
-      } else if (
-        searchParams.has("semester") &&
-        searchParams.has("year") &&
-        searchParams.has("subjectCode")
-      ) {
+      if (paramsHasAllVars(params)) {
+        paramsString = params!.toString();
+      } else if (paramsHasAllVars(searchParams)) {
         paramsString = searchParams.toString();
       } else if (searchParams.size > 0) {
         throw new Error("URL parameters are missing required fields");

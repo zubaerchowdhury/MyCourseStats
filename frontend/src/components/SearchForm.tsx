@@ -31,17 +31,16 @@ const SearchForm: React.FC<SearchFormProps> = ({
   className = "",
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { filters, setFilters, setSubjectOptions } = useSearch();
+  const { setSubjectOptions } = useSearch();
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>(
     {}
   );
-
-	let searchFilters: SearchFilters = {
+	const [searchFilters, setSearchFilters] = useState<SearchFilters>({
 		semester: "",
 		year: undefined,
 		subjectCode: "",
-	}
+	});
 
   // Initialize filters from URL params if they exist
   useEffect(() => {
@@ -78,24 +77,24 @@ const SearchForm: React.FC<SearchFormProps> = ({
         };
       }
     });
-    // Set filters state variable
-    setFilters(tempFilters);
+    // Set form filters
+    setSearchFilters(tempFilters);
   }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
     // Validation
-    if (!filters.semester) {
+    if (!searchFilters.semester) {
       alert("Please select a semester");
       return;
     }
-    if (!filters.subjectCode) {
+    if (!searchFilters.subjectCode) {
       alert("Please select a subject");
       return;
     }
 
-    const params = new URLSearchParams(getSearchFiltersStrings(filters));
+    const params = new URLSearchParams(getSearchFiltersStrings(searchFilters));
     setSearchParams(params);
 
     if (onSearch) {
@@ -104,11 +103,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
   };
 
   const clearFilters = () => {
-    setFilters({
-      semester: "",
-      year: undefined,
-      subjectCode: "",
-    });
+		setSearchFilters({
+			semester: "",
+			year: undefined,
+			subjectCode: "",
+		});
     setSubjectOptions([]);
   };
 
@@ -116,16 +115,16 @@ const SearchForm: React.FC<SearchFormProps> = ({
     if (field === "semester") {
       setSubjectOptions([]);
       const [semester, year] = value.split("-");
-      setFilters({
-        ...filters,
+      setSearchFilters({
+        ...searchFilters,
         semester: semester,
         year: parseInt(year),
         subjectCode: "",
       });
       return;
     }
-    setFilters({
-      ...filters,
+    setSearchFilters({
+      ...searchFilters,
       [field]: value,
     });
   };
@@ -145,12 +144,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
           </div>
           <input
             type="text"
-            value={filters.name || ""}
+            value={searchFilters.name || ""}
             onChange={(e) => setField("name", e.target.value)}
             className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             placeholder="Search by class name..."
           />
-          {filters.name && (
+          {searchFilters.name && (
             <button
               type="button"
               onClick={() => setField("name", "")}
@@ -168,10 +167,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </label>
             <div className="relative">
               <select
-                value={`${filters.semester}-${filters.year}` || ""}
+                value={`${searchFilters.semester}-${searchFilters.year}` || ""}
                 onChange={(e) => setField("semester", e.target.value)}
                 className={`w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pr-10 pl-1 appearance-none ${
-                  filters.semester ? "text-gray-900" : "text-gray-500"
+                  searchFilters.semester ? "text-gray-900" : "text-gray-500"
                 }`}
               >
                 {semesterYearOptions.map((option) => (
@@ -200,8 +199,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <SearchableDropdown
             label="Subject"
             required
-            value={filters.subjectCode || ""}
+            value={searchFilters.subjectCode || ""}
             onChange={(value) => setField("subjectCode", value)}
+						searchFilters={searchFilters}
             placeholder="Select or search for a subject"
           />
 
@@ -211,7 +211,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </label>
             <input
               type="text"
-              value={filters.catalogNumber || ""}
+              value={searchFilters.catalogNumber || ""}
               onChange={(e) => setField("catalogNumber", e.target.value)}
               placeholder="e.g. 101"
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
@@ -253,7 +253,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
               <MultiSelectDropdown
-                value={filters.days || []} // Pass the days array from filters
+                value={searchFilters.days || []} // Pass the days array from searchFilters
                 onChange={(values) => setField("days", values)} // Receive the full array
               />
               </div>
@@ -263,7 +263,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={filters.instructor || ""}
+                  value={searchFilters.instructor || ""}
                   onChange={(e) => setField("instructor", e.target.value)}
                   placeholder="e.g. Lokesh Ramamoorthi"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
@@ -278,7 +278,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
                   </label>
                   <input
                     type="text"
-                    value={filters.classNumber || ""}
+                    value={searchFilters.classNumber || ""}
                     onChange={(e) => setField("classNumber", e.target.value)}
                     placeholder="e.g. 8888"
                     className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-1"
@@ -288,7 +288,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             </div>
           </div>
         )}
-        {showClearButton && Object.values(filters).some((v) => v) && (
+        {showClearButton && Object.values(searchFilters).some((v) => v) && (
           <div className="flex items-center justify-between">
             <button
               type="button"

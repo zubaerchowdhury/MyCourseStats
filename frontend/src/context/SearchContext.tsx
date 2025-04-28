@@ -33,12 +33,8 @@ export interface SubjectOption {
 }
 
 interface SearchContextType {
-  filters: SearchFilters;
-  setFilters: (filters: SearchFilters) => void;
   subjectOptions: SubjectOption[];
   setSubjectOptions: (options: SubjectOption[]) => void;
-  isSubjectLoading: boolean;
-  setIsSubjectLoading: (isLoading: boolean) => void;
 }
 
 // Create the context
@@ -47,24 +43,12 @@ const SearchContext = createContext<SearchContextType | undefined>(undefined);
 // Create a provider component
 export const SearchProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   // States to be shared
-  const [filters, setFilters] = useState<SearchFilters>({
-    semester: "",
-		year: undefined,
-		subjectCode: "",
-    catalogNumber: ""
-  });
-  
   const [subjectOptions, setSubjectOptions] = useState<SubjectOption[]>([]);
-  const [isSubjectLoading, setIsSubjectLoading] = useState(false);
 
   // Value object to be passed to provider
   const providerValue = {
-    filters,
-    setFilters,
     subjectOptions, 
     setSubjectOptions,
-    isSubjectLoading,
-    setIsSubjectLoading,
   };
 
   return (
