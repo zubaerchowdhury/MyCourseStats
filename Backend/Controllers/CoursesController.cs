@@ -94,7 +94,7 @@ public class CoursesController : ControllerBase
     public async Task<IActionResult> CourseSearch([FromQuery] string semester, [FromQuery] int year,
         [FromQuery] string? subjectCode = null, [FromQuery] int? classNumber = null,
         [FromQuery] string? catalogNumber = null, [FromQuery] string? name = null,
-        [FromQuery] List<string>? days = null, [FromQuery] DateTime? startDate = null,
+        [FromQuery] string? days = null, [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null, [FromQuery] string? instructor = null
     )
     {
@@ -110,8 +110,9 @@ public class CoursesController : ControllerBase
 
         try
         {
+            List<string>? daysList = days?.Split(',').ToList();
             List<CourseContainer> courses =
-                await _mongoDbService.CourseSearch(semester, year, subjectCode, catalogNumber, name, days, startDate,
+                await _mongoDbService.CourseSearch(semester, year, subjectCode, catalogNumber, name, daysList, startDate,
                     endDate, instructor, classNumber);
             if (courses.Count == 0)
             {
