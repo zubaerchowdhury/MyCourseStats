@@ -22,9 +22,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 
-		options.AddPolicy("AllowGitHubPages", policy =>
+		options.AddPolicy("AllowReactApp", policy =>
 		{
-			policy.WithOrigins("https://zubaerchowdhury.github.io", "https://marcosm412.github.io")
+			policy.WithOrigins("https://www.mycoursestats.space")
 				.AllowAnyHeader()
 				.AllowAnyMethod();
 		});
@@ -43,7 +43,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-		app.UseCors("AllowGitHubPages");
+		app.UseCors("AllowReactApp");
 }
 
 app.UseHttpsRedirection();
