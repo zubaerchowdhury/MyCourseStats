@@ -187,7 +187,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 
   return (
 		<div className="w-full mx-auto p-2 sm:p-4">
-			<div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-8">
+			<div className="flex flex-col xl:flex-row xl:items-start gap-4 xl:gap-8">
 				<div className="flex-1 overflow-x-auto">
 					<div className="flex items-center justify-center gap-4 sm:gap-8 mb-4">
 						<button
@@ -209,7 +209,7 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 						</button>
 					</div>
 	
-					<div className="min-w-[600px] md:min-w-0"> {/* Allow horizontal scroll on mobile */}
+					<div className="min-w-[600px] xl:min-w-0"> {/* Allow horizontal scroll on mobile */}
 						<div className="grid grid-cols-8 text-center text-xs sm:text-sm font-semibold mb-2">
 							{[
 								"Mon",
@@ -291,13 +291,13 @@ const Calendar: React.FC<CalendarProps> = ({ courseStats }) => {
 				</div>
 				
 				{/* Legend section - stacks vertically on mobile */}
-				<div className="mt-6 md:mt-28 flex flex-col gap-3 md:gap-4 md:min-w-[200px]">
+				<div className="mt-6 xl:mt-28 flex flex-col gap-3 xl:gap-4 xl:min-w-[200px]">
 					<div className="text-sm font-medium mb-1">Legend</div>
 					<div className="flex items-center">
 						<span className="text-xs mr-1 italic">𝐗%</span>
 						<span className="text-xs sm:text-sm text-gray-600"> Seats filled</span>
 					</div>
-					<div className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-3">
+					<div className="grid grid-cols-2 xl:grid-cols-1 gap-2 xl:gap-3">
 						<div className="flex items-center">
 							<div
 								className="w-3 h-3 sm:w-4 sm:h-4 rounded mr-1 sm:mr-2"
