@@ -377,7 +377,7 @@ function CourseDetails() {
                   className="font-bold text-gray-900"
                   sx={{ fontSize: { xs: "1.25rem", sm: "1.5rem" }, mb: 2 }}
                 >
-                  Past Instructors
+                  Recent Instructors
                 </Typography>
               </div>
               <Paper
