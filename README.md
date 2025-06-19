@@ -36,5 +36,12 @@ This project is about supporting additional statistical data and metrics on each
 - HTML/CSS
 - .NET Core 8.0
 - MongoDB
-- Python 3
+- [![Python][Python-shield]][Python-url]
 - Selenium
+
+
+[product-screenshot]: images/screenshot.png 
+<!-- Technology Shields -->
+[Python-shield]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
+[Python-url]: https://python.org
+
