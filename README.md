@@ -13,13 +13,13 @@ This project is about supporting additional statistical data and metrics on each
 
 #### Website Pages
 
-![image](https://github.com/user-attachments/assets/8fcf7404-41f5-412d-8902-30786f3f5d49)
+![image](https://github.com/user-attachments/assets/8fcf7404-41f5-412d-8902-30786f3f5d49)\
 **Homepage**
 
-![image](https://github.com/user-attachments/assets/9ffaeffc-b1c0-4429-8517-289b6a650a3d)
+![image](https://github.com/user-attachments/assets/9ffaeffc-b1c0-4429-8517-289b6a650a3d)\
 **Search Results Page**
 
-![image](https://github.com/user-attachments/assets/c911cdff-0c88-4d89-955d-871d0f71bd0c)
+![image](https://github.com/user-attachments/assets/c911cdff-0c88-4d89-955d-871d0f71bd0c)\
 **Course Details Page**
 
 #### Application System Architecture Design
