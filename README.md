@@ -31,17 +31,37 @@ This project is about supporting additional statistical data and metrics on each
 - (Need to update WebScraper to scrape date from the current updated CaneLink UI)
 
 **Tech Stack:**
-- React
-- MaterialsUI
-- HTML/CSS
-- .NET Core 8.0
-- MongoDB
+- [![React][React-shield]][React-url]
+- [![MaterialsUI][MaterialsUI-shield]][MaterialsUI-url]
+- [![HTML][HTML-shield]][HTML-url]
+- [![CSS][CSS-shield]][CSS-url]
 - [![Python][Python-shield]][Python-url]
-- Selenium
+- [![Selenium][Selenium-shield]][Selenium-url]
+- [![dotNET8.0][dotNET8.0-shield]][dotNET8.0-url]
+- [![MongoDB][MongoDB-shield]][MongoDB-url]
 
 
 [product-screenshot]: images/screenshot.png 
 <!-- Technology Shields -->
 [Python-shield]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python-url]: https://python.org
-
+[React-shield]: https://img.shields.io/badge/-ReactJs-61DAFB?logo=react&logoColor=white&style=for-the-badge
+[React-url]: https://react.dev/
+[MaterialsUI-shield]: https://img.shields.io/badge/Material%20UI-007FFF?style=for-the-badge&logo=mui&logoColor=white
+[MaterialsUI-url]: https://mui.com/material-ui/
+[HTML-shield]: https://shields.io/badge/HTML-%E2%98%85%E2%98%85%E2%98%85%E2%98%85%E2%98%85-f06529?logo=html5&logoColor=white&labelColor=f06529
+[HTML-url]: https://www.w3.org/standards/
+[CSS-shield]: https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white
+[CSS-url]: https://developer.mozilla.org/en-US/docs/Web/CSS
+[dotNET8.0-shield]: https://img.shields.io/badge/-.NET%208.0-blueviolet?logo=dotnet
+[dotNET8.0-url]: https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8/overview
+[MongoDB-shield]: https://img.shields.io/badge/-MongoDB-13aa52?style=for-the-badge&logo=mongodb&logoColor=white
+[MongoDB-url]: https://www.mongodb.com/docs/
+[Selenium-shield]: https://img.shields.io/badge/-selenium-CB02A?style=for-the-badge&logo=selenium&logoColor=white
+[Selenium-url]: https://www.selenium.dev/documentation/
+[MacOS-shield]: https://shields.io/badge/MacOS--9cf?logo=Apple&style=social
+[MacOS-url]: https://www.apple.com/macos
+[Windows-shield]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
+[Windows-url]: https://www.microsoft.com/en-us/windows
+[Linux-shield]: https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black
+[Linux-url]: https://www.linux.org
