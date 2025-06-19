@@ -11,7 +11,7 @@ This project is about supporting additional statistical data and metrics on each
 - Features most benefited by other departments where students can enroll by themselves
 - Possibility to scale to other universities across US
 
-#### Website Pages
+### Website Pages
 
 ![image](https://github.com/user-attachments/assets/8fcf7404-41f5-412d-8902-30786f3f5d49)\
 **Homepage**
@@ -22,9 +22,8 @@ This project is about supporting additional statistical data and metrics on each
 ![image](https://github.com/user-attachments/assets/c911cdff-0c88-4d89-955d-871d0f71bd0c)\
 **Course Details Page**
 
-#### Application System Architecture Design
-![image](https://github.com/user-attachments/assets/0b3d4e4a-c6c0-4883-8b25-0be368974fa8)
-
+### Application System Architecture Design
+![image](https://github.com/user-attachments/assets/0b3d4e4a-c6c0-4883-8b25-0be368974fa8)\
 
 **Future Feature:**
 - Include all degree program requirements and 4 year course outline for all departments
