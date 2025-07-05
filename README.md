@@ -29,7 +29,7 @@ This project is about supporting additional statistical data and metrics on each
 - Include all degree program requirements and 4 year course outline for all departments
 - AI advisor that can help you plan out your daily schedule, semester schedule and 4 year degree plan (1st year free trial with .edu email, paid feature afterwards)
 
-**Issues**
+**Issues:**
 - Need to update WebScraper to scrape date from the current updated CaneLink UI
 
 **Tech Stack:**
