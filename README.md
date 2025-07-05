@@ -23,7 +23,7 @@ This project is about supporting additional statistical data and metrics on each
 **Course Details Page**
 
 ### Application System Architecture Design
-![image](https://github.com/user-attachments/assets/0b3d4e4a-c6c0-4883-8b25-0be368974fa8)\
+![image](https://github.com/user-attachments/assets/0b3d4e4a-c6c0-4883-8b25-0be368974fa8)
 
 **Future Feature:**
 - Include all degree program requirements and 4 year course outline for all departments
