@@ -33,15 +33,15 @@ This project is about supporting additional statistical data and metrics on each
 - Need to update WebScraper to scrape date from the current updated CaneLink UI
 
 **Tech Stack:**
-- [![React][React-shield]][React-url]
-- [![MaterialsUI][MaterialsUI-shield]][MaterialsUI-url]
-- [![HTML][HTML-shield]][HTML-url]
-- [![CSS][CSS-shield]][CSS-url]
 - [![Python][Python-shield]][Python-url]
 - [![Selenium][Selenium-shield]][Selenium-url]
+- [![HTML][HTML-shield]][HTML-url]
+- [![CSS][CSS-shield]][CSS-url]
+- [![React][React-shield]][React-url]
+- [![MaterialsUI][MaterialsUI-shield]][MaterialsUI-url]
 - [![dotNET8.0][dotNET8.0-shield]][dotNET8.0-url]
 - [![MongoDB][MongoDB-shield]][MongoDB-url]
-
+- [![MS-Azure][MS-Azure-shield][MS-Azure-url]]
 
 [product-screenshot]: images/screenshot.png 
 <!-- Technology Shields -->
@@ -61,6 +61,8 @@ This project is about supporting additional statistical data and metrics on each
 [MongoDB-url]: https://www.mongodb.com/docs/
 [Selenium-shield]: https://img.shields.io/badge/-selenium-CB02A?style=for-the-badge&logo=selenium&logoColor=white
 [Selenium-url]: https://www.selenium.dev/documentation/
+[MS-Azure-shield]: https://custom-icon-badges.demolab.com/badge/Microsoft%20Azure-0089D6?logo=msazure&logoColor=white
+[MS-Azure-url]: https://learn.microsoft.com/en-us/azure/
 [MacOS-shield]: https://shields.io/badge/MacOS--9cf?logo=Apple&style=social
 [MacOS-url]: https://www.apple.com/macos
 [Windows-shield]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
